@@ -15,7 +15,7 @@ public abstract partial class LanguageEffect
         uint m = 2147483648; // 2^31;
         uint c = 12345;
         long result = (a * seed + c) % m;
-        return (int)(result % (max - min)) + min;
+        return (int)(Math.Abs(result) % (max - min)) + min;
     }
 
     internal int StringToInt(string message)
@@ -101,7 +101,7 @@ public sealed partial class SyllableReplacementEffect : PunctuationBasedEffect
             }
 
             // Loop until we're NOT on punctuation anymore, and add it to the builder if needed.
-            while (i < message.Length  && (PunctuationChars.Contains(message[i]) || message[i] == ' '))
+            while (i < message.Length && (PunctuationChars.Contains(message[i]) || message[i] == ' '))
             {
                 if(message[i] == ' ')
                     builder.Append(' ');
@@ -140,7 +140,7 @@ public sealed partial class PhraseObfuscationEffect : PunctuationBasedEffect
     public float Proportion = 1f / 3;
 
     /// <summary>
-    /// Which characters are considered punctuation for the sake of preservation.
+    /// Which characters are considered line ending punctuation for the sake of preservation.
     /// </summary>
     [DataField]
     public new char[] PunctuationChars { get; private set; } = ['.', '!', '?'];
@@ -169,7 +169,7 @@ public sealed partial class PhraseObfuscationEffect : PunctuationBasedEffect
                 sentenceHash += StringToInt(message.Substring(startIndex, endIndex - startIndex));
 
                 // Found the end of a sentence.
-                if (PunctuationChars.Contains(message[i]))
+                if (i == message.Length || PunctuationChars.Contains(message[i]))
                 {
                     var phraseCount = (int) Math.Round(Math.Clamp(Math.Pow(sentenceLength, Proportion), MinPhrases, MaxPhrases));
 
@@ -185,8 +185,8 @@ public sealed partial class PhraseObfuscationEffect : PunctuationBasedEffect
             // Loop until we're NOT on punctuation anymore, and add it to the builder if needed.
             while (i < message.Length && (PunctuationChars.Contains(message[i]) || message[i] == ' '))
             {
-                if(message[i] == ' ')
-                    builder.Append(' ');
+                // Don't re-create spaces, otherwise we end up with random gaps in the phrases.
+                if(message[i] == ' ') { }
                 else if(PreservePunctuation)
                     builder.Append(message[i]);
                 i++;
