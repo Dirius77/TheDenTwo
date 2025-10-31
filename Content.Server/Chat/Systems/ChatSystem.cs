@@ -735,6 +735,7 @@ public sealed partial class ChatSystem : SharedChatSystem
 
     public string TransformSpeech(EntityUid sender, string message)
     {
+        // DEN - Transform Speech based on what kind of language is being spoken, IE: Verbal, Telepathy, Sign
         var ev = new TransformSpeechEvent(sender, message);
         RaiseLocalEvent(sender, ev, true);
 

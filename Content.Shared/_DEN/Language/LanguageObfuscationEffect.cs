@@ -4,7 +4,7 @@ using System.Text;
 namespace Content.Shared._DEN.Language;
 
 [ImplicitDataDefinitionForInheritors]
-public abstract partial class LanguageEffect
+public abstract partial class LanguageObfuscationEffect
 {
     // Linear Congruential Generator go brrrrrrrr
     // https://en.wikipedia.org/wiki/Linear_congruential_generator
@@ -32,7 +32,7 @@ public abstract partial class LanguageEffect
 /// <summary>
 /// Replaces the entire message with one of the available replacement phrases.
 /// </summary>
-public partial class ReplacementEffect : LanguageEffect
+public partial class ReplacementObfuscationEffect : LanguageObfuscationEffect
 {
     /// <summary>
     /// The list of replacement phrases to use with this ReplacementEffect
@@ -46,7 +46,7 @@ public partial class ReplacementEffect : LanguageEffect
     }
 }
 
-public abstract partial class PunctuationBasedEffect : ReplacementEffect
+public abstract partial class PunctuationBasedObfuscationEffect : ReplacementObfuscationEffect
 {
     /// <summary>
     /// Which characters are considered punctuation for the sake of preservation.
@@ -67,7 +67,7 @@ public abstract partial class PunctuationBasedEffect : ReplacementEffect
 /// Specific words will always be translated into the same sequence of syllables within a round, meaning that
 /// it is possible to 'learn' particular words.
 /// </summary>
-public sealed partial class SyllableReplacementEffect : PunctuationBasedEffect
+public sealed partial class SyllableReplacementObfuscationEffect : PunctuationBasedObfuscationEffect
 {
     [DataField]
     public int MinSyllables { get; private set; } = 1;
@@ -119,7 +119,7 @@ public sealed partial class SyllableReplacementEffect : PunctuationBasedEffect
 /// Replaces entire sentences in the message with a sequence of phrases. The number of phrases used is based
 /// upon the length of the initial sentence.
 /// </summary>
-public sealed partial class PhraseObfuscationEffect : PunctuationBasedEffect
+public sealed partial class PhraseObfuscationEffect : LanguageObfuscationEffect
 {
     [DataField]
     public int MinPhrases { get; private set; } = 1;
@@ -143,7 +143,19 @@ public sealed partial class PhraseObfuscationEffect : PunctuationBasedEffect
     /// Which characters are considered line ending punctuation for the sake of preservation.
     /// </summary>
     [DataField]
-    public new char[] PunctuationChars { get; private set; } = ['.', '!', '?'];
+    public char[] PunctuationChars { get; private set; } = ['.', '!', '?'];
+
+    /// <summary>
+    /// The list of replacement phrases to use with this ReplacementEffect
+    /// </summary>
+    [DataField(required: true)]
+    public List<string> Replacements { get; private set; }
+
+    /// <summary>
+    /// Whether to reproduce punctuation characters. Spaces are always reproduced.
+    /// </summary>
+    [DataField]
+    public bool PreservePunctuation { get; private set; } = true;
 
     public override string Apply(string message, int roundId)
     {
@@ -152,7 +164,7 @@ public sealed partial class PhraseObfuscationEffect : PunctuationBasedEffect
         var i = 0;
         var sentenceLength = 0;
         var sentenceHash = 0;
-        // Start looping over the message
+        // Start looping over the message.
         while (i < message.Length)
         {
             var startIndex = i;
