@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Content.Shared._DEN.Language.Prototypes;
 using Content.Shared.Chat;
 using Content.Shared.Speech;
 
@@ -15,12 +16,14 @@ public sealed class AccentSystem : EntitySystem
 
     private void AccentHandler(TransformSpeechEvent args)
     {
-        if (args.Cancelled)
+        // DEN: TransformSpeechEvent is a handled event now.
+        if (args.Handled)
             return;
 
         var accentEvent = new AccentGetEvent(args.Sender, args.Message);
 
         RaiseLocalEvent(args.Sender, accentEvent, true);
         args.Message = accentEvent.Message;
+        args.Handled = true; // DEN
     }
 }

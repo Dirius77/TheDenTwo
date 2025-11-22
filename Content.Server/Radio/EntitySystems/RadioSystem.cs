@@ -19,7 +19,7 @@ namespace Content.Server.Radio.EntitySystems;
 /// <summary>
 ///     This system handles intrinsic radios and the general process of converting radio messages into chat messages.
 /// </summary>
-public sealed class RadioSystem : EntitySystem
+public sealed partial class RadioSystem : EntitySystem
 {
     [Dependency] private readonly INetManager _netMan = default!;
     [Dependency] private readonly IReplayRecordingManager _replay = default!;
@@ -33,11 +33,16 @@ public sealed class RadioSystem : EntitySystem
 
     private EntityQuery<TelecomExemptComponent> _exemptQuery;
 
+    // DEN - Initialization for partial class
+    partial void InitializeLanguages();
+
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<IntrinsicRadioReceiverComponent, RadioReceiveEvent>(OnIntrinsicReceive);
         SubscribeLocalEvent<IntrinsicRadioTransmitterComponent, EntitySpokeEvent>(OnIntrinsicSpeak);
+
+        InitializeLanguages();
 
         _exemptQuery = GetEntityQuery<TelecomExemptComponent>();
     }
@@ -76,8 +81,17 @@ public sealed class RadioSystem : EntitySystem
         if (!_messages.Add(message))
             return;
 
-        var evt = new TransformSpeakerNameEvent(messageSource, MetaData(messageSource).EntityName);
+        // DEN start - Pass language to name transform event.
+        var spokenLanguage = _languageSystem.GetCurrentLanguage(messageSource);
+        if (spokenLanguage is null)
+        {
+            _sawmill.Info($"Entity tried to speak without a spoken language: {ToPrettyString(messageSource):user}");
+            return;
+        }
+
+        var evt = new TransformSpeakerNameEvent(messageSource, MetaData(messageSource).EntityName, spokenLanguage);
         RaiseLocalEvent(messageSource, evt);
+        // DEN end.
 
         var name = evt.VoiceName;
         name = FormattedMessage.EscapeText(name);

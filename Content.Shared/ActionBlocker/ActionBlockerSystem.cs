@@ -1,3 +1,4 @@
+using Content.Shared._DEN.Language.Prototypes;
 using Content.Shared.Body.Events;
 using Content.Shared.Emoting;
 using Content.Shared.Hands;
@@ -146,10 +147,11 @@ namespace Content.Shared.ActionBlocker
             return !itemEv.Cancelled;
         }
 
-        public bool CanSpeak(EntityUid uid)
+        // DEN: Add language to SpeakAttemptEvent
+        public bool CanSpeak(EntityUid uid, LanguagePrototype language)
         {
             // This one is used as broadcast
-            var ev = new SpeakAttemptEvent(uid);
+            var ev = new SpeakAttemptEvent(uid, language); // DEN
             RaiseLocalEvent(uid, ev, true);
 
             return !ev.Cancelled;

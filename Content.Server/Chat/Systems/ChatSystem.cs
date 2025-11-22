@@ -8,6 +8,8 @@ using Content.Server.GameTicking;
 using Content.Server.Speech.EntitySystems;
 using Content.Server.Speech.Prototypes;
 using Content.Server.Station.Systems;
+using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Prototypes;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Administration;
 using Content.Shared.CCVar;
@@ -64,6 +66,9 @@ public sealed partial class ChatSystem : SharedChatSystem
     private bool _critLoocEnabled;
     private readonly bool _adminLoocEnabled = true;
 
+    // DEN - Initialization for partial class
+    partial void InitializeLanguages();
+
     public override void Initialize()
     {
         base.Initialize();
@@ -73,6 +78,8 @@ public sealed partial class ChatSystem : SharedChatSystem
         Subs.CVar(_configurationManager, CCVars.CritLoocEnabled, OnCritLoocEnabledChanged, true);
 
         SubscribeLocalEvent<GameRunLevelChangedEvent>(OnGameChange);
+
+        InitializeLanguages(); // DEN - Initialization for partial class
     }
 
     private void OnLoocEnabledChanged(bool val)
@@ -208,12 +215,22 @@ public sealed partial class ChatSystem : SharedChatSystem
         if (string.IsNullOrEmpty(message))
             return;
 
+        // DEN - Pass Language to speaking related functions so that they can be decided based on
+        // the type of language being spoken.
+        var spokenLanguage = _languageSystem.GetCurrentLanguage(source);
+        if (spokenLanguage is null)
+        {
+            _sawmill.Info($"Entity tried to speak without a spoken language: {ToPrettyString(source):user}");
+            return;
+        }
+        // DEN TODO: Don't allow sending mental or verbal languages over the radio.
+
         // This message may have a radio prefix, and should then be whispered to the resolved radio channel
         if (checkRadioPrefix)
         {
             if (TryProcessRadioMessage(source, message, out var modMessage, out var channel))
             {
-                SendEntityWhisper(source, modMessage, range, channel, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityWhisper(source, modMessage, range, channel, nameOverride, spokenLanguage, hideLog, ignoreActionBlocker);
                 return;
             }
         }
@@ -222,10 +239,10 @@ public sealed partial class ChatSystem : SharedChatSystem
         switch (desiredType)
         {
             case InGameICChatType.Speak:
-                SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntitySpeak(source, message, range, nameOverride, spokenLanguage, hideLog, ignoreActionBlocker); // DEN
                 break;
             case InGameICChatType.Whisper:
-                SendEntityWhisper(source, message, range, null, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityWhisper(source, message, range, null, nameOverride, spokenLanguage, hideLog, ignoreActionBlocker); // DEN
                 break;
             case InGameICChatType.Emote:
                 SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
@@ -373,11 +390,12 @@ public sealed partial class ChatSystem : SharedChatSystem
         string originalMessage,
         ChatTransmitRange range,
         string? nameOverride,
+        LanguagePrototype spokenLanguage, // DEN
         bool hideLog = false,
         bool ignoreActionBlocker = false
         )
     {
-        if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
+        if (!_actionBlocker.CanSpeak(source, spokenLanguage) && !ignoreActionBlocker) // DEN
             return;
 
         var message = TransformSpeech(source, originalMessage);
@@ -395,7 +413,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         }
         else
         {
-            var nameEv = new TransformSpeakerNameEvent(source, Name(source));
+            var nameEv = new TransformSpeakerNameEvent(source, Name(source), spokenLanguage); // DEN
             RaiseLocalEvent(source, nameEv);
             name = nameEv.VoiceName;
             // Check for a speech verb override
@@ -414,7 +432,7 @@ public sealed partial class ChatSystem : SharedChatSystem
 
         SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range);
 
-        var ev = new EntitySpokeEvent(source, message, null, null);
+        var ev = new EntitySpokeEvent(source, message, null, null, spokenLanguage);
         RaiseLocalEvent(source, ev, true);
 
         // To avoid logging any messages sent by entities that are not players, like vendors, cloning, etc.
@@ -446,11 +464,12 @@ public sealed partial class ChatSystem : SharedChatSystem
         ChatTransmitRange range,
         RadioChannelPrototype? channel,
         string? nameOverride,
+        LanguagePrototype spokenLanguage, // DEN
         bool hideLog = false,
         bool ignoreActionBlocker = false
         )
     {
-        if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
+        if (!_actionBlocker.CanSpeak(source, spokenLanguage) && !ignoreActionBlocker) // DEN
             return;
 
         var message = TransformSpeech(source, FormattedMessage.RemoveMarkupOrThrow(originalMessage));
@@ -469,7 +488,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         }
         else
         {
-            var nameEv = new TransformSpeakerNameEvent(source, Name(source));
+            var nameEv = new TransformSpeakerNameEvent(source, Name(source), spokenLanguage); // DEN
             RaiseLocalEvent(source, nameEv);
             name = nameEv.VoiceName;
         }
@@ -557,7 +576,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             !TryEmoteChatInput(source, action))
             return;
 
-        SendInVoiceRange(ChatChannel.Emotes, action, wrappedMessage, source, range, author);
+        SendInVoiceRange(ChatChannel.Emotes, action, wrappedMessage, null, null, source, range, author); // DEN: Emotes don't use languages either.
         if (!hideLog)
             if (name != Name(source))
                 _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Emote from {source} as {name}: {action}");
@@ -584,7 +603,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             ("entityName", name),
             ("message", FormattedMessage.EscapeText(message)));
 
-        SendInVoiceRange(ChatChannel.LOOC, message, wrappedMessage, source, hideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, player.UserId);
+        SendInVoiceRange(ChatChannel.LOOC, message, wrappedMessage, null, null, source, hideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, player.UserId); // DEN: LOOC doesn't use languages.
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"LOOC from {source}: {message}");
     }
 
@@ -665,7 +684,7 @@ public sealed partial class ChatSystem : SharedChatSystem
     /// <summary>
     ///     Sends a chat message to the given players in range of the source entity.
     /// </summary>
-    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null)
+    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, string? langObfuscatedMessage, string? wrappedLangObfuscatedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null, LanguagePrototype? language = null) // DEN
     {
         foreach (var (session, data) in GetRecipients(source, VoiceRange))
         {
@@ -735,7 +754,6 @@ public sealed partial class ChatSystem : SharedChatSystem
 
     public string TransformSpeech(EntityUid sender, string message)
     {
-        // DEN - Transform Speech based on what kind of language is being spoken, IE: Verbal, Telepathy, Sign
         var ev = new TransformSpeechEvent(sender, message);
         RaiseLocalEvent(sender, ev, true);
 

@@ -62,7 +62,7 @@ public sealed partial class VoiceMaskSystem : EntitySystem
     private void TransformSpeech(Entity<VoiceMaskComponent> entity, TransformSpeechEvent args)
     {
         if (entity.Comp.AccentHide && entity.Comp.Active)
-            args.Cancel();
+            args.Handled = true; // DEN this is a handled event not just cancellable.
     }
 
     private void OnTransformSpeech(Entity<VoiceMaskComponent> entity, ref TransformSpeechEvent args)

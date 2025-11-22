@@ -1,3 +1,5 @@
+using System.Resources;
+using Content.Shared._DEN.Language.Prototypes;
 using Content.Shared.Inventory;
 using Content.Shared.Radio;
 using Content.Shared.Speech;
@@ -15,11 +17,13 @@ public sealed class TransformSpeakerNameEvent : EntityEventArgs, IInventoryRelay
     public EntityUid Sender;
     public string VoiceName;
     public ProtoId<SpeechVerbPrototype>? SpeechVerb;
+    public LanguagePrototype Language; // DEN: Add language to event.
 
-    public TransformSpeakerNameEvent(EntityUid sender, string name)
+    public TransformSpeakerNameEvent(EntityUid sender, string name, LanguagePrototype language) // DEN
     {
         Sender = sender;
         VoiceName = name;
+        Language = language; // DEN
         SpeechVerb = null;
     }
 }
@@ -27,7 +31,7 @@ public sealed class TransformSpeakerNameEvent : EntityEventArgs, IInventoryRelay
 /// <summary>
 /// Raised broadcast in order to transform speech.transmit
 /// </summary>
-public sealed class TransformSpeechEvent : CancellableEntityEventArgs, IInventoryRelayEvent
+public sealed class TransformSpeechEvent : HandledEntityEventArgs, IInventoryRelayEvent // DEN: Swap to Handled
 {
     public SlotFlags TargetSlots { get; } = SlotFlags.WITHOUT_POCKET;
     public EntityUid Sender;
@@ -60,6 +64,7 @@ public sealed class EntitySpokeEvent : EntityEventArgs
     public readonly EntityUid Source;
     public readonly string Message;
     public readonly string? ObfuscatedMessage; // not null if this was a whisper
+    public readonly LanguagePrototype Language; // DEN: The Language used.
 
     /// <summary>
     /// If the entity was trying to speak into a radio, this was the channel they were trying to access. If a radio
@@ -67,11 +72,12 @@ public sealed class EntitySpokeEvent : EntityEventArgs
     /// </summary>
     public RadioChannelPrototype? Channel;
 
-    public EntitySpokeEvent(EntityUid source, string message, RadioChannelPrototype? channel, string? obfuscatedMessage)
+    public EntitySpokeEvent(EntityUid source, string message, RadioChannelPrototype? channel, string? obfuscatedMessage, LanguagePrototype language) // DEN
     {
         Source = source;
         Message = message;
         Channel = channel;
         ObfuscatedMessage = obfuscatedMessage;
+        Language = language; // DEN
     }
 }

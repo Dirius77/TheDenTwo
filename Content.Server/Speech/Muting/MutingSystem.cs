@@ -1,5 +1,6 @@
 using Content.Server.Popups;
 using Content.Server.Speech.EntitySystems;
+using Content.Shared._DEN.Language.Prototypes;
 using Content.Shared.Abilities.Mime;
 using Content.Shared.Chat;
 using Content.Shared.Chat.Prototypes;
@@ -47,6 +48,10 @@ namespace Content.Server.Speech.Muting
         private void OnSpeakAttempt(EntityUid uid, MutedComponent component, SpeakAttemptEvent args)
         {
             // TODO something better than this.
+
+            // DEN: Don't mute non-spoken languages.
+            if (args.Language.CommunicationType != CommunicationType.Verbal)
+                return;
 
             if (HasComp<MimePowersComponent>(uid))
                 _popupSystem.PopupEntity(Loc.GetString("mime-cant-speak"), uid, uid);
