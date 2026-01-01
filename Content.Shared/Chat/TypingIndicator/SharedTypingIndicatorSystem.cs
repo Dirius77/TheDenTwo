@@ -21,9 +21,15 @@ public abstract partial class SharedTypingIndicatorSystem : EntitySystem // TheD
     /// </summary>
     public static readonly ProtoId<TypingIndicatorPrototype> InitialIndicatorId = "default";
 
+    // DEN - Initialization for partial class
+    partial void InitializeLanguages();
+
     public override void Initialize()
     {
         base.Initialize();
+
+        InitializeLanguages(); // DEN Languages
+
         SubscribeLocalEvent<PlayerAttachedEvent>(OnPlayerAttached);
         SubscribeLocalEvent<TypingIndicatorComponent, PlayerDetachedEvent>(OnPlayerDetached);
 
@@ -72,8 +78,17 @@ public abstract partial class SharedTypingIndicatorSystem : EntitySystem // TheD
             return;
         }
 
+        // DEN Languages
+        var spokenLanguage = _languageSystem.GetCurrentLanguage(uid.Value);
+        if (spokenLanguage is null)
+        {
+            _sawmill.Info($"Typing indicator with no language from: {ToPrettyString(uid.Value):user}");
+            return;
+        }
+        // DEN end
+
         // check if this entity can speak or emote
-        if (!_actionBlocker.CanEmote(uid.Value) && !_actionBlocker.CanSpeak(uid.Value))
+        if (!_actionBlocker.CanEmote(uid.Value) && !_actionBlocker.CanSpeak(uid.Value, spokenLanguage)) // DEN Languages, but also why is this checked? (L)OOC exists.
         {
             // nah, make sure that typing indicator is disabled
             SetTypingIndicatorState(uid.Value, TypingIndicatorState.None);

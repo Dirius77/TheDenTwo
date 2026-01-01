@@ -1,6 +1,7 @@
 using Content.Server.Popups;
 using Content.Server.Speech.EntitySystems;
 using Content.Shared._DEN.Language.Prototypes;
+using Content.Shared._DEN.Language.Systems;
 using Content.Shared.Abilities.Mime;
 using Content.Shared.Chat;
 using Content.Shared.Chat.Prototypes;
@@ -50,7 +51,7 @@ namespace Content.Server.Speech.Muting
             // TODO something better than this.
 
             // DEN: Don't mute non-spoken languages.
-            if (args.Language.CommunicationType != CommunicationType.Verbal)
+            if (!args.Language.LanguageTags.Contains(LanguageSystem.VerbalTag))
                 return;
 
             if (HasComp<MimePowersComponent>(uid))

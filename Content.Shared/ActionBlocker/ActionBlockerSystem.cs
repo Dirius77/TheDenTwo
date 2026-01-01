@@ -147,7 +147,7 @@ namespace Content.Shared.ActionBlocker
             return !itemEv.Cancelled;
         }
 
-        // DEN: Add language to SpeakAttemptEvent
+        // DEN: Add language to SpeakAttemptEvent as different things may block different kinds of communication.
         public bool CanSpeak(EntityUid uid, LanguagePrototype language)
         {
             // This one is used as broadcast

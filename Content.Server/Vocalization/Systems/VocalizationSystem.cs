@@ -24,6 +24,8 @@ public sealed partial class VocalizationSystem : EntitySystem
     {
         base.Initialize();
 
+        InitializeLanguages(); // DEN: Languages
+
         SubscribeLocalEvent<VocalizerComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<VocalizerRequiresPowerComponent, TryVocalizeEvent>(OnRequiresPowerTryVocalize);
     }
@@ -81,9 +83,18 @@ public sealed partial class VocalizationSystem : EntitySystem
         if (vocalizeEvent.Handled)
             return;
 
+        // DEN Languages
+        var spokenLanguage = _languageSystem.GetCurrentLanguage(entity);
+        if (spokenLanguage is null)
+        {
+            _sawmill.Info($"Entity tried to vocalize without a language: {ToPrettyString(entity):user}");
+            return;
+        }
+        // DEN end
+
         // default to local chat if no other system handles the event
         // first check if the entity can speak
-        if (!_actionBlocker.CanSpeak(entity))
+        if (!_actionBlocker.CanSpeak(entity, spokenLanguage)) // DEN Language
             return;
 
         // send the message

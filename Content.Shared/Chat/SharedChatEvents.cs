@@ -17,9 +17,9 @@ public sealed class TransformSpeakerNameEvent : EntityEventArgs, IInventoryRelay
     public EntityUid Sender;
     public string VoiceName;
     public ProtoId<SpeechVerbPrototype>? SpeechVerb;
-    public LanguagePrototype Language; // DEN: Add language to event.
+    public LanguagePrototype? Language; // DEN: Add language to event.
 
-    public TransformSpeakerNameEvent(EntityUid sender, string name, LanguagePrototype language) // DEN
+    public TransformSpeakerNameEvent(EntityUid sender, string name, LanguagePrototype? language = null) // DEN
     {
         Sender = sender;
         VoiceName = name;

@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using System.Text.RegularExpressions;
+using Content.Shared._DEN.Language.Prototypes;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Chat.Prototypes;
 using Content.Shared.Popups;
@@ -87,10 +88,11 @@ public abstract partial class SharedChatSystem : EntitySystem
     ///     Attempts to find an applicable <see cref="SpeechVerbPrototype"/> for a speaking entity's message.
     ///     If one is not found, returns <see cref="DefaultSpeechVerb"/>.
     /// </summary>
-    public SpeechVerbPrototype GetSpeechVerb(EntityUid source, string message, SpeechComponent? speech = null)
+    public SpeechVerbPrototype GetSpeechVerb(EntityUid source, string message, SpeechComponent? speech = null, LanguagePrototype? language = null) // DEN Language
     {
+        // DEN Use language verbs instead of the default if there is one.
         if (!Resolve(source, ref speech, false))
-            return _prototypeManager.Index(DefaultSpeechVerb);
+            return language?.VerbOverride is null ? _prototypeManager.Index(DefaultSpeechVerb) : _prototypeManager.Index(language.VerbOverride);
 
         // check for a suffix-applicable speech verb
         SpeechVerbPrototype? current = null;
@@ -102,6 +104,8 @@ public abstract partial class SharedChatSystem : EntitySystem
                 current = proto;
             }
         }
+        // DEN Use the language verbs if there is one.
+        current = language?.VerbOverride is null ? current : _prototypeManager.Index(language.VerbOverride);
 
         // if no applicable suffix verb return the normal one used by the entity
         return current ?? _prototypeManager.Index(speech.SpeechVerb);

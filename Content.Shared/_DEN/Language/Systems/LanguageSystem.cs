@@ -14,9 +14,12 @@ public sealed partial class LanguageSystem : EntitySystem
     [Dependency] private readonly IPrototypeManager _prototypes = default!;
     [Dependency] private readonly SharedGameTicker _gameTicker = default!;
 
+    public static readonly ProtoId<LanguageTagPrototype> VerbalTag = "Verbal";
+
     public override void Initialize()
     {
         SubscribeLocalEvent<ObfuscateLanguageEvent>(OnObfuscateLanguage);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, DetermineUnderstandingEvent>(OnDetermineUnderstanding);
     }
 
     public void OnObfuscateLanguage(ObfuscateLanguageEvent args)
@@ -26,6 +29,15 @@ public sealed partial class LanguageSystem : EntitySystem
 
         args.ObfuscatedMessage = ObfuscateMessageWithLanguage(args.OriginalMessage, args.Language);
         args.Handled = true;
+    }
+
+    public void OnDetermineUnderstanding(EntityUid target, LanguageCommunicatorComponent communicatorComponent, DetermineUnderstandingEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        if (communicatorComponent.UnderstoodLanguages.ContainsKey(args.Language))
+            args.Understands = true;
     }
 
     public LanguagePrototype? GetCurrentLanguage(EntityUid entity)

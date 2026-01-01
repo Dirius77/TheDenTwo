@@ -36,9 +36,9 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     [DataField(required: true)]
     public LanguageObfuscationEffect ObfuscationEffect { get; private set; }
 
-    // What form of communication this language uses.
-    [DataField(required: true)]
-    public CommunicationType CommunicationType { get; private set; }
+    [DataField]
+    [AlwaysPushInheritance]
+    public HashSet<ProtoId<LanguageTagPrototype>> LanguageTags { get; private set; }
 
     [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<LanguagePrototype>))]
     public string[]? Parents { get; private set; }
@@ -46,16 +46,4 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     [NeverPushInheritance]
     [AbstractDataField]
     public bool Abstract { get; private set; }
-}
-
-/// <summary>
-/// What form of communication this language uses. Used for determining things such as whether accents should be
-/// applied.
-/// </summary>
-public enum CommunicationType
-{
-    Verbal, // Spoken out loud, applies accents and requires a free mouth.
-    // TODO: Implement mental communication.
-    Mental, // Spoken mentally, just requires the user to be conscious.
-    Physical, // Spoken using body movements, requires free use of hands.
 }
