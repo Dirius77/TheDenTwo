@@ -23,11 +23,8 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     [ViewVariables(VVAccess.ReadOnly)]
     public string Abbreviation => Loc.GetString(Name + "-abbreviation");
 
-    [DataField]
-    public LocId Description { get; set; }
-
     [ViewVariables(VVAccess.ReadOnly)]
-    public string LocalizedDescription => Loc.GetString(Description);
+    public string LocalizedDescription => Loc.GetString(Name + "-description");
 
     // Replace the normal speaking verbs when using this language, useful for things like Sign Language.
     [DataField]
@@ -36,7 +33,7 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     [DataField(required: true)]
     public LanguageObfuscationEffect ObfuscationEffect { get; private set; }
 
-    [DataField]
+    [DataField("tags")]
     [AlwaysPushInheritance]
     public HashSet<ProtoId<LanguageTagPrototype>> LanguageTags { get; private set; }
 

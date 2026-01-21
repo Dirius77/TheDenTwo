@@ -1,0 +1,17 @@
+# Tags to be used in the language system.
+
+- type: languageTag
+  id: Verbal
+  name: language-tag-verbal
+
+- type: languageTag
+  id: Mental
+  name: language-tag-mental
+
+- type: languageTag
+  id: Physical
+  name: language-tag-physical
+
+- type: languageTag
+  id: Gestalt
+  name: language-tag-gestalt

@@ -222,7 +222,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             _sawmill.Info($"Entity tried to speak without a spoken language: {ToPrettyString(source):user}");
             return;
         }
-        // DEN TODO: Don't allow sending mental or verbal languages over the radio.
+        // DEN TODO: Don't allow sending non-verbal languages over the radio.
 
         // This message may have a radio prefix, and should then be whispered to the resolved radio channel
         if (checkRadioPrefix)
@@ -443,7 +443,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             ("fontSize", speech.FontSize),
             ("message", obfuscatedMessage));
 
-        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, obfuscatedMessage, wrappedObfuscatedMessage, source, range);
+        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, obfuscatedMessage, wrappedObfuscatedMessage, source, range, language: spokenLanguage); // DEN Language
 
         var ev = new EntitySpokeEvent(source, message, null, obfuscatedMessage, spokenLanguage);
         RaiseLocalEvent(source, ev, true);
@@ -549,8 +549,13 @@ public sealed partial class ChatSystem : SharedChatSystem
                 continue; // Won't get logged to chat, and ghosts are too far away to see the pop-up, so we just won't send it to them.
 
             // DEN Language Start
-            var understandingEvent = new DetermineUnderstandingEvent(source, spokenLanguage);
+            var understandingEvent = new DetermineUnderstandingEvent(source, spokenLanguage, message);
             RaiseLocalEvent(listener, understandingEvent);
+
+            if (understandingEvent.Hide)
+                continue;
+
+            string toSend;
 
             if (data.Range <= WhisperClearRange || data.Observer)
             {
@@ -758,8 +763,9 @@ public sealed partial class ChatSystem : SharedChatSystem
                 }
 
                 var target = session.AttachedEntity.Value;
-                var understandingEvent = new DetermineUnderstandingEvent(source, language);
+                var understandingEvent = new DetermineUnderstandingEvent(source, language, message);
                 RaiseLocalEvent(target, understandingEvent);
+
                 if(understandingEvent.Understands)
                     _chatManager.ChatMessageToOne(channel, message, wrappedMessage, source, entHideChat, session.Channel, author: author);
                 else

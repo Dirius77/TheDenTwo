@@ -36,7 +36,7 @@ public sealed partial class LanguageSystem : EntitySystem
         if (args.Handled)
             return;
 
-        if (communicatorComponent.UnderstoodLanguages.ContainsKey(args.Language))
+        if (communicatorComponent.UnderstoodLanguages.Contains(args.Language))
             args.Understands = true;
     }
 
@@ -47,7 +47,7 @@ public sealed partial class LanguageSystem : EntitySystem
 
         // No language selected, switch to one that they speak, assuming they still speak one.
         if (languageCommunicator.CurrentLanguage is null && languageCommunicator.SpokenLanguages.Count != 0)
-            languageCommunicator.CurrentLanguage = languageCommunicator.SpokenLanguages.First().Key;
+            languageCommunicator.CurrentLanguage = languageCommunicator.SpokenLanguages.First();
 
         return !_prototypes.Resolve(languageCommunicator.CurrentLanguage, out var languageProto) ? null : languageProto;
     }
@@ -56,4 +56,6 @@ public sealed partial class LanguageSystem : EntitySystem
     {
         return language.ObfuscationEffect.Apply(message, _gameTicker.RoundId);
     }
+
+    public string WrapLanguageBasedMessage(LocId wrapper, string message, )
 }

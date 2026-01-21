@@ -17,9 +17,12 @@ public sealed partial class ObfuscateLanguageEvent(LanguagePrototype language, s
 
 public sealed partial class DetermineUnderstandingEvent(
     EntityUid sourceEntity,
-    LanguagePrototype language) : HandledEntityEventArgs
+    LanguagePrototype language, string message) : HandledEntityEventArgs
 {
     public EntityUid SourceEntity = sourceEntity;
     public LanguagePrototype Language = language;
+    public string OriginalMessage = message;
     public bool Understands = false;
+    public bool Hide = false; // Hide the message completely.
+    public string? MessageOverride;
 }

@@ -159,6 +159,11 @@
     - FootstepSound
     - DoorBumpOpener
     - AnomalyHost
+  - type: LanguageCommunicator
+    spoken:
+    - Basic
+    understood:
+    - Basic
 
 - type: entity
   abstract: true

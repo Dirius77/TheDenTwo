@@ -18,14 +18,16 @@ public sealed partial class LanguageCommunicatorComponent : Component
     public ProtoId<LanguagePrototype>? CurrentLanguage { get; set; }
 
     /// <summary>
-    /// The languages that this entity is capable of speaking in, as well as what the source of that ability is.
+    /// The languages that this entity is capable of speaking in.
     /// </summary>
+    [DataField("spoken")]
     [ViewVariables(VVAccess.ReadWrite), AutoNetworkedField]
-    public Dictionary<ProtoId<LanguagePrototype>, EntityUid?> SpokenLanguages { get; set; } = new();
+    public HashSet<ProtoId<LanguagePrototype>> SpokenLanguages { get; set; } = new();
 
     /// <summary>
-    /// The languages that this entity is capable of understanding, as well as what the source of that ability is.
+    /// The languages that this entity is capable of understanding.
     /// </summary>
+    [DataField("understood")]
     [ViewVariables(VVAccess.ReadWrite), AutoNetworkedField]
-    public Dictionary<ProtoId<LanguagePrototype>, EntityUid?> UnderstoodLanguages { get; set; } = new();
+    public HashSet<ProtoId<LanguagePrototype>> UnderstoodLanguages { get; set; } = new();
 }

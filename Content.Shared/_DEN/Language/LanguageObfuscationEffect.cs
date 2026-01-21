@@ -18,21 +18,13 @@ public abstract partial class LanguageObfuscationEffect
         return (int)(Math.Abs(result) % (max - min)) + min;
     }
 
-    internal int StringToInt(string message)
-    {
-        ulong hash = 0;
-        foreach (var c in message)
-            hash += (c + 31 * hash);
-        return (int)hash;
-    }
-
     public abstract string Apply(string message, int roundId);
 }
 
 /// <summary>
 /// Replaces the entire message with one of the available replacement phrases.
 /// </summary>
-public partial class ReplacementObfuscationEffect : LanguageObfuscationEffect
+public partial class ReplacementEffect : LanguageObfuscationEffect
 {
     /// <summary>
     /// The list of replacement phrases to use with this ReplacementEffect
@@ -42,11 +34,11 @@ public partial class ReplacementObfuscationEffect : LanguageObfuscationEffect
 
     public override string Apply(string message, int roundId)
     {
-        return Replacements[SeededPseudoRandom(StringToInt(message) + roundId, 0, Replacements.Count)];
+        return Replacements[SeededPseudoRandom(message.GetHashCode() + roundId, 0, Replacements.Count)];
     }
 }
 
-public abstract partial class PunctuationBasedObfuscationEffect : ReplacementObfuscationEffect
+public abstract partial class PunctuationObfuscationEffect : ReplacementEffect
 {
     /// <summary>
     /// Which characters are considered punctuation for the sake of preservation.
@@ -67,13 +59,13 @@ public abstract partial class PunctuationBasedObfuscationEffect : ReplacementObf
 /// Specific words will always be translated into the same sequence of syllables within a round, meaning that
 /// it is possible to 'learn' particular words.
 /// </summary>
-public sealed partial class SyllableReplacementObfuscationEffect : PunctuationBasedObfuscationEffect
+public sealed partial class SyllableReplacementEffect : PunctuationObfuscationEffect
 {
     [DataField]
     public int MinSyllables { get; private set; } = 1;
 
     [DataField]
-    public int MaxSyllables { get; private set; } = 4;
+    public int MaxSyllables { get; private set; } = 3;
 
     public override string Apply(string message, int roundId)
     {
@@ -91,7 +83,7 @@ public sealed partial class SyllableReplacementObfuscationEffect : PunctuationBa
             {
                 var endIndex = i;
                 var word = message.Substring(startIndex, endIndex-startIndex);
-                var hash = StringToInt(word);
+                var hash = word.GetHashCode();
                 // The max is exclusive.
                 var count = SeededPseudoRandom(hash + roundId, MinSyllables, MaxSyllables + 1);
 
@@ -119,7 +111,7 @@ public sealed partial class SyllableReplacementObfuscationEffect : PunctuationBa
 /// Replaces entire sentences in the message with a sequence of phrases. The number of phrases used is based
 /// upon the length of the initial sentence.
 /// </summary>
-public sealed partial class PhraseObfuscationEffect : LanguageObfuscationEffect
+public sealed partial class PhraseReplacementEffect : LanguageObfuscationEffect
 {
     [DataField]
     public int MinPhrases { get; private set; } = 1;
@@ -178,7 +170,7 @@ public sealed partial class PhraseObfuscationEffect : LanguageObfuscationEffect
                 var endIndex = i;
 
                 sentenceLength += endIndex - startIndex;
-                sentenceHash += StringToInt(message.Substring(startIndex, endIndex - startIndex));
+                sentenceHash += message.Substring(startIndex, endIndex - startIndex).GetHashCode();
 
                 // Found the end of a sentence.
                 if (i == message.Length || PunctuationChars.Contains(message[i]))

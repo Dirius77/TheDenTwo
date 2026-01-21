@@ -81,7 +81,7 @@ public sealed partial class RadioSystem : EntitySystem
         if (!_messages.Add(message))
             return;
 
-        // DEN start - Pass language to name transform event.
+        // DEN start - TODO: This is not the right way to do this here.
         var spokenLanguage = _languageSystem.GetCurrentLanguage(messageSource);
         if (spokenLanguage is null)
         {
