@@ -1,20 +1,13 @@
 using Content.Shared._DEN.Language.Prototypes;
-using Content.Shared.Speech;
 
 namespace Content.Shared._DEN.Language;
 
 /// <summary>
-/// Obfuscates the given message using the provided language. ObfuscatedMessage will be filled in when the event resolves.
+/// Event sent targeting the entity trying to understand a particular statement in a language.
 /// </summary>
-/// <param name="language">The language to obfuscate with</param>
-/// <param name="originalMessage">The original message.</param>
-public sealed partial class ObfuscateLanguageEvent(LanguagePrototype language, string originalMessage) : HandledEntityEventArgs
-{
-    public LanguagePrototype Language = language;
-    public string OriginalMessage = originalMessage;
-    public string ObfuscatedMessage = "";
-}
-
+/// <param name="sourceEntity"></param>
+/// <param name="language"></param>
+/// <param name="message"></param>
 public sealed partial class DetermineUnderstandingEvent(
     EntityUid sourceEntity,
     LanguagePrototype language, string message) : HandledEntityEventArgs

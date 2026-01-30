@@ -3,9 +3,7 @@ using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.Prototypes;
 using Content.Shared.Chat;
 using Content.Shared.GameTicking;
-using Content.Shared.Speech;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Utility;
 
 namespace Content.Shared._DEN.Language.Systems;
 
@@ -18,17 +16,17 @@ public sealed partial class LanguageSystem : EntitySystem
 
     public override void Initialize()
     {
-        SubscribeLocalEvent<ObfuscateLanguageEvent>(OnObfuscateLanguage);
         SubscribeLocalEvent<LanguageCommunicatorComponent, DetermineUnderstandingEvent>(OnDetermineUnderstanding);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, TransformSpeakerNameEvent>(OnTransformSpeakerName);
     }
 
-    public void OnObfuscateLanguage(ObfuscateLanguageEvent args)
+    private void OnTransformSpeakerName(Entity<LanguageCommunicatorComponent> ent, ref TransformSpeakerNameEvent args)
     {
-        if (args.Handled)
+        if (args.Language is null)
             return;
 
-        args.ObfuscatedMessage = ObfuscateMessageWithLanguage(args.OriginalMessage, args.Language);
-        args.Handled = true;
+        if (args.Language.VerbOverride is not null)
+            args.SpeechVerb = args.Language.VerbOverride;
     }
 
     public void OnDetermineUnderstanding(EntityUid target, LanguageCommunicatorComponent communicatorComponent, DetermineUnderstandingEvent args)
@@ -38,6 +36,8 @@ public sealed partial class LanguageSystem : EntitySystem
 
         if (communicatorComponent.UnderstoodLanguages.Contains(args.Language))
             args.Understands = true;
+
+        args.Handled = true;
     }
 
     public LanguagePrototype? GetCurrentLanguage(EntityUid entity)
@@ -56,6 +56,4 @@ public sealed partial class LanguageSystem : EntitySystem
     {
         return language.ObfuscationEffect.Apply(message, _gameTicker.RoundId);
     }
-
-    public string WrapLanguageBasedMessage(LocId wrapper, string message, )
 }

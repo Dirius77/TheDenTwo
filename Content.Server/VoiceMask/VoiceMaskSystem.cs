@@ -1,6 +1,8 @@
 using Content.Server.Speech;
+using Content.Shared._DEN.Language.Systems;
 using Content.Shared.Actions;
 using Content.Shared.Administration.Logs;
+using Content.Shared.Cargo;
 using Content.Shared.CCVar;
 using Content.Shared.Chat;
 using Content.Shared.Clothing;
@@ -61,8 +63,9 @@ public sealed partial class VoiceMaskSystem : EntitySystem
     /// </summary>
     private void TransformSpeech(Entity<VoiceMaskComponent> entity, TransformSpeechEvent args)
     {
-        if (entity.Comp.AccentHide && entity.Comp.Active)
-            args.Handled = true; // DEN this is a handled event not just cancellable.
+        if (args.Language.LanguageTags.Contains(LanguageSystem.VerbalTag) && // DEN: Only works on verbal languages.
+            entity.Comp.AccentHide && entity.Comp.Active)
+            args.Cancel();
     }
 
     private void OnTransformSpeech(Entity<VoiceMaskComponent> entity, ref TransformSpeechEvent args)
@@ -203,7 +206,8 @@ public sealed partial class VoiceMaskSystem : EntitySystem
 
     private void TransformVoice(Entity<VoiceMaskComponent> entity, TransformSpeakerNameEvent args)
     {
-        if (!entity.Comp.Active)
+        if (!entity.Comp.Active ||
+            args.Language is not null && !args.Language.LanguageTags.Contains(LanguageSystem.VerbalTag)) // DEN Only works on verbal languages.
             return;
 
         args.VoiceName = GetCurrentVoiceName(entity);

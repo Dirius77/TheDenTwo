@@ -26,6 +26,10 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     [ViewVariables(VVAccess.ReadOnly)]
     public string LocalizedDescription => Loc.GetString(Name + "-description");
 
+    [ViewVariables(VVAccess.ReadOnly)]
+    [DataField]
+    public bool ShowInChat = false;
+
     // Replace the normal speaking verbs when using this language, useful for things like Sign Language.
     [DataField]
     public ProtoId<SpeechVerbPrototype>? VerbOverride { get; private set; } = null!;

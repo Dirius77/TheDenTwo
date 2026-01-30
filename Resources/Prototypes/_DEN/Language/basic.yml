@@ -262,6 +262,7 @@
 - type: language
   id: NotBasic
   name: language-not-basic
+  showInChat: true
   tags:
   - Verbal
   obfuscationEffect:
