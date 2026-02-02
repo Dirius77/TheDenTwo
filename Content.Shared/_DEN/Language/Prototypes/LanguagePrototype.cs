@@ -15,16 +15,12 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     [DataField(required: true)]
     private LocId Name { get; set; }
 
-    [ViewVariables(VVAccess.ReadOnly)]
-    public string LocalizedName => Loc.GetString(Name);
-
     // A shortened form of the Language for display in chat.
-    // TODO: Add this to the YML checker to make sure it exists.
     [ViewVariables(VVAccess.ReadOnly)]
-    public string Abbreviation => Loc.GetString(Name + "-abbreviation");
+    public LocId Abbreviation => Name + "-abbreviation";
 
     [ViewVariables(VVAccess.ReadOnly)]
-    public string LocalizedDescription => Loc.GetString(Name + "-description");
+    public LocId Description => Name + "-description";
 
     [ViewVariables(VVAccess.ReadOnly)]
     [DataField]
@@ -33,6 +29,9 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     // Replace the normal speaking verbs when using this language, useful for things like Sign Language.
     [DataField]
     public ProtoId<SpeechVerbPrototype>? VerbOverride { get; private set; } = null!;
+
+    [DataField]
+    public Color FontColor = Color.White;
 
     [DataField(required: true)]
     public LanguageObfuscationEffect ObfuscationEffect { get; private set; }

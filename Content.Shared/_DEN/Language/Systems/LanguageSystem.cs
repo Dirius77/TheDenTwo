@@ -22,10 +22,7 @@ public sealed partial class LanguageSystem : EntitySystem
 
     private void OnTransformSpeakerName(Entity<LanguageCommunicatorComponent> ent, ref TransformSpeakerNameEvent args)
     {
-        if (args.Language is null)
-            return;
-
-        if (args.Language.VerbOverride is not null)
+        if (args.Language?.VerbOverride != null)
             args.SpeechVerb = args.Language.VerbOverride;
     }
 
