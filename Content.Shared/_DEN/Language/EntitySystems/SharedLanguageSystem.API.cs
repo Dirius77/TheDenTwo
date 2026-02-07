@@ -1,0 +1,250 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using Content.Shared._DEN.Language.Components;
+using JetBrains.Annotations;
+using Robust.Shared.Prototypes;
+
+namespace Content.Shared._DEN.Language.EntitySystems;
+
+public abstract partial class SharedLanguageSystem
+{
+    private static readonly ProtoId<LanguageFluencyPrototype> DefaultLanguageFluency = "Fluent";
+
+    #region Add Methods
+    /// <summary>
+    ///     Adds a language to the target entity. The entity will be able to speak and fully understand the language.
+    ///     This may add multiple languages if the language has related languages.
+    /// </summary>
+    /// <param name="target">The entity to add the language to.</param>
+    /// <param name="language">The ID of the language to add.</param>
+    /// <param name="languageEntities">The list of added languages.</param>
+    /// <returns>Whether the operation succeeded. Note that languages may have still been added if a related language failed.</returns>
+    [PublicAPI]
+    public bool TryAddLanguage(EntityUid target,
+        ProtoId<LanguagePrototype> language,
+        out List<EntityUid> languageEntities)
+    {
+        return TryAddLanguage(target, language,true, DefaultLanguageFluency, out languageEntities);
+    }
+
+    /// <summary>
+    ///     Adds a language to the target entity.
+    ///     This may add multiple languages if the language has related languages.
+    /// </summary>
+    /// <param name="target">The entity to add the language to.</param>
+    /// <param name="languageProto">The ID of the language to add.</param>
+    /// <param name="speaks">Whether the target should be able to speak the language.</param>
+    /// <param name="fluencyProto">The amount of fluency the target should have with the language.</param>
+    /// <param name="languageEntities">The list of added languages.</param>
+    /// <returns>Whether the operation succeeded. Note that languages may have still been added if a related language failed.</returns>
+    [PublicAPI]
+    public bool TryAddLanguage(EntityUid target,
+        ProtoId<LanguagePrototype> languageProto,
+        bool speaks,
+        ProtoId<LanguageFluencyPrototype> fluencyProto,
+        out List<EntityUid> languageEntities)
+    {
+        languageEntities = [];
+
+        return InsertLanguageAndChildren(target, languageProto, fluencyProto, speaks, out languageEntities);
+    }
+    #endregion
+
+    #region Remove Methods
+    /// <summary>
+    ///     Removes the most fluent instance of a language from an entity. This will leave less fluent instances
+    ///     such as related languages.
+    /// </summary>
+    /// <param name="target">The entity to remove the language from.</param>
+    /// <param name="languageProto">The language to remove.</param>
+    /// <returns>If a language was successfully removed.</returns>
+    [PublicAPI]
+    public bool TryRemoveLanguage(EntityUid target, ProtoId<LanguagePrototype> languageProto)
+    {
+        if (!TryGetLanguageEntity(target, languageProto, out var languageEntity) || Deleted(languageEntity.Value))
+            return false;
+
+        PredictedQueueDel(languageEntity);
+        return true;
+    }
+
+    /// <summary>
+    ///     Removes ALL instances of a language from an entity, regardless of source. This may cause odd behavior with
+    ///     translators or other sources of language.
+    /// </summary>
+    /// <param name="target">The entity to remove the language from.</param>
+    /// <param name="languageProto">The language to remove.</param>
+    /// <returns>If all the languages were successfully removed.</returns>
+    [PublicAPI]
+    public bool TryRemoveLanguages(EntityUid target, ProtoId<LanguagePrototype> languageProto)
+    {
+        if (!TryGetLanguageEntities(target, languageProto, out var languageEntities))
+            return false;
+
+        var errored = false;
+        foreach (var languageEntity in languageEntities)
+        {
+            if (Deleted(languageEntity))
+            {
+                errored = true;
+                continue;
+            }
+            PredictedQueueDel(languageEntity);
+        }
+
+        return !errored;
+    }
+    #endregion
+
+    #region Get Methods
+    /// <summary>
+    ///     Returns the first (most fluent) language entity for the given language on the target entity.
+    /// </summary>
+    /// <param name="target">The target entity.</param>
+    /// <param name="languageProto">The language to find a language entity for.</param>
+    /// <param name="languageEntity">The found language entity.</param>
+    /// <returns>Whether a language entity was found.</returns>
+    [PublicAPI]
+    public bool TryGetLanguageEntity(EntityUid target,
+        ProtoId<LanguagePrototype> languageProto,
+        [NotNullWhen(true)] out Entity<LanguageComponent>? languageEntity)
+    {
+        languageEntity = null;
+
+        if (!TryGetLanguageEntities(target, languageProto, out var languageEntities))
+            return false;
+
+        languageEntity = languageEntities.First();
+        return true;
+    }
+
+    /// <summary>
+    ///     Retrieves all the language entities from a target.
+    /// </summary>
+    /// <param name="target">The target entity</param>
+    /// <param name="languageEntities">All the language entities on the target.</param>
+    /// <returns>Whether the entities were successfully retrieved.</returns>
+    [PublicAPI]
+    public bool TryGetLanguageEntities(EntityUid target,
+        out List<Entity<LanguageComponent>> languageEntities)
+    {
+        languageEntities = [];
+
+        if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
+            return false;
+
+        if (communicator.Languages is not { } languages)
+            return false;
+
+        languageEntities.AddRange(
+            from languageEnt in languages.ContainedEntities
+            where _languageQuery.HasComp(languageEnt)
+            select _languageQuery.Get(languageEnt));
+
+        return languageEntities.Count > 0;
+    }
+
+    /// <summary>
+    ///     Retrieves a list of all the language entities that represent a particular language for an entity.
+    /// </summary>
+    /// <param name="target">The target entity to get language entities from.</param>
+    /// <param name="language">The language prototype to compare against.</param>
+    /// <param name="languageEntities">The language entities matching the language, sorted by fluency.</param>
+    /// <returns>Whether any language entities were retrieved.</returns>
+    [PublicAPI]
+    public bool TryGetLanguageEntities(EntityUid target,
+        ProtoId<LanguagePrototype> language,
+        out List<Entity<LanguageComponent>> languageEntities)
+    {
+        languageEntities = [];
+
+        if (!TryGetLanguageEntities(target, out languageEntities))
+            return false;
+
+        languageEntities = languageEntities.Where(e => e.Comp.Language == language).ToList();
+
+        languageEntities.Sort((lhs, rhs) => rhs.Comp.Fluency.CompareTo(lhs.Comp.Fluency));
+
+        return languageEntities.Count > 0;
+    }
+
+    /// <summary>
+    ///     Retrieves a list of all the languages an entity has matching the passed prototype
+    ///     as well as their fluency values and speaking state.
+    /// </summary>
+    /// <param name="target">The target entity to get the languages from.</param>
+    /// <param name="languageProto">The language to retrieve.</param>
+    /// <param name="languages">The languages found.</param>
+    /// <returns>Whether any languages were retrieved.</returns>
+    [PublicAPI]
+    public bool TryGetLanguages(EntityUid target,
+        ProtoId<LanguagePrototype> languageProto,
+        out List<(ProtoId<LanguagePrototype>, ProtoId<LanguageFluencyPrototype>, bool)> languages)
+    {
+        languages = [];
+
+        if (!TryGetLanguageEntities(target, languageProto, out var languageEntities))
+            return false;
+
+        languages.AddRange(languageEntities.Select(ent => (ent.Comp.Language, ent.Comp.Fluency, ent.Comp.Speaks))
+            .Select(item => ((ProtoId<LanguagePrototype>, ProtoId<LanguageFluencyPrototype>, bool)) item));
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Retrieves a list of all the languages an entity has, as well as their fluency values and speaking state.
+    /// </summary>
+    /// <param name="target">The target entity to get the languages from.</param>
+    /// <param name="languages">The languages found.</param>
+    /// <returns>Whether any languages were retrieved.</returns>
+    [PublicAPI]
+    public bool TryGetLanguages(EntityUid target,
+        out List<(ProtoId<LanguagePrototype>, ProtoId<LanguageFluencyPrototype>, bool)> languages)
+    {
+        languages = [];
+
+        if (!TryGetLanguageEntities(target, out var languageEntities))
+            return false;
+
+        languages.AddRange(
+            languageEntities.Select(ent => (ent.Comp.Language, ent.Comp.Fluency, ent.Comp.Speaks))
+            .Select(item => ((ProtoId<LanguagePrototype>, ProtoId<LanguageFluencyPrototype>, bool)) item));
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Checks whether the provided entity can speak the passed language.
+    /// </summary>
+    /// <param name="target">The entity to check against.</param>
+    /// <param name="languageProto">The language to check for.</param>
+    /// <returns>Whether the entity speaks the language.</returns>
+    [PublicAPI]
+    public bool SpeaksLanguage(EntityUid target, ProtoId<LanguagePrototype> languageProto)
+    {
+        if (!TryGetLanguages(target, languageProto, out var languages))
+            return false;
+
+        return languages.Exists(lang => lang.Item3);
+    }
+
+    /// <summary>
+    ///     Checks if the provided entity understands the matching language at least as well as the provided fluency.
+    /// </summary>
+    /// <param name="target">The entity to check against.</param>
+    /// <param name="languageProto">The language to check for.</param>
+    /// <param name="minimumFluency">The minimum fluency the entity must have.</param>
+    /// <returns>Whether the entity understands the language at the minimum fluency.</returns>
+    [PublicAPI]
+    public bool UnderstandsLanguage(EntityUid target,
+        ProtoId<LanguagePrototype> languageProto,
+        ProtoId<LanguageFluencyPrototype> minimumFluency)
+    {
+        if (!TryGetLanguages(target, languageProto, out var languages))
+            return false;
+
+        return languages.Exists(lang => _proto.Index(lang.Item2) >= _proto.Index(minimumFluency));
+    }
+    #endregion
+}
