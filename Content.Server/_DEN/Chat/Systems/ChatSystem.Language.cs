@@ -1,0 +1,356 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Text;
+using Content.Server._DEN.Language.EntitySystems;
+using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.EntitySystems;
+using Content.Shared.Chat;
+using Content.Shared.Radio;
+using Content.Shared.Speech;
+using Robust.Shared.Random;
+using Robust.Shared.Utility;
+
+namespace Content.Server.Chat.Systems;
+
+
+public sealed partial class ChatSystem
+{
+    [Dependency] private readonly LanguageSystem _language = default!;
+
+    public static readonly WrapperSet SpeakWrapper = new()
+    {
+        DialogWrapper = "chat-language-entity-speak-wrap-dialog",
+        EmoteWrapper = "chat-language-entity-speak-wrap-emote",
+        LanguageWrapper = "chat-language-entity-speak-wrap-language",
+        PrefixWrapper = "chat-language-entity-speak-wrap-prefix",
+        MessageWrapper = "chat-language-entity-speak-wrap-message",
+    };
+
+    private void SendEntityComplexSpeak(EntityUid source,
+        ComplexChatMessage originalMessage,
+        ChatChannel channel,
+        ChatTransmitRange range,
+        string? nameOverride,
+        bool hideLog = false,
+        bool ignoreActionBlocker = false)
+    {
+        if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
+            return;
+
+        var message = TransformComplexSpeech(source, originalMessage);
+
+        if (message.Parts.Count == 0)
+            return;
+
+        var speech = GetComplexSpeechVerb(source, message);
+
+        string name;
+        if (nameOverride != null)
+        {
+            name = nameOverride;
+        }
+        else
+        {
+            var nameEv = new TransformSpeakerNameEvent(source, Name(source));
+            RaiseLocalEvent(source, nameEv);
+            name = nameEv.VoiceName;
+            // Check for a speech verb override
+            if (nameEv.SpeechVerb != null && _prototypeManager.Resolve(nameEv.SpeechVerb, out var proto))
+                speech = proto;
+        }
+
+        var languageProto = _language.GetCurrentLanguage(source);
+        if (languageProto == null)
+        {
+            Log.Debug("Entity: " + Name(source) + " attempted to speak without a language.");
+            return;
+        }
+
+        var language = _prototypeManager.Index(languageProto.Value);
+
+        var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
+
+        foreach (var (session, data) in GetRecipients(source, VoiceRange))
+        {
+            var entRange = MessageRangeCheck(session, data, range);
+            if (entRange == MessageRangeCheckResult.Disallowed)
+                continue;
+
+            string? msgOverride = null;
+            Log.Debug("Language: " + Loc.GetString(language.Name));
+            bool hideLanguage = !language.DisplayInChat;
+            Log.Debug("HideLanguage: " + hideLanguage);
+            var understanding = _prototypeManager.Index(SharedLanguageSystem.MinimumFluency);
+
+            // Don't bother checking the event if the player doesn't have an entity.
+            if (session.AttachedEntity is { Valid: true } playerEntity)
+            {
+                var receiveEv = new AttemptUnderstandingEvent(source, languageProto.Value);
+                RaiseLocalEvent(playerEntity, receiveEv);
+
+                if (receiveEv.Cancelled)
+                    continue;
+
+                msgOverride = receiveEv.MessageOverride;
+
+                if (receiveEv.HideLanguage)
+                    hideLanguage = true;
+
+                if (_language.UnderstandsLanguage(playerEntity,
+                        languageProto.Value,
+                        SharedLanguageSystem.MinimumFluency,
+                        out var understandsEnt))
+                    understanding = understandsEnt.Value.Comp.Fluency;
+            }
+
+            var entHideChat = entRange == MessageRangeCheckResult.HideChat;
+
+            Log.Debug("HideLanguage: " + hideLanguage);
+
+            // TODO: Font selection for users. It's right there.
+            var toSend = WrapComplexMessage(message,
+                SpeakWrapper,
+                language,
+                understanding,
+                speech.Bold,
+                hideLanguage,
+                true,
+                false,
+                name,
+                verb);
+
+            _chatManager.ChatMessageToOne(channel, CoalesceComplexMessage(message), toSend, source, entHideChat, session.Channel);
+        }
+
+        _replay.RecordServerMessage(
+            new ChatMessage(channel,
+                CoalesceComplexMessage(message),
+                WrapComplexMessage(message, SpeakWrapper, language, _prototypeManager.Index(SharedLanguageSystem.MaximumFluency), speech.Bold, language.DisplayInChat, true, false, name, verb),
+                GetNetEntity(source),
+                null,
+                MessageRangeHideChatForReplay(range)));
+    }
+
+    private string WrapComplexMessage(ComplexChatMessage message, WrapperSet wrappers, LanguagePrototype language, LanguageFluencyPrototype understanding, bool bold, bool hideLanguage, bool useLanguageFont, bool whisper, string name, string verb)
+    {
+        var langStr = "";
+        if (!hideLanguage)
+            langStr = Loc.GetString(wrappers.LanguageWrapper,
+                ("language", Loc.GetString(language.Abbreviation)),
+                ("color", language.FontColor));
+
+        var prefix = Loc.GetString(wrappers.PrefixWrapper,
+            ("language", langStr),
+            ("spacing", message.NeedsSpacing ? "" : "("),
+            ("spacingClose", message.NeedsSpacing ? "" : ")"),
+            ("entityName", name));
+        var builder = new StringBuilder();
+        foreach (var (kind, part) in message.Parts)
+        {
+            if (kind == ChatPart.Dialog)
+            {
+                var understoodMsg = _language.ObfuscateMessageWithLanguage(part, language, understanding);
+                understoodMsg = SanitizeMessagePeriod(understoodMsg);
+                builder.Append(Loc.GetString(wrappers.DialogWrapper,
+                    ("fontType", useLanguageFont ? language.FontId : "Default"),
+                    ("fontColor", language.FontColor),
+                    ("fontSize", language.FontSize),
+                    ("bold", bold ? "[bold]" : ""),
+                    ("boldClose", bold ? "[/bold]" : ""),
+                    ("message", message.Delimiter + understoodMsg + message.Delimiter)));
+            }
+            else
+            {
+                builder.Append(Loc.GetString(wrappers.EmoteWrapper,
+                    ("message", part)));
+            }
+        }
+
+        var wrapResult = Loc.GetString(wrappers.MessageWrapper,
+            ("space", message.NeedsSpacing ? " " : ""),
+            ("verb", message.IsDetailed ? "" : verb + ", "),
+            ("prefix", prefix),
+            ("whisper", whisper ? "[italic]" : ""),
+            ("whisperClose", whisper ? "[/italic]" : ""),
+            ("message", builder.ToString()));
+        Log.Debug("Wrap result: " + wrapResult);
+        return wrapResult;
+    }
+
+    private SpeechVerbPrototype GetComplexSpeechVerb(EntityUid source, ComplexChatMessage message)
+    {
+        // We won't even actually use this in this case.
+        if (message.IsDetailed)
+            return _prototypeManager.Index(DefaultSpeechVerb);
+
+        var firstDialog = message.Parts.FirstOrDefault(p => p.Item1 == ChatPart.Dialog).Item2;
+
+        return GetSpeechVerb(source, firstDialog);
+    }
+
+    private ComplexChatMessage TransformComplexSpeech(EntityUid sender, ComplexChatMessage message)
+    {
+        var processedMessages = new List<(ChatPart, string)>();
+        foreach (var (kind, part) in message.Parts)
+        {
+            if (kind == ChatPart.Dialog)
+            {
+                var ev = new TransformSpeechEvent(sender, part);
+                RaiseLocalEvent(sender, ev, true);
+                if (string.IsNullOrEmpty(ev.Message))
+                    continue;
+                processedMessages.Add((kind, ev.Message));
+            }
+            else
+            {
+                processedMessages.Add((kind, part));
+            }
+        }
+
+        return new ComplexChatMessage { Parts = processedMessages.ToArray(), Delimiter = message.Delimiter, IsDetailed = message.IsDetailed, NeedsSpacing = message.NeedsSpacing };
+    }
+
+    private ComplexChatMessage ConvertMessageToComplex(string message)
+    {
+        var isDetailed = false;
+        var needsSpacing = true;
+        if (message.StartsWith('!'))
+        {
+            isDetailed = true;
+            message = message[1..];
+            if (message.StartsWith('\'') || message.StartsWith(','))
+            {
+                needsSpacing = false;
+                message = message[1..];
+            }
+            else if (message.StartsWith('"'))
+            {
+                needsSpacing = false;
+            }
+        }
+
+        return new ComplexChatMessage(message, "\"", isDetailed, needsSpacing);
+    }
+
+    private ComplexChatMessage SanitizeComplexMessage(
+        EntityUid source,
+        ComplexChatMessage message,
+        out List<string> emoteStrs,
+        bool shouldCapitalize = true,
+        bool punctuate = false,
+        bool capitalizeTheWordI = true)
+    {
+        emoteStrs = [];
+        var newParts = new List<(ChatPart, string)>(message.Parts.Count);
+        foreach (var part in message.Parts)
+        {
+            if (part.Item1 == ChatPart.Dialog)
+            {
+                var sanitized = SanitizeInGameICMessage(source,
+                    part.Item2,
+                    out var emote,
+                    shouldCapitalize,
+                    punctuate,
+                    capitalizeTheWordI);
+                if (!string.IsNullOrEmpty(sanitized))
+                    newParts.Add((part.Item1, sanitized));
+                if (emote is not null)
+                    emoteStrs.Add(emote);
+            }
+            else
+            {
+                newParts.Add((part.Item1, part.Item2));
+            }
+        }
+
+        return new ComplexChatMessage() { Parts = newParts, Delimiter = message.Delimiter, IsDetailed = message.IsDetailed, NeedsSpacing = message.NeedsSpacing };
+    }
+
+    private bool TryProcessRadioOnComplexMessage(
+        EntityUid source,
+        ComplexChatMessage message,
+        [NotNullWhen(true)] out ComplexChatMessage? newMessage,
+        out RadioChannelPrototype? channel)
+    {
+        newMessage = null;
+        if (!TryProcessRadioMessage(source, message.Parts.First().Item2, out var modMessage, out channel))
+            return false;
+
+        List<(ChatPart, string)> newParts = new(message.Parts.Count);
+        newParts.AddRange(message.Parts);
+        var first = newParts[0];
+        first.Item2 = modMessage;
+        newParts[0] = first;
+
+        newMessage = new ComplexChatMessage() { Parts = newParts, Delimiter = message.Delimiter, IsDetailed = message.IsDetailed, NeedsSpacing = message.NeedsSpacing };
+
+        return true;
+    }
+
+    private string CoalesceComplexMessage(ComplexChatMessage msg)
+    {
+        var builder = new StringBuilder();
+        foreach (var (kind, part) in msg.Parts)
+        {
+            if (kind == ChatPart.Dialog)
+            {
+                builder.Append(msg.Delimiter);
+                builder.Append(part);
+                builder.Append(msg.Delimiter);
+            }
+            else
+            {
+                builder.Append(part);
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    public enum ChatPart
+    {
+        Dialog,
+        Emote,
+    }
+
+    public struct ComplexChatMessage()
+    {
+        public IReadOnlyList<(ChatPart, string)> Parts = [];
+        public string Delimiter = string.Empty;
+        public bool IsDetailed;
+        public bool NeedsSpacing;
+
+        public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing) : this()
+        {
+            Delimiter = delimiter;
+            IsDetailed = isDetailed;
+            NeedsSpacing = needsSpacing;
+            message = FormattedMessage.EscapeText(message);
+            if (!isDetailed)
+            {
+                Parts = [(ChatPart.Dialog, message)];
+                return;
+            }
+
+            var outside = false;
+            List<(ChatPart, string)> parts = [];
+            foreach (var msgChunk in message.Split(delimiter))
+            {
+                if (!string.IsNullOrEmpty(msgChunk))
+                    parts.Add((outside ? ChatPart.Dialog : ChatPart.Emote, msgChunk));
+                outside = !outside;
+            }
+
+            Parts = parts;
+        }
+    }
+
+    public struct WrapperSet()
+    {
+        public LocId DialogWrapper;
+        public LocId EmoteWrapper;
+        public LocId LanguageWrapper;
+        public LocId PrefixWrapper;
+        public LocId MessageWrapper;
+    }
+}

@@ -33,21 +33,21 @@ public sealed partial class LanguageSyllableScrambler : ILanguageScrambler
     [DataField(required: true)]
     public List<string> Syllables { get; private set; } = new();
 
-
-    private static readonly Regex Lowercase = new("[a-z]", RegexOptions.Compiled);
+    private static readonly Regex Lowercase = new("[a-z]|I$|[0-9]", RegexOptions.Compiled);
     private static readonly Regex Sentence = new(@"(.+?(?:[\.!\?]|$))", RegexOptions.Compiled);
-    private static readonly Regex Punctuation = new(@"[\.\!\?]", RegexOptions.Compiled);
+    private static readonly Regex Punctuation = new(@"[\,\.\!\?]", RegexOptions.Compiled);
 
     public string ScrambleMessage(string message, EntitySystems.SharedLanguageSystem languageSystem, ProtoId<LanguagePrototype> language, int understanding = 0)
     {
-        // This should never happen but...
         if (understanding >= 100)
             return message;
 
         // Check if we have this cached. This is useful so we don't have to re-scramble the message for multiple listeners.
         if (languageSystem.TryGetMessageCachedValue(language.Id + "-" + understanding, message, out var value))
-            return value;
-
+        {
+            var allCaps = !Lowercase.IsMatch(message);
+            return allCaps ? value.ToUpper() : value;
+        }
 
         var builder = new StringBuilder();
         var wordBuilder = new StringBuilder();
@@ -107,7 +107,6 @@ public sealed partial class LanguageSyllableScrambler : ILanguageScrambler
                 builder.Remove(builder.Length - 1, 1);
                 builder.Append(sentence.Value[^1]);
             }
-
 
             builder.Append(' ');
         }

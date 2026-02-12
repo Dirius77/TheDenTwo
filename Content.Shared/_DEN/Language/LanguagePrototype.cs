@@ -9,13 +9,13 @@ public sealed partial class LanguagePrototype : IPrototype
     [IdDataField] public string ID { get; private set; } = default!;
 
     [DataField(required: true)]
-    private LocId Name = default!;
+    public LocId Name = default!;
 
     [ViewVariables(VVAccess.ReadOnly)]
-    private LocId Abbreviation => "language-" + ID + "-abbreviation";
+    public LocId Abbreviation => Name + "-abbreviation";
 
     [ViewVariables(VVAccess.ReadOnly)]
-    private LocId Description => "language-" + ID + "-description";
+    public LocId Description => Name + "-description";
 
     /// <summary>
     ///     Override the base speaking verb for the language.

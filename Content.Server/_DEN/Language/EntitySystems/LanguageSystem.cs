@@ -1,17 +1,16 @@
 using System.Diagnostics.CodeAnalysis;
-using Content.Server._DEN.CCVars;
+using Content.Shared._DEN.CCVars;
+using Content.Server.Chat.Systems;
 using Content.Shared._DEN.Language;
 using Content.Shared.Dataset;
-using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._DEN.Language.EntitySystems;
 
 public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.SharedLanguageSystem
 {
-    [Dependency] private readonly IConfigurationManager _cfg = default!;
-
     [Dependency] private readonly IPrototypeManager _proto = default!;
+    [Dependency] private readonly ChatSystem _chat = default!;
 
     // 1000 most common words and their order. This is a dictionary to make looking up specific words faster.
     public Dictionary<string, int> CommonWordFrequency = new();
@@ -23,7 +22,6 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
     // Cache for messages, cares about the understanding of the language.
     private readonly Dictionary<string, OrderedDictionary<string, string>> _messageCache = new();
 
-    private static readonly ProtoId<LanguagePrototype> BasicLanguage = "Basic";
     private static readonly ProtoId<LocalizedDatasetPrototype> CommonWords = "CommonWords";
 
     private int _messageCacheMaxSize = 0;
@@ -37,14 +35,6 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
         _cfg.OnValueChanged(DenCCVars.LanguageWordCacheSize, cacheSize => _wordCacheMaxSize = cacheSize, true);
 
         BuildCommonWordSet();
-
-        var basic = _proto.Index(BasicLanguage);
-        Log.Debug(basic.Scrambler.ScrambleMessage("The quick brown fox jumped over the lazy dog.", this, BasicLanguage, 100));
-        Log.Debug(basic.Scrambler.ScrambleMessage("The quick brown fox jumped over the lazy dog.", this, BasicLanguage, 80));
-        Log.Debug(basic.Scrambler.ScrambleMessage("The quick brown fox jumped over the lazy dog.", this, BasicLanguage, 60));
-        Log.Debug(basic.Scrambler.ScrambleMessage("The quick brown fox jumped over the lazy dog.", this, BasicLanguage, 40));
-        Log.Debug(basic.Scrambler.ScrambleMessage("The quick brown fox jumped over the lazy dog.", this, BasicLanguage, 20));
-        Log.Debug(basic.Scrambler.ScrambleMessage("The quick brown fox jumped over the lazy dog.", this, BasicLanguage, 0));
     }
 
     private void BuildCommonWordSet()
@@ -56,6 +46,13 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
         {
             CommonWordFrequency.Add(Loc.GetString(word), i++);
         }
+    }
+
+    public string ObfuscateMessageWithLanguage(string message,
+        LanguagePrototype language,
+        LanguageFluencyPrototype understanding)
+    {
+        return language.Scrambler.ScrambleMessage(message, this, language, understanding.Understanding);
     }
 
     public override bool TryGetMessageCachedValue(string key, string msg, [MaybeNullWhen(false)] out string value)

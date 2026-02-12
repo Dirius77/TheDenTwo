@@ -21,7 +21,6 @@ using Content.Shared.Players;
 using Content.Shared.Players.RateLimiting;
 using Content.Shared.Radio;
 using Content.Shared.Station.Components;
-using Content.Shared.Whitelist;
 using Robust.Server.Player;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
@@ -183,6 +182,8 @@ public sealed partial class ChatSystem : SharedChatSystem
             _chatManager.EnsurePlayer(player.UserId).AddEntity(GetNetEntity(source));
         }
 
+        Log.Debug("Original Message: " + message);
+
         if (desiredType == InGameICChatType.Speak && message.StartsWith(LocalPrefix))
         {
             // prevent radios and remove prefix.
@@ -196,24 +197,34 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool shouldCapitalizeTheWordI = (!CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Parent.Name == "en")
             || (CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Name == "en");
 
-        message = SanitizeInGameICMessage(source, message, out var emoteStr, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
+        // DEN: Detailed message system.
+        var complexMessage = ConvertMessageToComplex(message);
+        complexMessage = SanitizeComplexMessage(source, complexMessage, out var emoteStrs, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
 
-        // Was there an emote in the message? If so, send it.
-        if (player != null && emoteStr != message && emoteStr != null)
+        foreach (var (kind, part) in complexMessage.Parts)
+            Log.Debug("Kind: " + kind + ", Part: " + part);
+
+        // DEN: Send emote strings extracted from the complex message.
+        // Multiple emotes in multiple dialogs works. I hope no one ever actually does this.
+        if (player != null && emoteStrs.Count != 0)
         {
-            SendEntityEmote(source, emoteStr, range, nameOverride, ignoreActionBlocker);
+            foreach (var emoteStr in emoteStrs)
+            {
+                SendEntityEmote(source, emoteStr, range, nameOverride, ignoreActionBlocker);
+            }
         }
 
-        // This can happen if the entire string is sanitized out.
-        if (string.IsNullOrEmpty(message))
+        // DEN: Complex message will be empty, rather than a null string.
+        if (complexMessage.Parts.Count == 0)
             return;
 
         // This message may have a radio prefix, and should then be whispered to the resolved radio channel
         if (checkRadioPrefix)
         {
-            if (TryProcessRadioMessage(source, message, out var modMessage, out var channel))
+            // DEN: Complex message parsing.
+            if (TryProcessRadioOnComplexMessage(source, complexMessage, out var newCmplxMsg, out var channel))
             {
-                SendEntityWhisper(source, modMessage, range, channel, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityWhisper(source, CoalesceComplexMessage(newCmplxMsg.Value), range, channel, nameOverride, hideLog, ignoreActionBlocker);
                 return;
             }
         }
@@ -222,7 +233,9 @@ public sealed partial class ChatSystem : SharedChatSystem
         switch (desiredType)
         {
             case InGameICChatType.Speak:
-                SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
+                // DEN: Complex Speech and language
+                SendEntityComplexSpeak(source, complexMessage, ChatChannel.Local, range, nameOverride, hideLog, ignoreActionBlocker);
+                //SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
                 SendEntityWhisper(source, message, range, null, nameOverride, hideLog, ignoreActionBlocker);
@@ -368,6 +381,8 @@ public sealed partial class ChatSystem : SharedChatSystem
 
     #region Private API
 
+    // DEN: Mark Obsolete
+    [Obsolete("This method is obsolete, use the Den language system's Complex functions instead.")]
     private void SendEntitySpeak(
         EntityUid source,
         string originalMessage,

@@ -13,9 +13,10 @@ public sealed partial class LanguageCommunicatorComponent : Component
     [ViewVariables]
     public Container? Languages;
 
-    [ViewVariables, AutoNetworkedField]
+    [AutoNetworkedField]
     public EntityUid? CurrentLanguage;
 
+    [AlwaysPushInheritance]
     [DataField("languages")]
     public Dictionary<ProtoId<LanguagePrototype>, (bool, ProtoId<LanguageFluencyPrototype>)> BaseLanguages = new();
 }

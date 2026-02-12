@@ -1,6 +1,7 @@
 - type: language
   id: Basic
   name: language-basic
+  displayInChat: true
   scrambler:
     !type:LanguageSyllableScrambler
     minSyllables: 1

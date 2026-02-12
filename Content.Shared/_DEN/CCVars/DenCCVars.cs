@@ -1,6 +1,6 @@
 using Robust.Shared.Configuration;
 
-namespace Content.Server._DEN.CCVars;
+namespace Content.Shared._DEN.CCVars;
 
 [CVarDefs]
 public sealed class DenCCVars
@@ -18,4 +18,17 @@ public sealed class DenCCVars
     /// </summary>
     public static readonly CVarDef<int> LanguageWordCacheSize =
         CVarDef.Create("languages.word_cache_size", 50, CVar.ARCHIVE);
+
+    /// <summary>
+    ///     Whether or not to give an entity that tries speaking without LanguageCommunicatorComponent a language.
+    /// </summary>
+    public static readonly CVarDef<bool> UseDefaultLanguage =
+        CVarDef.Create("languages.use_default_language", false, CVar.ARCHIVE);
+
+    /// <summary>
+    ///     The language to use if an entity that lacks a LanguageCommunicatorComponent tries to speak.
+    ///     This only does anything is UseDefaultLanguage is true.
+    /// </summary>
+    public static readonly CVarDef<string> DefaultLanguage =
+        CVarDef.Create("languages.default_language", "Basic", CVar.ARCHIVE);
 }

@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language.Components;
+using Robust.Shared.Configuration;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 
@@ -7,11 +9,14 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 
 public abstract partial class SharedLanguageSystem : EntitySystem
 {
-
+    [Dependency] protected readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly SharedContainerSystem _container = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
 
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
+    public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
+
+    public static ProtoId<LanguagePrototype>? DefaultLanguage;
 
     private EntityQuery<LanguageComponent> _languageQuery;
 
@@ -20,8 +25,20 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorInit);
+        SubscribeLocalEvent<LanguageComponent, ComponentShutdown>(OnLanguageShutdown);
+
+        _cfg.OnValueChanged(DenCCVars.UseDefaultLanguage, _ => UpdateDefaultLanguage(), true);
+        _cfg.OnValueChanged(DenCCVars.DefaultLanguage, _ => UpdateDefaultLanguage(), true);
 
         _languageQuery = GetEntityQuery<LanguageComponent>();
+    }
+
+    private void UpdateDefaultLanguage()
+    {
+        if (!_cfg.GetCVar(DenCCVars.UseDefaultLanguage))
+            DefaultLanguage = null;
+        else
+            DefaultLanguage = _cfg.GetCVar(DenCCVars.DefaultLanguage);
     }
 
     private void OnLanguageCommunicatorInit(Entity<LanguageCommunicatorComponent> ent, ref ComponentInit evt)
@@ -32,6 +49,14 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         {
             TryAddLanguage(ent, language, speaks, fluency, out _);
         }
+    }
+
+    private void OnLanguageShutdown(Entity<LanguageComponent> ent, ref ComponentShutdown evt)
+    {
+        Log.Debug("LanguageComponent shutdown.");
+        if (TryComp<LanguageCommunicatorComponent>(ent.Comp.Holder, out var commComp) &&
+            commComp.CurrentLanguage == ent)
+            commComp.CurrentLanguage = null;
     }
 
     private bool InsertLanguageAndChildren(EntityUid target,

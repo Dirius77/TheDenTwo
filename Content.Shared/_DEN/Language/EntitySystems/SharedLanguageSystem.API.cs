@@ -3,12 +3,31 @@ using System.Linq;
 using Content.Shared._DEN.Language.Components;
 using JetBrains.Annotations;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
 
 public abstract partial class SharedLanguageSystem
 {
     private static readonly ProtoId<LanguageFluencyPrototype> DefaultLanguageFluency = "Fluent";
+
+    /// <summary>
+    ///     Sets the currently spoken language by the entity to the passed language if it speaks it.
+    /// </summary>
+    /// <param name="target">The entity to set the language on.</param>
+    /// <param name="languageProto">The language to set the entity to.</param>
+    /// <returns>Whether the language was set.</returns>
+    [PublicAPI]
+    public bool TrySetLanguage(EntityUid target, ProtoId<LanguagePrototype> languageProto)
+    {
+        if (!SpeaksLanguage(target, languageProto, out var languageEntity))
+            return false;
+
+        var communicator = EnsureComp<LanguageCommunicatorComponent>(target);
+
+        communicator.CurrentLanguage = languageEntity;
+        return true;
+    }
 
     #region Add Methods
     /// <summary>
@@ -97,6 +116,57 @@ public abstract partial class SharedLanguageSystem
     #endregion
 
     #region Get Methods
+    /// <summary>
+    ///     Retrieves the currently spoken language of the entity. If the entity isn't currently set to one, but it
+    ///     does speak one, then it will be set to the first language it speaks.
+    /// </summary>
+    /// <param name="target">The entity to retrieve the current language of.</param>
+    /// <returns>The language entity for the currently spoken language, or null if there are none.</returns>
+    [PublicAPI]
+    public EntityUid? GetCurrentLanguageEntity(EntityUid target)
+    {
+        if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
+            return null;
+
+        if (communicator.CurrentLanguage is null || Deleted(communicator.CurrentLanguage))
+        {
+            if (!TryGetLanguageEntities(target, out var languageEntities))
+                return null;
+
+            communicator.CurrentLanguage = languageEntities.FirstOrNull(lang => lang.Comp.Speaks);
+        }
+
+        return communicator.CurrentLanguage;
+    }
+
+    /// <summary>
+    ///     Retrieves the currently spoken language of the entity. If the entity isn't currently set to one, but it
+    ///     does speak one, then it will be set to the first language it speaks.
+    ///     If the entity does not have a LanguageCommunicatorComponent then falls back on the values of
+    ///     languages.use_default_language and languages.default_language
+    /// </summary>
+    /// <param name="target">The entity to retrieve the current language of.</param>
+    /// <returns>The language entity for the currently spoken language, or null if there are none.</returns>
+    [PublicAPI]
+    public ProtoId<LanguagePrototype>? GetCurrentLanguage(EntityUid target)
+    {
+        if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
+            return DefaultLanguage;
+
+        if (communicator.CurrentLanguage is null || Deleted(communicator.CurrentLanguage))
+        {
+            if (!TryGetLanguageEntities(target, out var languageEntities))
+                return DefaultLanguage;
+
+            communicator.CurrentLanguage = languageEntities.FirstOrNull(lang => lang.Comp.Speaks);
+        }
+
+        if (!_languageQuery.TryComp(communicator.CurrentLanguage, out var languageComp))
+            return DefaultLanguage;
+
+        return languageComp.Language;
+    }
+
     /// <summary>
     ///     Returns the first (most fluent) language entity for the given language on the target entity.
     /// </summary>
@@ -223,10 +293,30 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public bool SpeaksLanguage(EntityUid target, ProtoId<LanguagePrototype> languageProto)
     {
-        if (!TryGetLanguages(target, languageProto, out var languages))
+        if (!TryGetLanguageEntities(target, languageProto, out var languages))
             return false;
 
-        return languages.Exists(lang => lang.Item3);
+        return languages.Exists(lang => lang.Comp.Speaks);
+    }
+
+    /// <summary>
+    ///     Checks whether the provided entity can speak the passed language.
+    /// </summary>
+    /// <param name="target">The entity to check against.</param>
+    /// <param name="languageProto">The language to check for.</param>
+    /// <param name="languageEnt">The language entity responsible for this ability.</param>
+    /// <returns>Whether the entity speaks the language.</returns>
+    [PublicAPI]
+    public bool SpeaksLanguage(EntityUid target, ProtoId<LanguagePrototype> languageProto, [NotNullWhen(true)] out Entity<LanguageComponent>? languageEnt)
+    {
+        languageEnt = null;
+
+        if (!TryGetLanguageEntities(target, languageProto, out var languages))
+            return false;
+
+        languageEnt = languages.FirstOrNull(lang => lang.Comp.Speaks);
+
+        return languageEnt != null;
     }
 
     /// <summary>
@@ -241,10 +331,34 @@ public abstract partial class SharedLanguageSystem
         ProtoId<LanguagePrototype> languageProto,
         ProtoId<LanguageFluencyPrototype> minimumFluency)
     {
-        if (!TryGetLanguages(target, languageProto, out var languages))
+        if (!TryGetLanguageEntities(target, languageProto, out var languages))
             return false;
 
-        return languages.Exists(lang => _proto.Index(lang.Item2) >= _proto.Index(minimumFluency));
+        return languages.Exists(lang => lang.Comp.Fluency >= _proto.Index(minimumFluency));
+    }
+
+    /// <summary>
+    ///     Checks if the provided entity understands the matching language at least as well as the provided fluency.
+    ///     These are sorted by fluency, so the returned entity will always be the most fluent.
+    /// </summary>
+    /// <param name="target">The entity to check against.</param>
+    /// <param name="languageProto">The language to check for.</param>
+    /// <param name="minimumFluency">The minimum fluency the entity must have.</param>
+    /// <param name="languageEnt">The language entity responsible for this ability.</param>
+    /// <returns>Whether the entity understands the language at the minimum fluency.</returns>
+    [PublicAPI]
+    public bool UnderstandsLanguage(EntityUid target,
+        ProtoId<LanguagePrototype> languageProto,
+        ProtoId<LanguageFluencyPrototype> minimumFluency,
+        [NotNullWhen(true)] out Entity<LanguageComponent>? languageEnt)
+    {
+        languageEnt = null;
+
+        if (!TryGetLanguageEntities(target, languageProto, out var languages))
+            return false;
+
+        languageEnt = languages.FirstOrNull(lang => lang.Comp.Fluency >= _proto.Index(minimumFluency));
+        return languageEnt != null;
     }
     #endregion
 }
