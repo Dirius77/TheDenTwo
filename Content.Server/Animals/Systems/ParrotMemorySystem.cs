@@ -42,10 +42,12 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
 
         SubscribeLocalEvent<ParrotListenerComponent, MapInitEvent>(ListenerOnMapInit);
 
-        SubscribeLocalEvent<ParrotListenerComponent, ListenEvent>(OnListen);
+        //SubscribeLocalEvent<ParrotListenerComponent, ListenEvent>(OnListen); // DEN: Obsolete, see ParrotMemorySystem.Language
         SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveRelayEvent>(OnHeadsetReceive);
 
         SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeEvent>(OnTryVocalize);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnErase(ref EraseEvent args)
@@ -60,6 +62,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
             Log.Warning($"Entity {ToPrettyString(entity)} has a ParrotListenerComponent but was not given an ActiveListenerComponent");
     }
 
+    [Obsolete("Obsolete, use OnLanguageListen instead.")]
     private void OnListen(Entity<ParrotListenerComponent> entity, ref ListenEvent args)
     {
 

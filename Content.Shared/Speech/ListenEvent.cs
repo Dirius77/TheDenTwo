@@ -1,5 +1,6 @@
 namespace Content.Shared.Speech;
 
+[Obsolete("Use ListenLanguageEvent instead.", true)] // DEN: Languages
 public sealed class ListenEvent : EntityEventArgs
 {
     public readonly string Message;
@@ -12,6 +13,7 @@ public sealed class ListenEvent : EntityEventArgs
     }
 }
 
+[Obsolete("Use ListenLanguageAttemptEvent instead.", true)] // DEN: Languages
 public sealed class ListenAttemptEvent : CancellableEntityEventArgs
 {
     public readonly EntityUid Source;

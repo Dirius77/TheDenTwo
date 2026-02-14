@@ -1,34 +1,26 @@
 using Content.Server.Chat.Systems;
+using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Speech;
 using Content.Shared.Chat;
-using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
 
 namespace Content.Server.Speech.EntitySystems;
 
-/// <summary>
-///     This system redirects local chat messages to listening entities (e.g., radio microphones).
-/// </summary>
-public sealed partial class ListeningSystem : EntitySystem // DEN: Make partial
+public sealed partial class ListeningSystem
 {
-    [Dependency] private readonly SharedTransformSystem _xforms = default!;
+    [Dependency] private readonly SharedChatSystem _chat = default!;
 
-    public override void Initialize()
+    private void InitializeLanguage()
     {
-        base.Initialize();
-
-        InitializeLanguage();
-
-        //SubscribeLocalEvent<EntitySpokeEvent>(OnSpeak); // DEN: Comment out, obsolete.
+        SubscribeLocalEvent<EntitySpokeLanguageEvent>(OnSpeakLanguage);
     }
 
-    [Obsolete("Use OnSpeakLanguage instead.")] // DEN: Mark obsolete for languages.
-    private void OnSpeak(EntitySpokeEvent ev)
+    private void OnSpeakLanguage(EntitySpokeLanguageEvent ev)
     {
-        PingListeners(ev.Source, ev.Message, ev.ObfuscatedMessage);
+        PingLanguageListeners(ev.Source, ev.Message, ev.Language, ev.Whisper);
     }
 
-    [Obsolete("Use PingListenersLanguage instead.")] // DEN: Mark obsolete for languages.
-    public void PingListeners(EntityUid source, string message, string? obfuscatedMessage)
+    public void PingLanguageListeners(EntityUid source, SharedChatSystem.ComplexChatMessage message, LanguagePrototype language, bool whisper)
     {
         // TODO whispering / audio volume? Microphone sensitivity?
         // for now, whispering just arbitrarily reduces the listener's max range.
@@ -37,18 +29,18 @@ public sealed partial class ListeningSystem : EntitySystem // DEN: Make partial
         var sourceXform = xformQuery.GetComponent(source);
         var sourcePos = _xforms.GetWorldPosition(sourceXform, xformQuery);
 
-        var attemptEv = new ListenAttemptEvent(source);
-        var ev = new ListenEvent(message, source);
-        var obfuscatedEv = obfuscatedMessage == null ? null : new ListenEvent(obfuscatedMessage, source);
+        var attemptEv = new ListenLanguageAttemptEvent(source, language);
+        var ev = new ListenLanguageEvent(message, source, language);
+        var obfuscatedEv = whisper
+            ? new ListenLanguageEvent(_chat.ObfuscateComplexChatMessage(message, 0.2f), source, language)
+            : null;
         var query = EntityQueryEnumerator<ActiveListenerComponent, TransformComponent>();
 
-        while(query.MoveNext(out var listenerUid, out var listener, out var xform))
+        while (query.MoveNext(out var listenerUid, out var listener, out var xform))
         {
             if (xform.MapID != sourceXform.MapID)
                 continue;
 
-            // range checks
-            // TODO proper speech occlusion
             var distance = (sourcePos - _xforms.GetWorldPosition(xform, xformQuery)).LengthSquared();
             if (distance > listener.Range * listener.Range)
                 continue;
@@ -65,5 +57,6 @@ public sealed partial class ListeningSystem : EntitySystem // DEN: Make partial
             else
                 RaiseLocalEvent(listenerUid, ev);
         }
+
     }
 }

@@ -6,8 +6,10 @@ using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
+using Content.Shared.Database;
 using Content.Shared.Radio;
 using Content.Shared.Speech;
+using Robust.Shared.Player;
 using Robust.Shared.Random;
 using Robust.Shared.Utility;
 
@@ -30,6 +32,7 @@ public sealed partial class ChatSystem
     private void SendEntityComplexSpeech(EntityUid source,
         ComplexChatMessage originalMessage,
         ChatTransmitRange range,
+        RadioChannelPrototype? channel,
         string? nameOverride,
         bool whisper,
         bool hideLog = false,
@@ -154,6 +157,43 @@ public sealed partial class ChatSystem
                 GetNetEntity(source),
                 null,
                 MessageRangeHideChatForReplay(range)));
+
+        var ev = new EntitySpokeLanguageEvent(source, message, language, channel, whisper);
+        RaiseLocalEvent(source, ev, true);
+
+        if (!HasComp<ActorComponent>(source) || hideLog)
+            return;
+
+        var (original, _) = BuildComplexMessage(originalMessage,
+            SpeakWrapper,
+            language,
+            _prototypeManager.Index(SharedLanguageSystem.MaximumFluency),
+            speech.Bold,
+            language.DisplayInChat,
+            true,
+            whisper,
+            0,
+            name,
+            verb);
+
+        var languageName = Loc.GetString(language.Name);
+
+        if (original == unwrappedMessage)
+        {
+            if (name != Name(source))
+                _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Say from {source} as {name} in {languageName}: {original}.");
+            else
+                _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Say from {source} in {languageName}: {original}.");
+        }
+        else
+        {
+            if (name != Name(source))
+                _adminLogger.Add(LogType.Chat, LogImpact.Low,
+                    $"Say from {source} as {name} in {languageName}, original: {original}, transformed: {unwrappedMessage}.");
+            else
+                _adminLogger.Add(LogType.Chat, LogImpact.Low,
+                    $"Say from {source} in {languageName}, original: {original}, transformed: {unwrappedMessage}.");
+        }
     }
 
     // Returns the unwrapped message, as well as a wrapped version of the message based on the provided settings.
@@ -263,7 +303,7 @@ public sealed partial class ChatSystem
             }
         }
 
-        return new ComplexChatMessage { Parts = processedMessages.ToArray(), Delimiter = message.Delimiter, IsDetailed = message.IsDetailed, NeedsSpacing = message.NeedsSpacing };
+        return new ComplexChatMessage(message, processedMessages.ToArray());
     }
 
     private ComplexChatMessage ConvertMessageToComplex(string message)
@@ -319,7 +359,7 @@ public sealed partial class ChatSystem
             }
         }
 
-        return new ComplexChatMessage() { Parts = newParts, Delimiter = message.Delimiter, IsDetailed = message.IsDetailed, NeedsSpacing = message.NeedsSpacing };
+        return new ComplexChatMessage(message, newParts);
     }
 
     private bool TryProcessRadioOnComplexMessage(
@@ -338,7 +378,7 @@ public sealed partial class ChatSystem
         first.Item2 = modMessage;
         newParts[0] = first;
 
-        newMessage = new ComplexChatMessage() { Parts = newParts, Delimiter = message.Delimiter, IsDetailed = message.IsDetailed, NeedsSpacing = message.NeedsSpacing };
+        newMessage = new ComplexChatMessage(message, newParts);
 
         return true;
     }
@@ -361,44 +401,6 @@ public sealed partial class ChatSystem
         }
 
         return builder.ToString();
-    }
-
-    public enum ChatPart
-    {
-        Dialog,
-        Emote,
-    }
-
-    public struct ComplexChatMessage()
-    {
-        public IReadOnlyList<(ChatPart, string)> Parts = [];
-        public string Delimiter = string.Empty;
-        public bool IsDetailed;
-        public bool NeedsSpacing;
-
-        public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing) : this()
-        {
-            Delimiter = delimiter;
-            IsDetailed = isDetailed;
-            NeedsSpacing = needsSpacing;
-            message = FormattedMessage.EscapeText(message);
-            if (!isDetailed)
-            {
-                Parts = [(ChatPart.Dialog, message)];
-                return;
-            }
-
-            var outside = false;
-            List<(ChatPart, string)> parts = [];
-            foreach (var msgChunk in message.Split(delimiter))
-            {
-                if (!string.IsNullOrEmpty(msgChunk))
-                    parts.Add((outside ? ChatPart.Dialog : ChatPart.Emote, msgChunk));
-                outside = !outside;
-            }
-
-            Parts = parts;
-        }
     }
 
     public struct WrapperSet()

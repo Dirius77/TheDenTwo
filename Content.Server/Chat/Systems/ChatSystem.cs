@@ -182,8 +182,6 @@ public sealed partial class ChatSystem : SharedChatSystem
             _chatManager.EnsurePlayer(player.UserId).AddEntity(GetNetEntity(source));
         }
 
-        Log.Debug("Original Message: " + message);
-
         if (desiredType == InGameICChatType.Speak && message.StartsWith(LocalPrefix))
         {
             // prevent radios and remove prefix.
@@ -200,9 +198,6 @@ public sealed partial class ChatSystem : SharedChatSystem
         // DEN: Detailed message system.
         var complexMessage = ConvertMessageToComplex(message);
         complexMessage = SanitizeComplexMessage(source, complexMessage, out var emoteStrs, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
-
-        foreach (var (kind, part) in complexMessage.Parts)
-            Log.Debug("Kind: " + kind + ", Part: " + part);
 
         // DEN: Send emote strings extracted from the complex message.
         // Multiple emotes in multiple dialogs works. I hope no one ever actually does this.
@@ -224,7 +219,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             // DEN: Complex message parsing.
             if (TryProcessRadioOnComplexMessage(source, complexMessage, out var newCmplxMsg, out var channel))
             {
-                SendEntityWhisper(source, CoalesceComplexMessage(newCmplxMsg.Value), range, channel, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, newCmplxMsg.Value, range, channel, nameOverride, true, hideLog, ignoreActionBlocker);
                 return;
             }
         }
@@ -234,11 +229,11 @@ public sealed partial class ChatSystem : SharedChatSystem
         {
             case InGameICChatType.Speak:
                 // DEN: Complex Speech and language
-                SendEntityComplexSpeech(source, complexMessage, range, nameOverride, false, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, range, null, nameOverride, false, hideLog, ignoreActionBlocker);
                 //SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
-                SendEntityComplexSpeech(source, complexMessage, range,  nameOverride, true, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, range, null, nameOverride, true, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Emote:
                 SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
@@ -845,26 +840,6 @@ public sealed partial class ChatSystem : SharedChatSystem
 
     public readonly record struct ICChatRecipientData(float Range, bool Observer, bool? HideChatOverride = null)
     {
-    }
-
-    private string ObfuscateMessageReadability(string message, float chance)
-    {
-        var modifiedMessage = new StringBuilder(message);
-
-        for (var i = 0; i < message.Length; i++)
-        {
-            if (char.IsWhiteSpace((modifiedMessage[i])))
-            {
-                continue;
-            }
-
-            if (_random.Prob(1 - chance))
-            {
-                modifiedMessage[i] = '~';
-            }
-        }
-
-        return modifiedMessage.ToString();
     }
 
     public string BuildGibberishString(IReadOnlyList<char> charOptions, int length)

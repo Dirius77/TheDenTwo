@@ -8,7 +8,8 @@ using Robust.Shared.Timing;
 
 namespace Content.Server.Speech
 {
-    public sealed class SpeechSoundSystem : EntitySystem
+    // DEN: Make partial for language handlers.
+    public sealed partial class SpeechSoundSystem : EntitySystem
     {
         [Dependency] private readonly IGameTiming _gameTiming = default!;
         [Dependency] private readonly IPrototypeManager _protoManager = default!;
@@ -19,7 +20,10 @@ namespace Content.Server.Speech
         {
             base.Initialize();
 
-            SubscribeLocalEvent<SpeechComponent, EntitySpokeEvent>(OnEntitySpoke);
+            InitializeLanguage(); // DEN: Language
+
+            // TODO: Uncomment this when I make it not an error again.
+            //SubscribeLocalEvent<SpeechComponent, EntitySpokeEvent>(OnEntitySpoke);
         }
 
         public SoundSpecifier? GetSpeechSound(Entity<SpeechComponent> ent, string message)
@@ -56,6 +60,7 @@ namespace Content.Server.Speech
             return contextSound;
         }
 
+        [Obsolete("This method is obsolete, use OnEntitySpokeLanguage instead")] // DEN: Languages
         private void OnEntitySpoke(EntityUid uid, SpeechComponent component, EntitySpokeEvent args)
         {
             if (component.SpeechSounds == null)
