@@ -234,11 +234,11 @@ public sealed partial class ChatSystem : SharedChatSystem
         {
             case InGameICChatType.Speak:
                 // DEN: Complex Speech and language
-                SendEntityComplexSpeak(source, complexMessage, ChatChannel.Local, range, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, range, nameOverride, false, hideLog, ignoreActionBlocker);
                 //SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
-                SendEntityWhisper(source, message, range, null, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, range,  nameOverride, true, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Emote:
                 SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
@@ -455,6 +455,8 @@ public sealed partial class ChatSystem : SharedChatSystem
         }
     }
 
+    // DEN: Mark Obsolete
+    [Obsolete("This method is obsolete, use the Den language system's Complex functions instead.")]
     private void SendEntityWhisper(
         EntityUid source,
         string originalMessage,

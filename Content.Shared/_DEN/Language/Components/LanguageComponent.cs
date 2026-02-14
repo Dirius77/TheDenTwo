@@ -20,5 +20,5 @@ public sealed partial class LanguageComponent : Component
     public EntityUid Holder;
 
     [ViewVariables(VVAccess.ReadOnly)]
-    public List<EntityUid> Children;
+    public List<EntityUid> Children = new();
 }

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using Content.Shared._DEN.Language.EntitySystems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 
@@ -16,7 +17,7 @@ public partial interface ILanguageScrambler
     /// <param name="language">The language that this translation is occurring for.</param>
     /// <param name="understanding">The amount of understanding applicable to the scrambling.</param>
     /// <returns>Scrambled version of the message.</returns>
-    string ScrambleMessage(string message, EntitySystems.SharedLanguageSystem languageSystem, ProtoId<LanguagePrototype> language, int understanding = 0);
+    string ScrambleMessage(string message, SharedLanguageSystem languageSystem, ProtoId<LanguagePrototype> language, int understanding = 0);
 }
 
 /// <summary>
@@ -37,7 +38,7 @@ public sealed partial class LanguageSyllableScrambler : ILanguageScrambler
     private static readonly Regex Sentence = new(@"(.+?(?:[\.!\?]|$))", RegexOptions.Compiled);
     private static readonly Regex Punctuation = new(@"[\,\.\!\?]", RegexOptions.Compiled);
 
-    public string ScrambleMessage(string message, EntitySystems.SharedLanguageSystem languageSystem, ProtoId<LanguagePrototype> language, int understanding = 0)
+    public string ScrambleMessage(string message, SharedLanguageSystem languageSystem, ProtoId<LanguagePrototype> language, int understanding = 0)
     {
         if (understanding >= 100)
             return message;

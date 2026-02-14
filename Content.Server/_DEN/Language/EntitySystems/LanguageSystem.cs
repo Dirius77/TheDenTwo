@@ -10,7 +10,6 @@ namespace Content.Server._DEN.Language.EntitySystems;
 public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.SharedLanguageSystem
 {
     [Dependency] private readonly IPrototypeManager _proto = default!;
-    [Dependency] private readonly ChatSystem _chat = default!;
 
     // 1000 most common words and their order. This is a dictionary to make looking up specific words faster.
     public Dictionary<string, int> CommonWordFrequency = new();

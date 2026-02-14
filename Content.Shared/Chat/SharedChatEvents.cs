@@ -55,6 +55,7 @@ public sealed class CheckIgnoreSpeechBlockerEvent : EntityEventArgs
 /// <summary>
 /// Raised on an entity when it speaks, either through 'say' or 'whisper'.
 /// </summary>
+[Obsolete("Use EntitySpokeLanguageEvent instead.")]
 public sealed class EntitySpokeEvent : EntityEventArgs
 {
     public readonly EntityUid Source;

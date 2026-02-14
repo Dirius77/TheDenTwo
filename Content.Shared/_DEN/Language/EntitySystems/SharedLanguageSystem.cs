@@ -53,10 +53,14 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
     private void OnLanguageShutdown(Entity<LanguageComponent> ent, ref ComponentShutdown evt)
     {
-        Log.Debug("LanguageComponent shutdown.");
         if (TryComp<LanguageCommunicatorComponent>(ent.Comp.Holder, out var commComp) &&
             commComp.CurrentLanguage == ent)
             commComp.CurrentLanguage = null;
+
+        foreach (var child in ent.Comp.Children)
+        {
+            QueueDel(child);
+        }
     }
 
     private bool InsertLanguageAndChildren(EntityUid target,
