@@ -408,7 +408,7 @@ namespace Content.Server.Lathe
 
             foreach (var channel in ent.Comp.Channels)
             {
-                _radio.SendRadioMessage(ent.Owner, message, channel, ent.Owner, escapeMarkup: false);
+                _radio.SendLanguageRadioMessage(ent.Owner, message, channel, ent.Owner, escapeMarkup: false); // DEN: Language
             }
         }
 

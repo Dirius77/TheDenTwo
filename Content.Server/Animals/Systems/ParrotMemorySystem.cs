@@ -43,7 +43,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         SubscribeLocalEvent<ParrotListenerComponent, MapInitEvent>(ListenerOnMapInit);
 
         //SubscribeLocalEvent<ParrotListenerComponent, ListenEvent>(OnListen); // DEN: Obsolete, see ParrotMemorySystem.Language
-        SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveRelayEvent>(OnHeadsetReceive);
+        //SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveRelayEvent>(OnHeadsetReceive); // DEN: Obsolete, see ParrotMemorySystem.Language
 
         SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeEvent>(OnTryVocalize);
 
@@ -62,13 +62,14 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
             Log.Warning($"Entity {ToPrettyString(entity)} has a ParrotListenerComponent but was not given an ActiveListenerComponent");
     }
 
-    [Obsolete("Obsolete, use OnLanguageListen instead.")]
+    [Obsolete("Obsolete, use OnLanguageListen instead.")] // DEN: Language
     private void OnListen(Entity<ParrotListenerComponent> entity, ref ListenEvent args)
     {
 
         TryLearn(entity.Owner, args.Message, args.Source);
     }
 
+    [Obsolete("Obsolete, use OnHeadsetReceiveLanguage instead.")] // DEN: Language
     private void OnHeadsetReceive(Entity<ParrotListenerComponent> entity, ref HeadsetRadioReceiveRelayEvent args)
     {
         var message = args.RelayedEvent.Message;
@@ -145,15 +146,17 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
             return;
 
         // actually commit this message to memory
-        Learn((entity, entity.Comp1), message, source);
+        //Learn((entity, entity.Comp1), message, source); DEN: Languages
     }
 
+    /* DEN: Languages
     /// <summary>
     /// Actually learn a message and commit it to memory
     /// </summary>
     /// <param name="entity">Entity learning a new word</param>
     /// <param name="message">Message to learn</param>
     /// <param name="source">Source EntityUid of the message</param>
+    [Obsolete("Obsolete, use LearnLanguage instead.")]
     private void Learn(Entity<ParrotMemoryComponent> entity, string message, EntityUid source)
     {
         // log a low-priority chat type log to the admin logger
@@ -179,6 +182,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         var replaceIdx = _random.Next(entity.Comp.SpeechMemories.Count);
         entity.Comp.SpeechMemories[replaceIdx] = newMemory;
     }
+    */
 
     /// <summary>
     /// Delete all messages from a specified player on all ParrotMemoryComponents

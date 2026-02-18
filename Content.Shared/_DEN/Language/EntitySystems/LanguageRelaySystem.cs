@@ -6,7 +6,7 @@ public sealed partial class LanguageRelaySystem : EntitySystem
 {
     public override void Initialize()
     {
-        SubscribeLocalEvent<LanguageCommunicatorComponent, AttemptUnderstandingEvent>(RelaySpokenLanguageEvent);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, AttemptUnderstandingEvent>(RelayKnownLanguagesEvent);
     }
 
     public void RelayKnownLanguagesEvent<T>(EntityUid uid, LanguageCommunicatorComponent comp, T args)
@@ -18,7 +18,6 @@ public sealed partial class LanguageRelaySystem : EntitySystem
     public void RelaySpokenLanguageEvent<T>(EntityUid uid, LanguageCommunicatorComponent comp, T args)
         where T : ISpokenLanguageRelayEvent
     {
-        Log.Debug("Relaying Spoken language Event.");
         RelaySpokenEvent((uid, comp), ref args);
     }
 

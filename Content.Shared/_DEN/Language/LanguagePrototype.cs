@@ -17,6 +17,10 @@ public sealed partial class LanguagePrototype : IPrototype
     [ViewVariables(VVAccess.ReadOnly)]
     public LocId Description => Name + "-description";
 
+    public string LocalizedName => Loc.GetString(Name);
+    public string LocalizedAbbreviation => Loc.GetString(Abbreviation);
+    public string LocalizedDescription => Loc.GetString(Description);
+
     /// <summary>
     ///     Override the base speaking verb for the language.
     /// </summary>

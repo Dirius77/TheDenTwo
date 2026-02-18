@@ -8,7 +8,7 @@ using Robust.Shared.Player;
 
 namespace Content.Server.Radio.EntitySystems;
 
-public sealed class HeadsetSystem : SharedHeadsetSystem
+public sealed partial class HeadsetSystem : SharedHeadsetSystem // DEN: Make partial
 {
     [Dependency] private readonly INetManager _netMan = default!;
     [Dependency] private readonly RadioSystem _radio = default!;
@@ -16,10 +16,11 @@ public sealed class HeadsetSystem : SharedHeadsetSystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<HeadsetComponent, RadioReceiveEvent>(OnHeadsetReceive);
+        //SubscribeLocalEvent<HeadsetComponent, RadioReceiveEvent>(OnHeadsetReceive); // DEN: Replace with Language.
         SubscribeLocalEvent<HeadsetComponent, EncryptionChannelsChangedEvent>(OnKeysChanged);
 
-        SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeEvent>(OnSpeak);
+        InitializeLanguage(); // DEN: Languages
+        //SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeEvent>(OnSpeak); // DEN: Replace with Language
     }
 
     private void OnKeysChanged(EntityUid uid, HeadsetComponent component, EncryptionChannelsChangedEvent args)
@@ -42,6 +43,7 @@ public sealed class HeadsetSystem : SharedHeadsetSystem
             EnsureComp<ActiveRadioComponent>(uid).Channels = new(keyHolder.Channels);
     }
 
+    [Obsolete("Obsolete, use OnSpeakLanguage instead.")] // DEN: Mark Obsolete for Languages
     private void OnSpeak(EntityUid uid, WearingHeadsetComponent component, EntitySpokeEvent args)
     {
         if (args.Channel != null
@@ -95,6 +97,7 @@ public sealed class HeadsetSystem : SharedHeadsetSystem
         }
     }
 
+    [Obsolete("Use OnHeadsetReceiveLanguage instead.", true)] // DEN: Languages
     private void OnHeadsetReceive(EntityUid uid, HeadsetComponent component, ref RadioReceiveEvent args)
     {
         // TODO: change this when a code refactor is done

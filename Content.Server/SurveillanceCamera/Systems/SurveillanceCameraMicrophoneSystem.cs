@@ -8,7 +8,7 @@ using static Content.Server.Chat.Systems.ChatSystem;
 
 namespace Content.Server.SurveillanceCamera;
 
-public sealed class SurveillanceCameraMicrophoneSystem : EntitySystem
+public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem // DEN: Make Partial
 {
     [Dependency] private readonly SharedTransformSystem _xforms = default!;
     [Dependency] private readonly EntityWhitelistSystem _whitelistSystem = default!;
@@ -16,9 +16,11 @@ public sealed class SurveillanceCameraMicrophoneSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ComponentInit>(OnInit);
-        SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenEvent>(RelayEntityMessage);
-        SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenAttemptEvent>(CanListen);
+        //SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenEvent>(RelayEntityMessage); // DEN: Language
+        //SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenAttemptEvent>(CanListen); // DEN: Language
         SubscribeLocalEvent<ExpandICChatRecipientsEvent>(OnExpandRecipients);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnExpandRecipients(ExpandICChatRecipientsEvent ev)
@@ -59,6 +61,7 @@ public sealed class SurveillanceCameraMicrophoneSystem : EntitySystem
             RemCompDeferred<ActiveListenerComponent>(uid);
     }
 
+    [Obsolete("Use CanListenLanguage instead.", true)] // DEN: Language
     public void CanListen(EntityUid uid, SurveillanceCameraMicrophoneComponent microphone, ListenAttemptEvent args)
     {
         // TODO maybe just make this a part of ActiveListenerComponent?
@@ -66,6 +69,7 @@ public sealed class SurveillanceCameraMicrophoneSystem : EntitySystem
             args.Cancel();
     }
 
+    [Obsolete("Use RelayEntityLanguageMessage instead.", true)] // DEN: Language
     public void RelayEntityMessage(EntityUid uid, SurveillanceCameraMicrophoneComponent component, ListenEvent args)
     {
         if (!TryComp(uid, out SurveillanceCameraComponent? camera))
@@ -96,6 +100,7 @@ public sealed class SurveillanceCameraMicrophoneSystem : EntitySystem
     }
 }
 
+[Obsolete("Use SurveillanceCameraSpeechLanguageSendEvent instead.", true)] // DEN: Languages
 public sealed class SurveillanceCameraSpeechSendEvent : EntityEventArgs
 {
     public EntityUid Speaker { get; }

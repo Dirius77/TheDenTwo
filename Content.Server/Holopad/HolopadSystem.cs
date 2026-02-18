@@ -27,7 +27,7 @@ using Content.Shared.Power.EntitySystems;
 
 namespace Content.Server.Holopad;
 
-public sealed class HolopadSystem : SharedHolopadSystem
+public sealed partial class HolopadSystem : SharedHolopadSystem // DEN: Make partial
 {
     [Dependency] private readonly TelephoneSystem _telephoneSystem = default!;
     [Dependency] private readonly UserInterfaceSystem _userInterfaceSystem = default!;
@@ -63,7 +63,7 @@ public sealed class HolopadSystem : SharedHolopadSystem
         SubscribeLocalEvent<HolopadComponent, TelephoneStateChangeEvent>(OnTelephoneStateChange);
         SubscribeLocalEvent<HolopadComponent, TelephoneCallCommencedEvent>(OnHoloCallCommenced);
         SubscribeLocalEvent<HolopadComponent, TelephoneCallEndedEvent>(OnHoloCallEnded);
-        SubscribeLocalEvent<HolopadComponent, TelephoneMessageSentEvent>(OnTelephoneMessageSent);
+        //SubscribeLocalEvent<HolopadComponent, TelephoneMessageSentEvent>(OnTelephoneMessageSent); // DEN: Language
 
         // Networked events
         SubscribeNetworkEvent<HolopadUserTypingChangedEvent>(OnTypingChanged);
@@ -83,6 +83,7 @@ public sealed class HolopadSystem : SharedHolopadSystem
         SubscribeLocalEvent<HolopadComponent, PowerChangedEvent>(OnPowerChanged);
         SubscribeLocalEvent<HolopadUserComponent, MobStateChangedEvent>(OnMobStateChanged);
 
+        InitializeLanguage(); // DEN: Languages
     }
 
     #region: Holopad UI bound user interface messages
@@ -287,6 +288,7 @@ public sealed class HolopadSystem : SharedHolopadSystem
             _userInterfaceSystem.CloseUi(entity.Owner, HolopadUiKey.AiRequestWindow, insertedAi);
     }
 
+    [Obsolete("See OnTelephoneMessageLanguageSent", true)] // DEN: Languages
     private void OnTelephoneMessageSent(Entity<HolopadComponent> holopad, ref TelephoneMessageSentEvent args)
     {
         LinkHolopadToUser(holopad, args.MessageSource);

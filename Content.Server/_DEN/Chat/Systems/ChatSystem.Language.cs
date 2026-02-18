@@ -10,6 +10,7 @@ using Content.Shared.Database;
 using Content.Shared.Radio;
 using Content.Shared.Speech;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Utility;
 
@@ -29,17 +30,20 @@ public sealed partial class ChatSystem
         MessageWrapper = "chat-language-entity-speak-wrap-message",
     };
 
-    private void SendEntityComplexSpeech(EntityUid source,
+    public void SendEntityComplexSpeech(EntityUid source,
         ComplexChatMessage originalMessage,
+        WrapperSet wrappers,
         ChatTransmitRange range,
         RadioChannelPrototype? channel,
         string? nameOverride,
         bool whisper,
         bool hideLog = false,
-        bool ignoreActionBlocker = false)
+        bool ignoreActionBlocker = false,
+        string? verbOverride = null,
+        ProtoId<LanguagePrototype>? languageOverride = null)
     {
         // Getting this first makes sure that if the language defaulted to something new it is set for CanSpeak
-        var languageProto = _language.GetCurrentLanguage(source);
+        var languageProto = languageOverride ?? _language.GetCurrentLanguage(source);
 
         if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
             return;
@@ -74,9 +78,17 @@ public sealed partial class ChatSystem
 
         var language = _prototypeManager.Index(languageProto.Value);
 
-        var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
-        if (whisper)
-            verb = "whispers";
+        string verb;
+        if (verbOverride != null)
+        {
+            verb = verbOverride;
+        }
+        else
+        {
+            verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
+            if (whisper)
+                verb = "whispers";
+        }
 
         foreach (var (session, data) in GetRecipients(source, whisper ? WhisperMuffledRange : VoiceRange))
         {
@@ -87,68 +99,40 @@ public sealed partial class ChatSystem
             if (whisper && entRange != MessageRangeCheckResult.Full)
                 continue;
 
-            string? msgOverride = null;
-            var hideLanguage = !language.DisplayInChat;
-            var understanding = _prototypeManager.Index(SharedLanguageSystem.MinimumFluency);
-            var languageFont = true;
-
             var visibleName = name;
+
+            var entHideChat = entRange == MessageRangeCheckResult.HideChat;
 
             // Don't bother checking the event if the player doesn't have an entity.
             if (session.AttachedEntity is { Valid: true } playerEntity)
             {
-                var receiveEv = new AttemptUnderstandingEvent(source, languageProto.Value);
-                RaiseLocalEvent(playerEntity, receiveEv);
-
-                if (receiveEv.Cancelled)
-                    continue;
-
-                msgOverride = receiveEv.MessageOverride;
-
-                if (whisper)
-                    visibleName = _examineSystem.InRangeUnOccluded(source, playerEntity, WhisperMuffledRange) ? name : "Someone";
-
-                if (receiveEv.HideLanguage)
-                    hideLanguage = true;
-
-                if (_language.UnderstandsLanguage(playerEntity,
-                        languageProto.Value,
-                        SharedLanguageSystem.MinimumFluency,
-                        out var understandsEnt))
-                    understanding = understandsEnt.Value.Comp.Fluency;
-
-                if (HasComp<LanguageFontSuppressionComponent>(playerEntity) && understanding.Understanding > 0)
-                    languageFont = false;
+                SendComplexMessageToEntity(source,
+                    playerEntity,
+                    message,
+                    language,
+                    wrappers,
+                    whisper ? ChatChannel.Whisper : ChatChannel.Local,
+                    visibleName,
+                    verb,
+                    speech.Bold,
+                    whisper,
+                    entHideChat,
+                    null,
+                    null);
             }
-
-            var entHideChat = entRange == MessageRangeCheckResult.HideChat;
-
-            var (unwrappedSend, wrappedSend) = BuildComplexMessage(message,
-                SpeakWrapper,
-                language,
-                understanding,
-                speech.Bold,
-                hideLanguage,
-                languageFont,
-                whisper,
-                data.Observer ? 0 : data.Range, // I could just add another parameter but...
-                visibleName,
-                verb);
-
-            _chatManager.ChatMessageToOne(whisper ? ChatChannel.Whisper : ChatChannel.Local, unwrappedSend, wrappedSend, source, entHideChat, session.Channel);
         }
 
         var (unwrappedMessage, wrappedMessage) = BuildComplexMessage(message,
-            SpeakWrapper,
+            wrappers,
             language,
-            _prototypeManager.Index(SharedLanguageSystem.MaximumFluency),
             speech.Bold,
             language.DisplayInChat,
             true,
             whisper,
-            0,
             name,
-            verb);
+            verb,
+            null,
+            null);
 
         _replay.RecordServerMessage(
             new ChatMessage(whisper ? ChatChannel.Whisper : ChatChannel.Local,
@@ -158,23 +142,24 @@ public sealed partial class ChatSystem
                 null,
                 MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeLanguageEvent(source, message, language, channel, whisper);
+        var ev = new EntitySpokeLanguageEvent(source, message, language, channel, verb, whisper);
         RaiseLocalEvent(source, ev, true);
 
         if (!HasComp<ActorComponent>(source) || hideLog)
             return;
 
+        // Build the original string to check if TransformComplexSpeech changed it.
         var (original, _) = BuildComplexMessage(originalMessage,
-            SpeakWrapper,
+            wrappers,
             language,
-            _prototypeManager.Index(SharedLanguageSystem.MaximumFluency),
             speech.Bold,
             language.DisplayInChat,
             true,
             whisper,
-            0,
             name,
-            verb);
+            verb,
+            null,
+            null);
 
         var languageName = Loc.GetString(language.Name);
 
@@ -196,30 +181,94 @@ public sealed partial class ChatSystem
         }
     }
 
-    // Returns the unwrapped message, as well as a wrapped version of the message based on the provided settings.
-    private (string, string) BuildComplexMessage(ComplexChatMessage message,
-        WrapperSet wrappers,
+    public void SendComplexMessageToEntity(EntityUid source,
+        Entity<ActorComponent?> listener,
+        ComplexChatMessage originalMessage,
         LanguagePrototype language,
-        LanguageFluencyPrototype understanding,
+        WrapperSet wrappers,
+        ChatChannel channel,
+        string name,
+        string verb,
+        bool bold,
+        bool whisper,
+        bool hideChat,
+        string? radioChannel,
+        Color? color)
+    {
+        if (!Resolve(listener, ref listener.Comp))
+            return;
+
+        var understandEv = new AttemptUnderstandingEvent(source, language);
+        RaiseLocalEvent(listener, understandEv);
+
+        if (understandEv.HideMessage)
+            return;
+
+        var message = originalMessage;
+
+        // TODO: Make this also handled by the events.
+        if (whisper)
+            name = _examineSystem.InRangeUnOccluded(source, listener, WhisperMuffledRange) ? name : "Someone";
+
+        if (understandEv.Handled)
+        {
+            // Don't bother doing the processing if we have an override, since we'll use that anyway.
+            if (understandEv.Understanding is not null && understandEv.MessageOverride is null)
+                message = _language.ModifyMessageWithLanguage(understandEv.Understanding.Value,
+                    source,
+                    listener,
+                    message,
+                    language,
+                    whisper);
+        }
+
+        var useLanguageFont = HasComp<LanguageFontSuppressionComponent>(listener);
+
+        var hideLanguage = !language.DisplayInChat;
+        if (understandEv.HideLanguage)
+            hideLanguage = false;
+
+        var (unwrappedMessage, wrappedMessage) = BuildComplexMessage(message,
+            wrappers,
+            language,
+            bold,
+            hideLanguage,
+            useLanguageFont,
+            whisper,
+            name,
+            verb,
+            radioChannel,
+            color
+        );
+
+        _chatManager.ChatMessageToOne(channel, unwrappedMessage, wrappedMessage, source, hideChat, listener.Comp.PlayerSession.Channel);
+    }
+
+    // Returns the unwrapped message, as well as a wrapped version of the message based on the provided settings.
+    public (string, string) BuildComplexMessage(ComplexChatMessage message,
+        WrapperSet wrapper,
+        LanguagePrototype language,
         bool bold,
         bool hideLanguage,
         bool useLanguageFont,
         bool whisper,
-        float range,
         string name,
-        string verb)
+        string verb,
+        string? channel,
+        Color? color)
     {
         var langStr = "";
         if (!hideLanguage)
-            langStr = Loc.GetString(wrappers.LanguageWrapper,
-                ("language", Loc.GetString(language.Abbreviation)),
+            langStr = Loc.GetString(wrapper.LanguageWrapper,
+                ("language", language.LocalizedAbbreviation),
                 ("color", language.FontColor));
 
-        var prefix = Loc.GetString(wrappers.PrefixWrapper,
+        var prefix = Loc.GetString(wrapper.PrefixWrapper,
             ("language", langStr),
             ("spacing", message.NeedsSpacing ? "" : "("),
             ("spacingClose", message.NeedsSpacing ? "" : ")"),
-            ("entityName", name));
+            ("entityName", name),
+            ("channel", channel is null ? "" : $"\\[{channel}\\]"));
         var wrappedBuilder = new StringBuilder();
         var unwrappedBuilder = new StringBuilder();
 
@@ -241,47 +290,33 @@ public sealed partial class ChatSystem
         {
             if (kind == ChatPart.Dialog)
             {
-                var understoodMsg = _language.ObfuscateMessageWithLanguage(part, language, understanding);
-                understoodMsg = SanitizeMessagePeriod(understoodMsg);
-                if (whisper && range > WhisperClearRange)
-                    understoodMsg = ObfuscateMessageReadability(understoodMsg, 0.2f);
-                unwrappedBuilder.Append(message.Delimiter + understoodMsg + message.Delimiter);
-                wrappedBuilder.Append(Loc.GetString(wrappers.DialogWrapper,
+                unwrappedBuilder.Append(message.Delimiter + part + message.Delimiter);
+                wrappedBuilder.Append(Loc.GetString(wrapper.DialogWrapper,
                     ("fontType", useLanguageFont ? language.FontId : "Default"),
-                    ("fontColor", language.FontColor),
+                    ("fontColor", color ?? language.FontColor),
                     ("fontSize", language.FontSize),
                     ("style", style),
                     ("styleClose", styleClose),
-                    ("message", message.Delimiter + understoodMsg + message.Delimiter)));
+                    ("message", message.Delimiter + part + message.Delimiter)));
             }
             else
             {
                 unwrappedBuilder.Append(part);
-                wrappedBuilder.Append(Loc.GetString(wrappers.EmoteWrapper,
+                wrappedBuilder.Append(Loc.GetString(wrapper.EmoteWrapper,
                     ("message", part)));
             }
         }
 
-        var wrapResult = Loc.GetString(wrappers.MessageWrapper,
+        var wrapResult = Loc.GetString(wrapper.MessageWrapper,
             ("space", message.NeedsSpacing ? " " : ""),
             ("verb", message.IsDetailed ? "" : verb + ", "),
             ("prefix", prefix),
             ("whisper", whisper ? "[italic]" : ""),
             ("whisperClose", whisper ? "[/italic]" : ""),
-            ("message", wrappedBuilder.ToString()));
+            ("message", wrappedBuilder.ToString()),
+            ("color", color is null ? "" : color));
         Log.Debug("Wrap result: " + wrapResult);
         return (unwrappedBuilder.ToString(), wrapResult);
-    }
-
-    private SpeechVerbPrototype GetComplexSpeechVerb(EntityUid source, ComplexChatMessage message)
-    {
-        // We won't even actually use this in this case.
-        if (message.IsDetailed)
-            return _prototypeManager.Index(DefaultSpeechVerb);
-
-        var firstDialog = message.Parts.FirstOrDefault(p => p.Item1 == ChatPart.Dialog).Item2;
-
-        return GetSpeechVerb(source, firstDialog);
     }
 
     private ComplexChatMessage TransformComplexSpeech(EntityUid sender, ComplexChatMessage message)

@@ -19,7 +19,7 @@ namespace Content.Server.Radio.EntitySystems;
 /// <summary>
 ///     This system handles radio speakers and microphones (which together form a hand-held radio).
 /// </summary>
-public sealed class RadioDeviceSystem : SharedRadioDeviceSystem
+public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem // DEN: Make partial
 {
     [Dependency] private readonly IPrototypeManager _protoMan = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
@@ -37,18 +37,20 @@ public sealed class RadioDeviceSystem : SharedRadioDeviceSystem
         SubscribeLocalEvent<RadioMicrophoneComponent, ComponentInit>(OnMicrophoneInit);
         SubscribeLocalEvent<RadioMicrophoneComponent, ExaminedEvent>(OnExamine);
         SubscribeLocalEvent<RadioMicrophoneComponent, ActivateInWorldEvent>(OnActivateMicrophone);
-        SubscribeLocalEvent<RadioMicrophoneComponent, ListenEvent>(OnListen);
-        SubscribeLocalEvent<RadioMicrophoneComponent, ListenAttemptEvent>(OnAttemptListen);
+        //SubscribeLocalEvent<RadioMicrophoneComponent, ListenEvent>(OnListen); // DEN: Language
+        //SubscribeLocalEvent<RadioMicrophoneComponent, ListenAttemptEvent>(OnAttemptListen); // DEN: Language
         SubscribeLocalEvent<RadioMicrophoneComponent, PowerChangedEvent>(OnPowerChanged);
 
         SubscribeLocalEvent<RadioSpeakerComponent, ComponentInit>(OnSpeakerInit);
         SubscribeLocalEvent<RadioSpeakerComponent, ActivateInWorldEvent>(OnActivateSpeaker);
-        SubscribeLocalEvent<RadioSpeakerComponent, RadioReceiveEvent>(OnReceiveRadio);
+        // SubscribeLocalEvent<RadioSpeakerComponent, RadioReceiveEvent>(OnReceiveRadio); // DEN: Language
 
         SubscribeLocalEvent<IntercomComponent, EncryptionChannelsChangedEvent>(OnIntercomEncryptionChannelsChanged);
         SubscribeLocalEvent<IntercomComponent, ToggleIntercomMicMessage>(OnToggleIntercomMic);
         SubscribeLocalEvent<IntercomComponent, ToggleIntercomSpeakerMessage>(OnToggleIntercomSpeaker);
         SubscribeLocalEvent<IntercomComponent, SelectIntercomChannelMessage>(OnSelectIntercomChannel);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     public override void Update(float frameTime)
@@ -149,6 +151,7 @@ public sealed class RadioDeviceSystem : SharedRadioDeviceSystem
         }
     }
 
+    [Obsolete("Obsolete: See OnListenLanguage", true)] // DEN: Language
     private void OnListen(EntityUid uid, RadioMicrophoneComponent component, ListenEvent args)
     {
         if (HasComp<RadioSpeakerComponent>(args.Source))
@@ -159,6 +162,7 @@ public sealed class RadioDeviceSystem : SharedRadioDeviceSystem
             _radio.SendRadioMessage(args.Source, args.Message, channel, uid);
     }
 
+    [Obsolete("Obsolete: See OnAttemptListenLanguage", true)] // DEN: Language
     private void OnAttemptListen(EntityUid uid, RadioMicrophoneComponent component, ListenAttemptEvent args)
     {
         if (component.PowerRequired && !this.IsPowered(uid, EntityManager)
@@ -168,6 +172,7 @@ public sealed class RadioDeviceSystem : SharedRadioDeviceSystem
         }
     }
 
+    [Obsolete("Obsolete: See OnReceiveLanguageRadio", true)] // DEN: Language
     private void OnReceiveRadio(EntityUid uid, RadioSpeakerComponent component, ref RadioReceiveEvent args)
     {
         if (uid == args.RadioSource)

@@ -173,10 +173,10 @@ public sealed class CriminalRecordsConsoleSystem : SharedCriminalRecordsConsoleS
             // this is impossible
             _ => "not-wanted"
         };
-        _radio.SendRadioMessage(ent,
+        _radio.SendLanguageRadioMessage(ent,
             Loc.GetString($"criminal-records-console-{statusString}", args),
             ent.Comp.SecurityChannel,
-            ent);
+            ent); // DEN: Language
 
         _adminLogger.Add(LogType.Identity, LogImpact.Low, $"{ToPrettyString(mob.Value):name} changed criminal status for {name} to \"{statusString}\"");
 

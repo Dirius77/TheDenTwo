@@ -17,10 +17,10 @@ public sealed partial class ListeningSystem
 
     private void OnSpeakLanguage(EntitySpokeLanguageEvent ev)
     {
-        PingLanguageListeners(ev.Source, ev.Message, ev.Language, ev.Whisper);
+        PingLanguageListeners(ev.Source, ev.Message, ev.Language, ev.Verb, ev.Whisper);
     }
 
-    public void PingLanguageListeners(EntityUid source, SharedChatSystem.ComplexChatMessage message, LanguagePrototype language, bool whisper)
+    public void PingLanguageListeners(EntityUid source, ComplexChatMessage message, LanguagePrototype language, string verb, bool whisper)
     {
         // TODO whispering / audio volume? Microphone sensitivity?
         // for now, whispering just arbitrarily reduces the listener's max range.
@@ -30,9 +30,9 @@ public sealed partial class ListeningSystem
         var sourcePos = _xforms.GetWorldPosition(sourceXform, xformQuery);
 
         var attemptEv = new ListenLanguageAttemptEvent(source, language);
-        var ev = new ListenLanguageEvent(message, source, language);
+        var ev = new ListenLanguageEvent(message, source, language, verb, whisper);
         var obfuscatedEv = whisper
-            ? new ListenLanguageEvent(_chat.ObfuscateComplexChatMessage(message, 0.2f), source, language)
+            ? new ListenLanguageEvent(_chat.ObfuscateComplexChatMessage(message, 0.2f), source, language, verb, whisper)
             : null;
         var query = EntityQueryEnumerator<ActiveListenerComponent, TransformComponent>();
 

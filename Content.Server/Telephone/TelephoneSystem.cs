@@ -24,7 +24,7 @@ using System.Linq;
 
 namespace Content.Server.Telephone;
 
-public sealed class TelephoneSystem : SharedTelephoneSystem
+public sealed partial class TelephoneSystem : SharedTelephoneSystem // DEN: Make Partial
 {
     [Dependency] private readonly AppearanceSystem _appearanceSystem = default!;
     [Dependency] private readonly InteractionSystem _interaction = default!;
@@ -46,9 +46,11 @@ public sealed class TelephoneSystem : SharedTelephoneSystem
 
         SubscribeLocalEvent<TelephoneComponent, ComponentShutdown>(OnComponentShutdown);
         SubscribeLocalEvent<TelephoneComponent, PowerChangedEvent>(OnPowerChanged);
-        SubscribeLocalEvent<TelephoneComponent, ListenAttemptEvent>(OnAttemptListen);
-        SubscribeLocalEvent<TelephoneComponent, ListenEvent>(OnListen);
-        SubscribeLocalEvent<TelephoneComponent, TelephoneMessageReceivedEvent>(OnTelephoneMessageReceived);
+        //SubscribeLocalEvent<TelephoneComponent, ListenAttemptEvent>(OnAttemptListen); // DEN: Languages
+        //SubscribeLocalEvent<TelephoneComponent, ListenEvent>(OnListen); // DEN: Languages
+        //SubscribeLocalEvent<TelephoneComponent, TelephoneMessageReceivedEvent>(OnTelephoneMessageReceived); // DEN: Languages
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     #region: Events
@@ -64,6 +66,7 @@ public sealed class TelephoneSystem : SharedTelephoneSystem
             TerminateTelephoneCalls(entity);
     }
 
+    [Obsolete("See OnAttemptLanguageListen", true)] // DEN: Languages
     private void OnAttemptListen(Entity<TelephoneComponent> entity, ref ListenAttemptEvent args)
     {
         if (!IsTelephonePowered(entity) ||
@@ -75,6 +78,7 @@ public sealed class TelephoneSystem : SharedTelephoneSystem
         }
     }
 
+    [Obsolete("See OnLanguageListen", true)] // DEN: Languages
     private void OnListen(Entity<TelephoneComponent> entity, ref ListenEvent args)
     {
         if (args.Source == entity.Owner)
@@ -91,6 +95,7 @@ public sealed class TelephoneSystem : SharedTelephoneSystem
         SendTelephoneMessage(args.Source, args.Message, entity);
     }
 
+    [Obsolete("See OnTelephoneMessageLanguageReceived", true)] // DEN: Languages
     private void OnTelephoneMessageReceived(Entity<TelephoneComponent> entity, ref TelephoneMessageReceivedEvent args)
     {
         // Prevent message feedback loops
@@ -327,6 +332,7 @@ public sealed class TelephoneSystem : SharedTelephoneSystem
         SetTelephoneMicrophoneState(entity, false);
     }
 
+    [Obsolete("Obsolete: See SendTelephoneLanguageMessage", true)] // DEN: Languages
     private void SendTelephoneMessage(EntityUid messageSource, string message, Entity<TelephoneComponent> source, bool escapeMarkup = true)
     {
         // This method assumes that you've already checked that this

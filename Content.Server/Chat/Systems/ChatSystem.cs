@@ -219,7 +219,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             // DEN: Complex message parsing.
             if (TryProcessRadioOnComplexMessage(source, complexMessage, out var newCmplxMsg, out var channel))
             {
-                SendEntityComplexSpeech(source, newCmplxMsg.Value, range, channel, nameOverride, true, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, newCmplxMsg.Value, SpeakWrapper, range, channel, nameOverride, true, hideLog, ignoreActionBlocker);
                 return;
             }
         }
@@ -229,11 +229,11 @@ public sealed partial class ChatSystem : SharedChatSystem
         {
             case InGameICChatType.Speak:
                 // DEN: Complex Speech and language
-                SendEntityComplexSpeech(source, complexMessage, range, null, nameOverride, false, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, range, null, nameOverride, false, hideLog, ignoreActionBlocker);
                 //SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
-                SendEntityComplexSpeech(source, complexMessage, range, null, nameOverride, true, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, range, null, nameOverride, true, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Emote:
                 SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);

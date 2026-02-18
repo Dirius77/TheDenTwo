@@ -22,12 +22,12 @@ public sealed class DenCCVars
     /// <summary>
     ///     Whether or not to give an entity that tries speaking without LanguageCommunicatorComponent a language.
     /// </summary>
-    public static readonly CVarDef<bool> UseDefaultLanguage =
-        CVarDef.Create("languages.use_default_language", false, CVar.ARCHIVE);
+    public static readonly CVarDef<bool> FallbackDefaultLanguage =
+        CVarDef.Create("languages.fallback_default_language", false, CVar.ARCHIVE);
 
     /// <summary>
-    ///     The language to use if an entity that lacks a LanguageCommunicatorComponent tries to speak.
-    ///     This only does anything is UseDefaultLanguage is true.
+    ///     The default spoken language. If fallback_default_language is set, entities without LanguageCommunicatorComponent
+    ///     will use this. Systems that directly send messages will also use this language.
     /// </summary>
     public static readonly CVarDef<string> DefaultLanguage =
         CVarDef.Create("languages.default_language", "Basic", CVar.ARCHIVE);

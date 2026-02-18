@@ -16,7 +16,8 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
     public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
 
-    public static ProtoId<LanguagePrototype>? DefaultLanguage;
+    private static ProtoId<LanguagePrototype> _defaultLanguage = "Basic";
+    private bool _fallbackDefaultLanguage;
 
     private EntityQuery<LanguageComponent> _languageQuery;
 
@@ -27,18 +28,10 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorInit);
         SubscribeLocalEvent<LanguageComponent, ComponentShutdown>(OnLanguageShutdown);
 
-        _cfg.OnValueChanged(DenCCVars.UseDefaultLanguage, _ => UpdateDefaultLanguage(), true);
-        _cfg.OnValueChanged(DenCCVars.DefaultLanguage, _ => UpdateDefaultLanguage(), true);
+        _cfg.OnValueChanged(DenCCVars.FallbackDefaultLanguage, fallback => _fallbackDefaultLanguage = fallback, true);
+        _cfg.OnValueChanged(DenCCVars.DefaultLanguage, lang => _defaultLanguage = lang, true);
 
         _languageQuery = GetEntityQuery<LanguageComponent>();
-    }
-
-    private void UpdateDefaultLanguage()
-    {
-        if (!_cfg.GetCVar(DenCCVars.UseDefaultLanguage))
-            DefaultLanguage = null;
-        else
-            DefaultLanguage = _cfg.GetCVar(DenCCVars.DefaultLanguage);
     }
 
     private void OnLanguageCommunicatorInit(Entity<LanguageCommunicatorComponent> ent, ref ComponentInit evt)

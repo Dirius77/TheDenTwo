@@ -10,7 +10,7 @@ namespace Content.Server.SurveillanceCamera;
 /// <summary>
 ///     This handles speech for surveillance camera monitors.
 /// </summary>
-public sealed class SurveillanceCameraSpeakerSystem : EntitySystem
+public sealed partial class SurveillanceCameraSpeakerSystem : EntitySystem // DEN: Partial (this actually just completely replaces this system, oops?)
 {
     [Dependency] private readonly SharedAudioSystem _audioSystem = default!;
     [Dependency] private readonly SpeechSoundSystem _speechSound = default!;
@@ -20,9 +20,12 @@ public sealed class SurveillanceCameraSpeakerSystem : EntitySystem
     /// <inheritdoc/>
     public override void Initialize()
     {
-        SubscribeLocalEvent<SurveillanceCameraSpeakerComponent, SurveillanceCameraSpeechSendEvent>(OnSpeechSent);
+        //SubscribeLocalEvent<SurveillanceCameraSpeakerComponent, SurveillanceCameraSpeechSendEvent>(OnSpeechSent); // DEN: Languages
+
+        InitializeLanguage(); // DEN: Languages
     }
 
+    [Obsolete("See OnSpeechLanguageSent", true)] // DEN: Languages
     private void OnSpeechSent(EntityUid uid, SurveillanceCameraSpeakerComponent component,
         SurveillanceCameraSpeechSendEvent args)
     {

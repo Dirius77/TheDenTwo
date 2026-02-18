@@ -2,6 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using Content.Shared._DEN.CCVars;
 using Content.Server.Chat.Systems;
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
+using Content.Shared.Chat;
 using Content.Shared.Dataset;
 using Robust.Shared.Prototypes;
 
@@ -30,10 +32,27 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
     {
         base.Initialize();
 
+        SubscribeLocalEvent<LanguageComponent, LanguageRelayedEvent<AttemptUnderstandingEvent>>(
+            OnAttemptUnderstandingRelay);
+
         _cfg.OnValueChanged(DenCCVars.LanguageMessageCacheSize, cacheSize => _messageCacheMaxSize = cacheSize, true);
         _cfg.OnValueChanged(DenCCVars.LanguageWordCacheSize, cacheSize => _wordCacheMaxSize = cacheSize, true);
 
         BuildCommonWordSet();
+    }
+
+    private void OnAttemptUnderstandingRelay(Entity<LanguageComponent> ent,
+        ref LanguageRelayedEvent<AttemptUnderstandingEvent> args)
+    {
+        var evt = args.Args;
+        if (evt.Language.ID != ent.Comp.Language)
+            return;
+
+        if (evt.Understanding is null || evt.Understanding.Value.Comp.Fluency < ent.Comp.Fluency)
+        {
+            evt.Understanding = ent;
+            evt.Handled = true;
+        }
     }
 
     private void BuildCommonWordSet()
@@ -52,6 +71,18 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
         LanguageFluencyPrototype understanding)
     {
         return language.Scrambler.ScrambleMessage(message, this, language, understanding.Understanding);
+    }
+
+    public ComplexChatMessage ModifyMessageWithLanguage(EntityUid languageEntity,
+        EntityUid sender,
+        EntityUid listener,
+        ComplexChatMessage originalMessage,
+        LanguagePrototype language,
+        bool isWhisper)
+    {
+        var ev = new LanguageModifyMessageEvent(sender, listener, originalMessage, language, isWhisper);
+        RaiseLocalEvent(languageEntity, ev);
+        return ev.Message;
     }
 
     public override bool TryGetMessageCachedValue(string key, string msg, [MaybeNullWhen(false)] out string value)

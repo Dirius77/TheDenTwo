@@ -6,8 +6,9 @@ namespace Content.Shared.Chat;
 public sealed class EntitySpokeLanguageEvent : EntityEventArgs
 {
     public readonly EntityUid Source;
-    public readonly SharedChatSystem.ComplexChatMessage Message;
+    public readonly ComplexChatMessage Message;
     public readonly LanguagePrototype Language;
+    public readonly string Verb;
     public readonly bool Whisper;
 
     /// <summary>
@@ -16,12 +17,13 @@ public sealed class EntitySpokeLanguageEvent : EntityEventArgs
     /// </summary>
     public RadioChannelPrototype? Channel;
 
-    public EntitySpokeLanguageEvent(EntityUid source, SharedChatSystem.ComplexChatMessage message, LanguagePrototype language, RadioChannelPrototype? channel, bool whisper = false)
+    public EntitySpokeLanguageEvent(EntityUid source, ComplexChatMessage message, LanguagePrototype language, RadioChannelPrototype? channel, string verb, bool whisper = false)
     {
         Source = source;
         Message = message;
         Language = language;
         Channel = channel;
+        Verb = verb;
         Whisper = whisper;
     }
 }

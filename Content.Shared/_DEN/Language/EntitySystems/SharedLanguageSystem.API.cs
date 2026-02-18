@@ -116,6 +116,17 @@ public abstract partial class SharedLanguageSystem
     #endregion
 
     #region Get Methods
+
+    /// <summary>
+    ///     Gets the current default language set by CVars.
+    /// </summary>
+    /// <returns>The current default language.</returns>
+    [PublicAPI]
+    public ProtoId<LanguagePrototype> GetDefaultLanguage()
+    {
+        return _defaultLanguage;
+    }
+
     /// <summary>
     ///     Retrieves the currently spoken language of the entity. If the entity isn't currently set to one, but it
     ///     does speak one, then it will be set to the first language it speaks.
@@ -150,19 +161,21 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public ProtoId<LanguagePrototype>? GetCurrentLanguage(EntityUid target)
     {
+        var fallbackLang = _fallbackDefaultLanguage ? GetDefaultLanguage() : (ProtoId<LanguagePrototype>?)null;
+
         if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
-            return DefaultLanguage;
+            return fallbackLang;
 
         if (communicator.CurrentLanguage is null || Deleted(communicator.CurrentLanguage))
         {
             if (!TryGetLanguageEntities(target, out var languageEntities))
-                return DefaultLanguage;
+                return fallbackLang;
 
             communicator.CurrentLanguage = languageEntities.FirstOrNull(lang => lang.Comp.Speaks);
         }
 
         if (!_languageQuery.TryComp(communicator.CurrentLanguage, out var languageComp))
-            return DefaultLanguage;
+            return fallbackLang;
 
         return languageComp.Language;
     }

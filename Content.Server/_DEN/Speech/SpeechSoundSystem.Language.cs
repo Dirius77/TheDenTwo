@@ -23,7 +23,7 @@ public sealed partial class SpeechSoundSystem
             return;
 
         var sound = GetSpeechSound((uid, component),
-            args.Message.Parts.LastOrDefault(part => part.Item1 == SharedChatSystem.ChatPart.Dialog).Item2);
+            args.Message.Parts.LastOrDefault(part => part.Item1 == ChatPart.Dialog).Item2);
         component.LastTimeSoundPlayed = currentTime;
         _audio.PlayPvs(sound, uid);
     }

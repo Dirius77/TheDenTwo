@@ -22,7 +22,6 @@ namespace Content.Server.Speech
 
             InitializeLanguage(); // DEN: Language
 
-            // TODO: Uncomment this when I make it not an error again.
             //SubscribeLocalEvent<SpeechComponent, EntitySpokeEvent>(OnEntitySpoke);
         }
 
