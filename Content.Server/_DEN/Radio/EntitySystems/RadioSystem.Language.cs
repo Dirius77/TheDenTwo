@@ -27,6 +27,8 @@ public sealed partial class RadioSystem
         LanguageWrapper = "chat-language-entity-speak-wrap-language",
         PrefixWrapper = "chat-language-entity-radio-wrap-prefix",
         MessageWrapper = "chat-language-entity-radio-wrap-message",
+        SingularMessageWrapper = "chat-language-entity-radio-wrap-message-singular", // Radio doesn't really use this but it means I don't need special logic.
+        BoldType = "chat-language-entity-speak-bold",
     };
 
     private void InitializeLanguage()
@@ -39,13 +41,19 @@ public sealed partial class RadioSystem
         IntrinsicRadioReceiverComponent component,
         ref RadioReceiveLanguageEvent args)
     {
+        var languageEnt = args.LanguageEnt;
+        if (!Resolve(languageEnt, ref languageEnt.Comp))
+            return;
+
+        var language = _prototype.Index(languageEnt.Comp.Language);
+
         if (TryComp(uid, out ActorComponent? actor))
         {
             _chat.SendComplexMessageToEntity(
                 args.RadioSource,
                 uid,
+                args.LanguageEnt,
                 args.Message,
-                args.Language,
                 RadioWrapper,
                 ChatChannel.Radio,
                 args.Name,
@@ -58,13 +66,13 @@ public sealed partial class RadioSystem
                 );
 
             // TODO: Put all this shit in one place. (See ChatSystem.Language)
-            var understandEv = new AttemptUnderstandingEvent(uid, args.Language);
+            var understandEv = new AttemptUnderstandingEvent(uid, language);
             RaiseLocalEvent(uid, understandEv);
 
             if (!understandEv.Handled)
                 return;
 
-            var hideLanguage = !args.Language.DisplayInChat;
+            var hideLanguage = !language.DisplayInChat;
             if (understandEv.HideLanguage)
                 hideLanguage = true;
 
@@ -74,11 +82,10 @@ public sealed partial class RadioSystem
             var (unwrappedMsg, wrappedMsg) = _chat.BuildComplexMessage(
                 args.Message,
                 RadioWrapper,
-                args.Language,
+                language,
                 args.Speech.Bold,
                 hideLanguage,
                 languageFont,
-                false,
                 args.Name,
                 args.Verb,
                 args.Channel.LocalizedName,
@@ -102,7 +109,7 @@ public sealed partial class RadioSystem
     {
         if (args.Channel != null && component.Channels.Contains(args.Channel.ID))
         {
-            SendLanguageRadioMessage(uid, args.Message, args.Language, args.Channel, uid);
+            SendLanguageRadioMessage(uid, args.LanguageEnt, args.Message, args.Channel, uid);
             args.Channel = null;
         }
     }
@@ -122,17 +129,25 @@ public sealed partial class RadioSystem
         EntityUid radioSource,
         bool escapeMarkup = true)
     {
-        var complex = new ComplexChatMessage(message, "\"", false, true, escapeMarkup);
-        var language = _prototype.Index(_language.GetDefaultLanguage());
-        SendLanguageRadioMessage(uid, complex, language, channel, radioSource);
+        var complex = new ComplexChatMessage(message, "\"", false, true, false, escapeMarkup);
+        var languageEnt = _language.GetCurrentLanguageEntity(uid, true);
+        if (languageEnt is null)
+        {
+            Log.Warning("Default language entity is null! Unable to send message.");
+            return;
+        }
+        SendLanguageRadioMessage(uid, languageEnt.Value, complex, channel, radioSource);
     }
 
     public void SendLanguageRadioMessage(EntityUid messageSource,
+        Entity<LanguageComponent?> languageEnt,
         ComplexChatMessage message,
-        LanguagePrototype language,
         RadioChannelPrototype channel,
         EntityUid radioSource)
     {
+        if (!Resolve(languageEnt, ref languageEnt.Comp))
+            return;
+
         if (!_messages.Add(message.OriginalMessage))
             return;
 
@@ -150,7 +165,7 @@ public sealed partial class RadioSystem
 
         var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
 
-        var ev = new RadioReceiveLanguageEvent(message, language, speech, name, verb, messageSource, channel, radioSource);
+        var ev = new RadioReceiveLanguageEvent(message, languageEnt, speech, name, verb, messageSource, channel, radioSource);
 
         var sendAttemptEv = new RadioSendAttemptEvent(channel, radioSource);
         RaiseLocalEvent(ref sendAttemptEv);
@@ -162,6 +177,9 @@ public sealed partial class RadioSystem
         var sourceServerExempt = _exemptQuery.HasComp(radioSource);
 
         var radioQuery = EntityQueryEnumerator<ActiveRadioComponent, TransformComponent>();
+
+        var language = _prototype.Index(languageEnt.Comp.Language);
+
         while (canSend && radioQuery.MoveNext(out var receiver, out var radio, out var transform))
         {
             if (!radio.ReceiveAllChannels)
@@ -193,7 +211,6 @@ public sealed partial class RadioSystem
             speech.Bold,
             language.DisplayInChat,
             true,
-            false,
             name,
             verb,
             channel.LocalizedName,

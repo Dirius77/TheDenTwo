@@ -51,6 +51,6 @@ public sealed partial class SurveillanceCameraSpeakerSystem
             name,
             true,
             verbOverride: args.Verb,
-            languageOverride: args.Language);
+            languageOverride: args.LanguageEnt);
     }
 }

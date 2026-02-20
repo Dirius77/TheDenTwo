@@ -72,8 +72,20 @@ public sealed partial class LanguagePrototype : IPrototype
     [DataField]
     public ProtoId<LanguageFluencyPrototype> UnderstandingForDisplay = "Unfamiliar";
 
+    /// <summary>
+    ///     Languages that are related to this language. If a speaker is completely Fluent in this language, then
+    ///     they will also be able to understand the related languages in the specified amount.
+    /// </summary>
     [DataField]
     public Dictionary<ProtoId<LanguagePrototype>, ProtoId<LanguageFluencyPrototype>> RelatedLanguages = new();
+
+    /// <summary>
+    ///     Other components to add to the language entity. These are used to add language specific effects
+    ///     such as being spoken, signed, telepathic, or other such behavior.
+    /// </summary>
+    [DataField]
+    [AlwaysPushInheritance]
+    public ComponentRegistry? LanguageComponents;
 
     [NeverPushInheritance]
     [AbstractDataField]

@@ -1,4 +1,5 @@
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Radio;
 
 namespace Content.Shared.Chat;
@@ -6,8 +7,8 @@ namespace Content.Shared.Chat;
 public sealed class EntitySpokeLanguageEvent : EntityEventArgs
 {
     public readonly EntityUid Source;
+    public readonly Entity<LanguageComponent?> LanguageEnt;
     public readonly ComplexChatMessage Message;
-    public readonly LanguagePrototype Language;
     public readonly string Verb;
     public readonly bool Whisper;
 
@@ -17,11 +18,11 @@ public sealed class EntitySpokeLanguageEvent : EntityEventArgs
     /// </summary>
     public RadioChannelPrototype? Channel;
 
-    public EntitySpokeLanguageEvent(EntityUid source, ComplexChatMessage message, LanguagePrototype language, RadioChannelPrototype? channel, string verb, bool whisper = false)
+    public EntitySpokeLanguageEvent(EntityUid source, Entity<LanguageComponent?> languageEnt, ComplexChatMessage message, RadioChannelPrototype? channel, string verb, bool whisper = false)
     {
         Source = source;
         Message = message;
-        Language = language;
+        LanguageEnt = languageEnt;
         Channel = channel;
         Verb = verb;
         Whisper = whisper;

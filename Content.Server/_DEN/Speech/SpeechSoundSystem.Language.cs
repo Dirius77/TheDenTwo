@@ -22,8 +22,13 @@ public sealed partial class SpeechSoundSystem
         if (currentTime - component.LastTimeSoundPlayed < cooldown)
             return;
 
-        var sound = GetSpeechSound((uid, component),
-            args.Message.Parts.LastOrDefault(part => part.Item1 == ChatPart.Dialog).Item2);
+        var lastDialog = args.Message.Parts.LastOrDefault(part => part.Item1 == ChatPart.Dialog).Item2;
+
+        // The "Speech" didn't actually contain any dialog.
+        if (lastDialog == null)
+            return;
+
+        var sound = GetSpeechSound((uid, component), lastDialog);
         component.LastTimeSoundPlayed = currentTime;
         _audio.PlayPvs(sound, uid);
     }

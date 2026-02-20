@@ -2,17 +2,21 @@ using System.Linq;
 using Content.Server.Animals.Components;
 using Content.Server.Radio;
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Speech;
 using Content.Shared.Animals.Components;
 using Content.Shared.Chat;
 using Content.Shared.Database;
 using Robust.Shared.Network;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 
 namespace Content.Server.Animals.Systems;
 
 public sealed partial class ParrotMemorySystem
 {
+    [Dependency] private readonly IPrototypeManager _proto = default!;
+
     private void InitializeLanguage()
     {
         SubscribeLocalEvent<ParrotListenerComponent, ListenLanguageEvent>(OnLanguageListen);
@@ -23,25 +27,28 @@ public sealed partial class ParrotMemorySystem
     {
         if (args.Whisper)
             return;
-        TryLearnLanguage(entity.Owner, args.Message, args.Language, args.Source);
+        TryLearnLanguage(entity.Owner, args.LanguageEnt, args.Message, args.Source);
     }
 
     private void OnHeadsetReceiveLanguage(Entity<ParrotListenerComponent> entity,
         ref HeadsetRadioReceiveLanguageRelayEvent args)
     {
         var message = args.RelayedEvent.Message;
-        var language = args.RelayedEvent.Language;
+        var languageEnt = args.RelayedEvent.LanguageEnt;
         var source = args.RelayedEvent.MessageSource;
 
-        TryLearnLanguage(entity.Owner, message, language, source);
+        TryLearnLanguage(entity.Owner, languageEnt, message, source);
     }
 
     private void TryLearnLanguage(Entity<ParrotMemoryComponent?, ParrotListenerComponent?> entity,
+        Entity<LanguageComponent?> languageEnt,
         ComplexChatMessage incomingMessage,
-        LanguagePrototype language,
         EntityUid source)
     {
         if (!Resolve(entity, ref entity.Comp1, ref entity.Comp2))
+            return;
+
+        if (!Resolve(languageEnt, ref languageEnt.Comp))
             return;
 
         if (!_whitelist.CheckBoth(source, entity.Comp2.Blacklist, entity.Comp2.Whitelist))
@@ -72,6 +79,8 @@ public sealed partial class ParrotMemorySystem
 
         if (!_random.Prob(entity.Comp1.LearnChance))
             return;
+
+        var language = _proto.Index(languageEnt.Comp.Language);
 
         LearnLanguage((entity, entity.Comp1), message, language, source);
     }

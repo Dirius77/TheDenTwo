@@ -53,6 +53,7 @@ public readonly record struct ComplexChatMessage()
     public readonly string Delimiter = string.Empty;
     public readonly bool IsDetailed;
     public readonly bool NeedsSpacing;
+    public readonly bool NeedsSeparation;
 
     public ComplexChatMessage(ComplexChatMessage primary, IReadOnlyList<(ChatPart, string)> parts) : this()
     {
@@ -60,15 +61,17 @@ public readonly record struct ComplexChatMessage()
         Delimiter = primary.Delimiter;
         IsDetailed = primary.IsDetailed;
         NeedsSpacing = primary.NeedsSpacing;
+        NeedsSeparation = primary.NeedsSeparation;
         Parts = parts;
     }
 
-    public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing, bool escapeMarkup = true) : this()
+    public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing, bool needsSeparation, bool escapeMarkup = true) : this()
     {
         OriginalMessage = message;
         Delimiter = delimiter;
         IsDetailed = isDetailed;
         NeedsSpacing = needsSpacing;
+        NeedsSeparation = needsSeparation;
         if (escapeMarkup)
             message = FormattedMessage.EscapeText(message);
         if (!isDetailed)

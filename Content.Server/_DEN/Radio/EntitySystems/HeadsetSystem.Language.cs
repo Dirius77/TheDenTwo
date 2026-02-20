@@ -27,7 +27,7 @@ public sealed partial class HeadsetSystem
             && TryComp(component.Headset, out EncryptionKeyHolderComponent? keys)
             && keys.Channels.Contains(args.Channel.ID))
         {
-            _radio.SendLanguageRadioMessage(uid, args.Message, args.Language, args.Channel, component.Headset);
+            _radio.SendLanguageRadioMessage(uid, args.LanguageEnt, args.Message, args.Channel, component.Headset);
         }
     }
 
@@ -41,13 +41,13 @@ public sealed partial class HeadsetSystem
             RaiseLocalEvent(parent, ref relayEvent);
         }
 
-        if (TryComp(parent, out ActorComponent? actor))
+        if (TryComp(parent, out ActorComponent? _))
         {
             _chat.SendComplexMessageToEntity(
                 args.RadioSource,
                 parent,
+                args.LanguageEnt,
                 args.Message,
-                args.Language,
                 RadioSystem.RadioWrapper,
                 ChatChannel.Radio,
                 args.Name,

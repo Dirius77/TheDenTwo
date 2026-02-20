@@ -1,5 +1,6 @@
 using Content.Server.Chat.Systems;
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared._DEN.Speech;
 using Content.Shared.Cargo;
@@ -22,6 +23,8 @@ public sealed partial class TelephoneSystem
         LanguageWrapper = "chat-language-entity-speak-wrap-language",
         PrefixWrapper = "chat-language-entity-telephone-wrap-prefix",
         MessageWrapper = "chat-language-entity-telephone-wrap-message",
+        SingularMessageWrapper = "chat-language-entity-telephone-wrap-message-singular",
+        BoldType = "chat-language-entity-speak-bold",
     };
 
     private void InitializeLanguage()
@@ -54,7 +57,7 @@ public sealed partial class TelephoneSystem
         if (!_recentChatMessages.Add((args.Source, args.Message.OriginalMessage, entity)))
             return;
 
-        SendTelephoneLanguageMessage(args.Source, args.Message, args.Language, entity);
+        SendTelephoneLanguageMessage(args.Source, args.LanguageEnt, args.Message, entity);
     }
 
     private void OnTelephoneMessageLanguageReceived(Entity<TelephoneComponent> entity,
@@ -83,14 +86,18 @@ public sealed partial class TelephoneSystem
             : ChatTransmitRange.GhostRangeLimit;
         var whisper = entity.Comp.SpeakerVolume == TelephoneVolume.Whisper;
 
-        _chat.SendEntityComplexSpeech(speaker, args.Message, TelephoneWrapper, range, null, name, whisper, languageOverride: args.Language);
+        _chat.SendEntityComplexSpeech(speaker, args.Message, TelephoneWrapper, range, null, name, whisper, languageOverride: args.LanguageEnt);
     }
 
-    private void SendTelephoneLanguageMessage(EntityUid messageSource, ComplexChatMessage message, LanguagePrototype language, Entity<TelephoneComponent> source)
+    private void SendTelephoneLanguageMessage(EntityUid messageSource, Entity<LanguageComponent?> languageEnt, ComplexChatMessage message, Entity<TelephoneComponent> source)
     {
         // This method assumes that you've already checked that this
         // telephone is able to transmit messages and that it can
         // send messages to any telephones linked to it
+        if (!Resolve(languageEnt, ref languageEnt.Comp))
+            return;
+
+        var language = _prototype.Index(languageEnt.Comp.Language);
 
         var ev = new TransformSpeakerNameEvent(messageSource, MetaData(messageSource).EntityName);
         RaiseLocalEvent(messageSource, ev);
@@ -106,11 +113,11 @@ public sealed partial class TelephoneSystem
 
         var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
 
-        var evSentMessage = new TelephoneMessageLanguageSentEvent(message, language, messageSource);
+        var evSentMessage = new TelephoneMessageLanguageSentEvent(message, languageEnt, messageSource);
         RaiseLocalEvent(source, ref evSentMessage);
         source.Comp.StateStartTime = _timing.CurTime;
 
-        var evReceivedMessage = new TelephoneMessageLanguageReceivedEvent(message, language, verb, name, messageSource, source);
+        var evReceivedMessage = new TelephoneMessageLanguageReceivedEvent(message, languageEnt, verb, name, messageSource, source);
 
         foreach (var receiver in source.Comp.LinkedTelephones)
         {
@@ -124,7 +131,6 @@ public sealed partial class TelephoneSystem
             speech.Bold,
             language.DisplayInChat,
             true,
-            false,
             name,
             verb,
             null,

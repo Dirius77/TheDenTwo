@@ -116,28 +116,30 @@ public abstract partial class SharedLanguageSystem
     #endregion
 
     #region Get Methods
-
-    /// <summary>
-    ///     Gets the current default language set by CVars.
-    /// </summary>
-    /// <returns>The current default language.</returns>
-    [PublicAPI]
-    public ProtoId<LanguagePrototype> GetDefaultLanguage()
-    {
-        return _defaultLanguage;
-    }
-
     /// <summary>
     ///     Retrieves the currently spoken language of the entity. If the entity isn't currently set to one, but it
     ///     does speak one, then it will be set to the first language it speaks.
     /// </summary>
     /// <param name="target">The entity to retrieve the current language of.</param>
+    /// <param name="forceDefault">Forces the creation of a default language regardless of fallback being on. This
+    ///     is for use by systems/entities that need to send radio messages.</param>
     /// <returns>The language entity for the currently spoken language, or null if there are none.</returns>
     [PublicAPI]
-    public EntityUid? GetCurrentLanguageEntity(EntityUid target)
+    public Entity<LanguageComponent?>? GetCurrentLanguageEntity(EntityUid target, bool forceDefault = false)
     {
-        if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
-            return null;
+        LanguageCommunicatorComponent? communicator;
+        if (!TryComp(target, out communicator))
+        {
+            if (forceDefault || _fallbackDefaultLanguage)
+            {
+                InsertLanguageAndChildren(target, _defaultLanguage, DefaultLanguageFluency, true, out _);
+                communicator = EnsureComp<LanguageCommunicatorComponent>(target); // Should already exist here.
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         if (communicator.CurrentLanguage is null || Deleted(communicator.CurrentLanguage))
         {
@@ -150,7 +152,7 @@ public abstract partial class SharedLanguageSystem
         return communicator.CurrentLanguage;
     }
 
-    /// <summary>
+    /// <summary>s
     ///     Retrieves the currently spoken language of the entity. If the entity isn't currently set to one, but it
     ///     does speak one, then it will be set to the first language it speaks.
     ///     If the entity does not have a LanguageCommunicatorComponent then falls back on the values of
@@ -161,23 +163,9 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public ProtoId<LanguagePrototype>? GetCurrentLanguage(EntityUid target)
     {
-        var fallbackLang = _fallbackDefaultLanguage ? GetDefaultLanguage() : (ProtoId<LanguagePrototype>?)null;
+        var languageEnt = GetCurrentLanguageEntity(target);
 
-        if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
-            return fallbackLang;
-
-        if (communicator.CurrentLanguage is null || Deleted(communicator.CurrentLanguage))
-        {
-            if (!TryGetLanguageEntities(target, out var languageEntities))
-                return fallbackLang;
-
-            communicator.CurrentLanguage = languageEntities.FirstOrNull(lang => lang.Comp.Speaks);
-        }
-
-        if (!_languageQuery.TryComp(communicator.CurrentLanguage, out var languageComp))
-            return fallbackLang;
-
-        return languageComp.Language;
+        return languageEnt?.Comp?.Language;
     }
 
     /// <summary>
@@ -347,7 +335,7 @@ public abstract partial class SharedLanguageSystem
         if (!TryGetLanguageEntities(target, languageProto, out var languages))
             return false;
 
-        return languages.Exists(lang => lang.Comp.Fluency >= _proto.Index(minimumFluency));
+        return languages.Exists(lang => _proto.Index(lang.Comp.Fluency) >= _proto.Index(minimumFluency));
     }
 
     /// <summary>
@@ -370,7 +358,7 @@ public abstract partial class SharedLanguageSystem
         if (!TryGetLanguageEntities(target, languageProto, out var languages))
             return false;
 
-        languageEnt = languages.FirstOrNull(lang => lang.Comp.Fluency >= _proto.Index(minimumFluency));
+        languageEnt = languages.FirstOrNull(lang => _proto.Index(lang.Comp.Fluency) >= _proto.Index(minimumFluency));
         return languageEnt != null;
     }
     #endregion

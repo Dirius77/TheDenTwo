@@ -1,4 +1,5 @@
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 
 namespace Content.Shared._DEN.Speech;
@@ -6,16 +7,16 @@ namespace Content.Shared._DEN.Speech;
 public sealed class ListenLanguageEvent : EntityEventArgs
 {
     public readonly ComplexChatMessage Message;
+    public readonly Entity<LanguageComponent?> LanguageEnt;
     public readonly EntityUid Source;
-    public readonly LanguagePrototype Language;
     public readonly string Verb;
     public readonly bool Whisper;
 
-    public ListenLanguageEvent(ComplexChatMessage msg, EntityUid source, LanguagePrototype lang, string verb, bool whisper)
+    public ListenLanguageEvent(ComplexChatMessage msg, EntityUid source, Entity<LanguageComponent?> languageEnt, string verb, bool whisper)
     {
         Message = msg;
         Source = source;
-        Language = lang;
+        LanguageEnt = languageEnt;
         Verb = verb;
         Whisper = whisper;
     }
@@ -24,11 +25,11 @@ public sealed class ListenLanguageEvent : EntityEventArgs
 public sealed class ListenLanguageAttemptEvent : CancellableEntityEventArgs
 {
     public readonly EntityUid Source;
-    public readonly LanguagePrototype Language;
+    public readonly Entity<LanguageComponent?> LanguageEnt;
 
-    public ListenLanguageAttemptEvent(EntityUid source, LanguagePrototype lang)
+    public ListenLanguageAttemptEvent(EntityUid source, Entity<LanguageComponent?> languageEnt)
     {
         Source = source;
-        Language = lang;
+        LanguageEnt = languageEnt;
     }
 }

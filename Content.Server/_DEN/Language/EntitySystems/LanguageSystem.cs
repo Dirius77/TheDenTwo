@@ -35,10 +35,30 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
         SubscribeLocalEvent<LanguageComponent, LanguageRelayedEvent<AttemptUnderstandingEvent>>(
             OnAttemptUnderstandingRelay);
 
+        SubscribeLocalEvent<LanguageComponent, LanguageModifyMessageEvent>(OnLanguageModifyMessage);
+
         _cfg.OnValueChanged(DenCCVars.LanguageMessageCacheSize, cacheSize => _messageCacheMaxSize = cacheSize, true);
         _cfg.OnValueChanged(DenCCVars.LanguageWordCacheSize, cacheSize => _wordCacheMaxSize = cacheSize, true);
 
         BuildCommonWordSet();
+    }
+
+    private void OnLanguageModifyMessage(Entity<LanguageComponent> entity, ref LanguageModifyMessageEvent args)
+    {
+        var newMessageParts = new List<(ChatPart, string)>();
+        foreach (var (kind, part) in args.Message.Parts)
+        {
+            if (kind == ChatPart.Dialog)
+            {
+                var modifiedMsg = ObfuscateMessageWithLanguage(part, args.Language, args.Understanding);
+                newMessageParts.Add((kind, modifiedMsg));
+            }
+            else
+            {
+                newMessageParts.Add((kind, part));
+            }
+        }
+        args.Message = new ComplexChatMessage(args.Message, newMessageParts);
     }
 
     private void OnAttemptUnderstandingRelay(Entity<LanguageComponent> ent,
@@ -48,7 +68,8 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
         if (evt.Language.ID != ent.Comp.Language)
             return;
 
-        if (evt.Understanding is null || evt.Understanding.Value.Comp.Fluency < ent.Comp.Fluency)
+        var hasUnderstanding = _proto.Index(ent.Comp.Fluency);
+        if (evt.Understanding is null || _proto.Index(evt.Understanding.Value.Comp.Fluency) < hasUnderstanding)
         {
             evt.Understanding = ent;
             evt.Handled = true;
@@ -78,10 +99,14 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
         EntityUid listener,
         ComplexChatMessage originalMessage,
         LanguagePrototype language,
-        bool isWhisper)
+        LanguageFluencyPrototype understanding,
+        string originalName,
+        bool isWhisper,
+        out string name)
     {
-        var ev = new LanguageModifyMessageEvent(sender, listener, originalMessage, language, isWhisper);
+        var ev = new LanguageModifyMessageEvent(sender, listener, originalMessage, language, understanding, originalName, isWhisper);
         RaiseLocalEvent(languageEntity, ev);
+        name = ev.Name;
         return ev.Message;
     }
 

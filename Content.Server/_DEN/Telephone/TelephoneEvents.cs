@@ -1,4 +1,5 @@
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Telephone;
 
@@ -10,7 +11,7 @@ namespace Content.Server.Telephone;
 [ByRefEvent]
 public readonly record struct TelephoneMessageLanguageSentEvent(
     ComplexChatMessage Message,
-    LanguagePrototype Language,
+    Entity<LanguageComponent?> LanguageEnt,
     EntityUid MessageSource);
 
 /// <summary>
@@ -19,7 +20,7 @@ public readonly record struct TelephoneMessageLanguageSentEvent(
 [ByRefEvent]
 public readonly record struct TelephoneMessageLanguageReceivedEvent(
     ComplexChatMessage Message,
-    LanguagePrototype Language,
+    Entity<LanguageComponent?> LanguageEnt,
     string Verb,
     string Name,
     EntityUid MessageSource,

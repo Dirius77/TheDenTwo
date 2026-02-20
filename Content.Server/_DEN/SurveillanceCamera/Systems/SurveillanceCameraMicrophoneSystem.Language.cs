@@ -1,4 +1,5 @@
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Speech;
 using Content.Shared.Chat;
 using Content.Shared.SurveillanceCamera.Components;
@@ -28,25 +29,25 @@ public sealed partial class SurveillanceCameraMicrophoneSystem
         if (!TryComp(uid, out SurveillanceCameraComponent? camera))
             return;
 
-        var ev = new SurveillanceCameraSpeechLanguageSendEvent(args.Source, args.Message, args.Language, args.Verb);
+        var ev = new SurveillanceCameraSpeechLanguageSendEvent(args.Source, args.LanguageEnt, args.Message, args.Verb);
     }
 }
 
 public sealed class SurveillanceCameraSpeechLanguageSendEvent : EntityEventArgs
 {
     public EntityUid Speaker { get; }
+    public Entity<LanguageComponent?> LanguageEnt { get; }
     public ComplexChatMessage Message { get; }
-    public LanguagePrototype Language { get; }
     public string Verb { get; }
 
     public SurveillanceCameraSpeechLanguageSendEvent(EntityUid speaker,
+        Entity<LanguageComponent?> languageEnt,
         ComplexChatMessage message,
-        LanguagePrototype language,
         string verb)
     {
         Speaker = speaker;
         Message = message;
-        Language = language;
+        LanguageEnt = languageEnt;
         Verb = verb;
     }
 }

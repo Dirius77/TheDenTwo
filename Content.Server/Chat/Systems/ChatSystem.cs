@@ -196,6 +196,17 @@ public sealed partial class ChatSystem : SharedChatSystem
             || (CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Name == "en");
 
         // DEN: Detailed message system.
+        bool needsRadio = false;
+        RadioChannelPrototype? channel = null;
+        // We want to do this processing before we try to parse it into a complex message.
+        if (checkRadioPrefix)
+        {
+            if (TryProcessRadioMessage(source, message, out var modMessage, out channel))
+            {
+                needsRadio = true;
+                message = modMessage;
+            }
+        }
         var complexMessage = ConvertMessageToComplex(message);
         complexMessage = SanitizeComplexMessage(source, complexMessage, out var emoteStrs, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
 
@@ -213,15 +224,11 @@ public sealed partial class ChatSystem : SharedChatSystem
         if (complexMessage.Parts.Count == 0)
             return;
 
-        // This message may have a radio prefix, and should then be whispered to the resolved radio channel
-        if (checkRadioPrefix)
+        // DEN: Complex message parsing.
+        if (needsRadio)
         {
-            // DEN: Complex message parsing.
-            if (TryProcessRadioOnComplexMessage(source, complexMessage, out var newCmplxMsg, out var channel))
-            {
-                SendEntityComplexSpeech(source, newCmplxMsg.Value, SpeakWrapper, range, channel, nameOverride, true, hideLog, ignoreActionBlocker);
-                return;
-            }
+            SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, channel, nameOverride, true, hideLog, ignoreActionBlocker);
+            return;
         }
 
         // Otherwise, send whatever type.
@@ -233,7 +240,7 @@ public sealed partial class ChatSystem : SharedChatSystem
                 //SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
-                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, range, null, nameOverride, true, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, null, nameOverride, true, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Emote:
                 SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);

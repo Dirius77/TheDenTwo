@@ -10,14 +10,15 @@ public sealed partial class LanguageComponent : Component
     public ProtoId<LanguagePrototype> Language;
 
     [ViewVariables(VVAccess.ReadOnly)]
-    public LanguageFluencyPrototype Fluency;
+    public ProtoId<LanguageFluencyPrototype> Fluency;
 
     // Maybe should be tied to fluency, but it could be useful for this to be asymmetric later.
     [ViewVariables(VVAccess.ReadOnly)]
     public bool Speaks;
 
+    // The entity currently holding this language. This will be null for the default language as it is shared by every entity.
     [ViewVariables(VVAccess.ReadOnly)]
-    public EntityUid Holder;
+    public EntityUid? Holder;
 
     [ViewVariables(VVAccess.ReadOnly)]
     public List<EntityUid> Children = new();

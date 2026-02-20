@@ -22,7 +22,7 @@ public sealed partial class RadioDeviceSystem
 
         var channel = _protoMan.Index(component.BroadcastChannel);
         if (_recentlySent.Add((args.Message.OriginalMessage, args.Source, channel)))
-            _radio.SendLanguageRadioMessage(args.Source, args.Message, args.Language, channel, uid);
+            _radio.SendLanguageRadioMessage(args.Source, args.LanguageEnt, args.Message, channel, uid);
     }
 
     private void OnAttemptListenLanguage(EntityUid uid,
@@ -58,6 +58,6 @@ public sealed partial class RadioDeviceSystem
             name,
             true,
             verbOverride: args.Verb,
-            languageOverride: args.Language);
+            languageOverride: args.LanguageEnt);
     }
 }

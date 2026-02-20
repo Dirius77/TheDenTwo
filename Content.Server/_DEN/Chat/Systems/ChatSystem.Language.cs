@@ -28,6 +28,19 @@ public sealed partial class ChatSystem
         LanguageWrapper = "chat-language-entity-speak-wrap-language",
         PrefixWrapper = "chat-language-entity-speak-wrap-prefix",
         MessageWrapper = "chat-language-entity-speak-wrap-message",
+        SingularMessageWrapper = "chat-language-entity-speak-wrap-message-singular",
+        BoldType = "chat-language-entity-speak-bold",
+    };
+
+    public static readonly WrapperSet WhisperWrapper = new()
+    {
+        DialogWrapper = "chat-language-entity-whisper-wrap-dialog",
+        EmoteWrapper =  "chat-language-entity-whisper-wrap-emote",
+        LanguageWrapper = "chat-language-entity-whisper-wrap-language",
+        PrefixWrapper = "chat-language-entity-whisper-wrap-prefix",
+        MessageWrapper = "chat-language-entity-whisper-wrap-message",
+        SingularMessageWrapper = "chat-language-entity-whisper-wrap-message-singular",
+        BoldType = "chat-language-entity-whisper-bold",
     };
 
     public void SendEntityComplexSpeech(EntityUid source,
@@ -40,10 +53,21 @@ public sealed partial class ChatSystem
         bool hideLog = false,
         bool ignoreActionBlocker = false,
         string? verbOverride = null,
-        ProtoId<LanguagePrototype>? languageOverride = null)
+        Entity<LanguageComponent?>? languageOverride = null)
     {
         // Getting this first makes sure that if the language defaulted to something new it is set for CanSpeak
-        var languageProto = languageOverride ?? _language.GetCurrentLanguage(source);
+        var retrievedLanguage = languageOverride ?? _language.GetCurrentLanguageEntity(source);
+        if (retrievedLanguage is null)
+        {
+            Log.Warning("Entity: " + Name(source) + " attempted to speak without a language.");
+            return;
+        }
+
+        var languageEnt = retrievedLanguage.Value;
+        if (!Resolve(languageEnt, ref languageEnt.Comp))
+            return;
+
+        // TODO: Fallback language needs an entity.
 
         if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
             return;
@@ -70,13 +94,7 @@ public sealed partial class ChatSystem
                 speech = proto;
         }
 
-        if (languageProto == null)
-        {
-            Log.Warning("Entity: " + Name(source) + " attempted to speak without a language.");
-            return;
-        }
-
-        var language = _prototypeManager.Index(languageProto.Value);
+        var language = _prototypeManager.Index(languageEnt.Comp.Language);
 
         string verb;
         if (verbOverride != null)
@@ -108,8 +126,8 @@ public sealed partial class ChatSystem
             {
                 SendComplexMessageToEntity(source,
                     playerEntity,
+                    languageEnt,
                     message,
-                    language,
                     wrappers,
                     whisper ? ChatChannel.Whisper : ChatChannel.Local,
                     visibleName,
@@ -126,9 +144,8 @@ public sealed partial class ChatSystem
             wrappers,
             language,
             speech.Bold,
-            language.DisplayInChat,
+            !language.DisplayInChat,
             true,
-            whisper,
             name,
             verb,
             null,
@@ -142,7 +159,7 @@ public sealed partial class ChatSystem
                 null,
                 MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeLanguageEvent(source, message, language, channel, verb, whisper);
+        var ev = new EntitySpokeLanguageEvent(source, languageEnt, message, channel, verb, whisper);
         RaiseLocalEvent(source, ev, true);
 
         if (!HasComp<ActorComponent>(source) || hideLog)
@@ -153,9 +170,8 @@ public sealed partial class ChatSystem
             wrappers,
             language,
             speech.Bold,
-            language.DisplayInChat,
+            !language.DisplayInChat,
             true,
-            whisper,
             name,
             verb,
             null,
@@ -183,8 +199,8 @@ public sealed partial class ChatSystem
 
     public void SendComplexMessageToEntity(EntityUid source,
         Entity<ActorComponent?> listener,
+        Entity<LanguageComponent?> speakingEnt,
         ComplexChatMessage originalMessage,
-        LanguagePrototype language,
         WrapperSet wrappers,
         ChatChannel channel,
         string name,
@@ -198,6 +214,11 @@ public sealed partial class ChatSystem
         if (!Resolve(listener, ref listener.Comp))
             return;
 
+        if (!Resolve(speakingEnt, ref speakingEnt.Comp))
+            return;
+
+        var language = _prototypeManager.Index(speakingEnt.Comp.Language);
+
         var understandEv = new AttemptUnderstandingEvent(source, language);
         RaiseLocalEvent(listener, understandEv);
 
@@ -206,27 +227,26 @@ public sealed partial class ChatSystem
 
         var message = originalMessage;
 
-        // TODO: Make this also handled by the events.
-        if (whisper)
-            name = _examineSystem.InRangeUnOccluded(source, listener, WhisperMuffledRange) ? name : "Someone";
+        var understanding = _prototypeManager.Index(SharedLanguageSystem.MinimumFluency);
 
-        if (understandEv.Handled)
+        if (understandEv is { Handled: true, Understanding: not null })
         {
-            // Don't bother doing the processing if we have an override, since we'll use that anyway.
-            if (understandEv.Understanding is not null && understandEv.MessageOverride is null)
-                message = _language.ModifyMessageWithLanguage(understandEv.Understanding.Value,
-                    source,
-                    listener,
-                    message,
-                    language,
-                    whisper);
+            understanding = _prototypeManager.Index(understandEv.Understanding.Value.Comp.Fluency);
         }
+        message = _language.ModifyMessageWithLanguage(speakingEnt,
+            source,
+            listener,
+            message,
+            language,
+            understanding,
+            name,
+            whisper,
+            out name);
 
         var useLanguageFont = HasComp<LanguageFontSuppressionComponent>(listener);
-
-        var hideLanguage = !language.DisplayInChat;
-        if (understandEv.HideLanguage)
-            hideLanguage = false;
+        var hideLanguage = !(language.DisplayInChat &&
+                             _prototypeManager.Index(language.UnderstandingForDisplay) <= understanding) ||
+                           understandEv.HideLanguage;
 
         var (unwrappedMessage, wrappedMessage) = BuildComplexMessage(message,
             wrappers,
@@ -234,7 +254,6 @@ public sealed partial class ChatSystem
             bold,
             hideLanguage,
             useLanguageFont,
-            whisper,
             name,
             verb,
             radioChannel,
@@ -251,7 +270,6 @@ public sealed partial class ChatSystem
         bool bold,
         bool hideLanguage,
         bool useLanguageFont,
-        bool whisper,
         string name,
         string verb,
         string? channel,
@@ -265,57 +283,63 @@ public sealed partial class ChatSystem
 
         var prefix = Loc.GetString(wrapper.PrefixWrapper,
             ("language", langStr),
-            ("spacing", message.NeedsSpacing ? "" : "("),
-            ("spacingClose", message.NeedsSpacing ? "" : ")"),
+            ("spacing", message.NeedsSeparation ? "(" : ""),
+            ("spacingClose", message.NeedsSeparation ? ")" : ""),
             ("entityName", name),
             ("channel", channel is null ? "" : $"\\[{channel}\\]"));
         var wrappedBuilder = new StringBuilder();
         var unwrappedBuilder = new StringBuilder();
 
-        var style = "";
-        var styleClose = "";
-        if (bold)
-        {
-            style = "[bold]";
-            styleClose = "[/bold]";
-        }
+        var boldType = Loc.GetString(wrapper.BoldType);
 
-        if (whisper)
+        var mainWrapper = wrapper.MessageWrapper;
+        // Special casing to get the " not to be in the bubble in pure dialog.
+        if (message.Parts is [{ Item1: ChatPart.Dialog }])
         {
-            style = "[italic]";
-            styleClose = "[/italic]";
-        }
+            var (_, part) = message.Parts[0];
+            unwrappedBuilder.Append(message.Delimiter + part + message.Delimiter);
+            wrappedBuilder.Append(Loc.GetString(wrapper.DialogWrapper,
+                ("fontType", useLanguageFont ? language.FontId : "Default"),
+                ("fontColor", color ?? language.FontColor),
+                ("fontSize", language.FontSize),
+                ("style", bold ? $"[{boldType}]" : ""),
+                ("styleClose", bold ? $"[/{boldType}]" : ""),
+                ("message", part)));
 
-        foreach (var (kind, part) in message.Parts)
+            mainWrapper = wrapper.SingularMessageWrapper;
+        }
+        else
         {
-            if (kind == ChatPart.Dialog)
+            foreach (var (kind, part) in message.Parts)
             {
-                unwrappedBuilder.Append(message.Delimiter + part + message.Delimiter);
-                wrappedBuilder.Append(Loc.GetString(wrapper.DialogWrapper,
-                    ("fontType", useLanguageFont ? language.FontId : "Default"),
-                    ("fontColor", color ?? language.FontColor),
-                    ("fontSize", language.FontSize),
-                    ("style", style),
-                    ("styleClose", styleClose),
-                    ("message", message.Delimiter + part + message.Delimiter)));
-            }
-            else
-            {
-                unwrappedBuilder.Append(part);
-                wrappedBuilder.Append(Loc.GetString(wrapper.EmoteWrapper,
-                    ("message", part)));
+                if (kind == ChatPart.Dialog)
+                {
+                    unwrappedBuilder.Append(message.Delimiter + part + message.Delimiter);
+                    wrappedBuilder.Append(message.Delimiter);
+                    wrappedBuilder.Append(Loc.GetString(wrapper.DialogWrapper,
+                        ("fontType", useLanguageFont ? language.FontId : "Default"),
+                        ("fontColor", color ?? language.FontColor),
+                        ("fontSize", language.FontSize),
+                        ("style", bold ? $"[{boldType}]" : ""),
+                        ("styleClose", bold ? $"[/{boldType}]" : ""),
+                        ("message", part)));
+                    wrappedBuilder.Append(message.Delimiter);
+                }
+                else
+                {
+                    unwrappedBuilder.Append(part);
+                    wrappedBuilder.Append(Loc.GetString(wrapper.EmoteWrapper,
+                        ("message", part)));
+                }
             }
         }
 
-        var wrapResult = Loc.GetString(wrapper.MessageWrapper,
+        var wrapResult = Loc.GetString(mainWrapper,
             ("space", message.NeedsSpacing ? " " : ""),
             ("verb", message.IsDetailed ? "" : verb + ", "),
             ("prefix", prefix),
-            ("whisper", whisper ? "[italic]" : ""),
-            ("whisperClose", whisper ? "[/italic]" : ""),
             ("message", wrappedBuilder.ToString()),
             ("color", color is null ? "" : color));
-        Log.Debug("Wrap result: " + wrapResult);
         return (unwrappedBuilder.ToString(), wrapResult);
     }
 
@@ -345,22 +369,22 @@ public sealed partial class ChatSystem
     {
         var isDetailed = false;
         var needsSpacing = true;
+        var needsSeparation = false;
         if (message.StartsWith('!'))
         {
             isDetailed = true;
-            message = message[1..];
-            if (message.StartsWith('\'') || message.StartsWith(','))
+            message = message[1..].Trim();
+            if (message.StartsWith('"'))
             {
-                needsSpacing = false;
-                message = message[1..];
+                needsSeparation = true;
             }
-            else if (message.StartsWith('"'))
+            else if (message.StartsWith(',') || message.StartsWith('\''))
             {
                 needsSpacing = false;
             }
         }
 
-        return new ComplexChatMessage(message, "\"", isDetailed, needsSpacing);
+        return new ComplexChatMessage(message, "\"", isDetailed, needsSpacing, needsSeparation);
     }
 
     private ComplexChatMessage SanitizeComplexMessage(
@@ -397,28 +421,7 @@ public sealed partial class ChatSystem
         return new ComplexChatMessage(message, newParts);
     }
 
-    private bool TryProcessRadioOnComplexMessage(
-        EntityUid source,
-        ComplexChatMessage message,
-        [NotNullWhen(true)] out ComplexChatMessage? newMessage,
-        out RadioChannelPrototype? channel)
-    {
-        newMessage = null;
-        if (!TryProcessRadioMessage(source, message.Parts.First().Item2, out var modMessage, out channel))
-            return false;
-
-        List<(ChatPart, string)> newParts = new(message.Parts.Count);
-        newParts.AddRange(message.Parts);
-        var first = newParts[0];
-        first.Item2 = modMessage;
-        newParts[0] = first;
-
-        newMessage = new ComplexChatMessage(message, newParts);
-
-        return true;
-    }
-
-    private string CoalesceComplexMessage(ComplexChatMessage msg)
+    public static string CoalesceComplexMessage(ComplexChatMessage msg)
     {
         var builder = new StringBuilder();
         foreach (var (kind, part) in msg.Parts)
@@ -445,5 +448,7 @@ public sealed partial class ChatSystem
         public LocId LanguageWrapper;
         public LocId PrefixWrapper;
         public LocId MessageWrapper;
+        public LocId SingularMessageWrapper;
+        public LocId BoldType;
     }
 }

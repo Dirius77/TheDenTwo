@@ -71,13 +71,9 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         if (communicator.Languages is not { } languages)
             return false;
 
-        var entity = Spawn();
-        var langComp = EnsureComp<LanguageComponent>(entity);
-        langComp.Fluency = fluency;
-        langComp.Language = languageProto;
-        langComp.Holder = target;
-        langComp.Speaks = speaks;
-        if (!_container.Insert(entity, languages))
+        var entity = SpawnLanguageEntity(languageProto, fluencyProto, speaks);
+        entity.Comp.Holder = target;
+        if (!_container.Insert(entity.AsType(), languages))
             return false;
 
         if (fluency < _proto.Index(MaximumFluency))
@@ -89,26 +85,37 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         var failedChild = false;
         foreach (var (relatedLang, relatedFluency) in language.RelatedLanguages)
         {
-            if (!_proto.TryIndex(relatedFluency, out var childFluency))
-                continue;
-            var childEnt = Spawn();
-            var childLang = EnsureComp<LanguageComponent>(childEnt);
-            childLang.Fluency = childFluency;
-            childLang.Language = relatedLang;
-            childLang.Speaks = false;
-            childLang.Holder = target;
+            var childEnt = SpawnLanguageEntity(relatedLang, relatedFluency, false);
+            childEnt.Comp.Holder = target;
 
-            if (!_container.Insert(childEnt, languages))
+            if (!_container.Insert(childEnt.AsType(), languages))
             {
                 failedChild = true;
                 continue;
             }
 
-            langComp.Children.Add(childEnt);
+            entity.Comp.Children.Add(childEnt);
             addedEntities.Add(childEnt);
         }
 
         return failedChild;
+    }
+
+    private Entity<LanguageComponent> SpawnLanguageEntity(ProtoId<LanguagePrototype> languageProto,
+        ProtoId<LanguageFluencyPrototype> fluencyProto,
+        bool speaks)
+    {
+        var language = _proto.Index(languageProto);
+
+        var languageEnt = Spawn();
+        var languageComp = EnsureComp<LanguageComponent>(languageEnt);
+        languageComp.Fluency = fluencyProto;
+        languageComp.Language = languageProto;
+        languageComp.Speaks = speaks;
+        if (language.LanguageComponents is not null)
+            EntityManager.AddComponents(languageEnt, language.LanguageComponents);
+
+        return (languageEnt, languageComp);
     }
 
 
