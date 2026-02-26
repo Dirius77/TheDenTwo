@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language.Components;
 using Robust.Shared.Configuration;
@@ -9,7 +8,7 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 
 public abstract partial class SharedLanguageSystem : EntitySystem
 {
-    [Dependency] protected readonly IConfigurationManager _cfg = default!;
+    [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly SharedContainerSystem _container = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
 
@@ -26,12 +25,22 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorInit);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentShutdown>(OnLanguageCommunicatorShutdown);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, EntInsertedIntoContainerMessage>(
+            OnLanguageCommunicatorEntityInserted);
+
         SubscribeLocalEvent<LanguageComponent, ComponentShutdown>(OnLanguageShutdown);
 
         _cfg.OnValueChanged(DenCCVars.FallbackDefaultLanguage, fallback => _fallbackDefaultLanguage = fallback, true);
         _cfg.OnValueChanged(DenCCVars.DefaultLanguage, lang => _defaultLanguage = lang, true);
 
         _languageQuery = GetEntityQuery<LanguageComponent>();
+    }
+
+    private void OnLanguageCommunicatorShutdown(Entity<LanguageCommunicatorComponent> ent, ref ComponentShutdown evt)
+    {
+        if (ent.Comp.Languages is { } container)
+            _container.ShutdownContainer(container);
     }
 
     private void OnLanguageCommunicatorInit(Entity<LanguageCommunicatorComponent> ent, ref ComponentInit evt)
@@ -42,6 +51,12 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         {
             TryAddLanguage(ent, language, speaks, fluency, out _);
         }
+    }
+
+    private void OnLanguageCommunicatorEntityInserted(Entity<LanguageCommunicatorComponent> ent,
+        ref EntInsertedIntoContainerMessage args)
+    {
+
     }
 
     private void OnLanguageShutdown(Entity<LanguageComponent> ent, ref ComponentShutdown evt)
@@ -117,19 +132,4 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
         return (languageEnt, languageComp);
     }
-
-
-    #region Server API
-    public abstract bool TryGetMessageCachedValue(string key, string msg, [MaybeNullWhen(false)] out string value);
-
-    public abstract void AddMessageToCache(string key, string msg, string value);
-
-    public abstract bool TryGetWordCachedValue(ProtoId<LanguagePrototype> language,
-        string word,
-        [MaybeNullWhen(false)] out string value);
-
-    public abstract void AddWordToCache(ProtoId<LanguagePrototype> language, string word, string value);
-
-    public abstract Dictionary<string, int> GetCommonWords();
-    #endregion
 }

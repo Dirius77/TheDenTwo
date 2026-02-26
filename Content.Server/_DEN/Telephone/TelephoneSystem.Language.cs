@@ -47,12 +47,15 @@ public sealed partial class TelephoneSystem
 
     private void OnLanguageListen(Entity<TelephoneComponent> entity, ref ListenLanguageEvent args)
     {
+        Log.Debug("Language Listen on Telephone.");
         if (args.Source == entity.Owner)
             return;
+        Log.Debug("Args.Source == Entity.Owner is false yay.");
 
         // Everything else in the chat code checks for ActorComponent...
         if (!HasComp<MindContainerComponent>(args.Source))
             return;
+        Log.Debug("Has mind container yippee.");
 
         if (!_recentChatMessages.Add((args.Source, args.Message.OriginalMessage, entity)))
             return;
@@ -91,6 +94,7 @@ public sealed partial class TelephoneSystem
 
     private void SendTelephoneLanguageMessage(EntityUid messageSource, Entity<LanguageComponent?> languageEnt, ComplexChatMessage message, Entity<TelephoneComponent> source)
     {
+        Log.Debug("OUGH! Telephone message wowie.");
         // This method assumes that you've already checked that this
         // telephone is able to transmit messages and that it can
         // send messages to any telephones linked to it

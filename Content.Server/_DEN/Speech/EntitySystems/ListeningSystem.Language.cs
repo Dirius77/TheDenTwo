@@ -31,7 +31,7 @@ public sealed partial class ListeningSystem
         var sourcePos = _xforms.GetWorldPosition(sourceXform, xformQuery);
 
         var attemptEv = new ListenLanguageAttemptEvent(source, languageEnt);
-        var ev = new ListenLanguageEvent(message, languageEnt, source, verb, whisper);
+        var ev = new ListenLanguageEvent(message, source, languageEnt, verb, whisper);
         var obfuscatedEv = whisper
             ? new ListenLanguageEvent(_chat.ObfuscateComplexChatMessage(message, 0.2f), source, languageEnt, verb, whisper)
             : null;

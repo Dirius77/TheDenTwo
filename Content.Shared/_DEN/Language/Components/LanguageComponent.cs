@@ -1,9 +1,10 @@
+using Content.Shared._DEN.Language.EntitySystems;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._DEN.Language.Components;
 
 [RegisterComponent]
-[Access(typeof(EntitySystems.SharedLanguageSystem))]
+[Access(typeof(SharedLanguageSystem))]
 public sealed partial class LanguageComponent : Component
 {
     [ViewVariables(VVAccess.ReadOnly)]

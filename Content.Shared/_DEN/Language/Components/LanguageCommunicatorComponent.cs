@@ -11,6 +11,7 @@ public sealed partial class LanguageCommunicatorComponent : Component
     public const string ContainerId = "languages";
 
     [ViewVariables]
+    [AutoNetworkedField]
     public Container? Languages;
 
     [AutoNetworkedField]

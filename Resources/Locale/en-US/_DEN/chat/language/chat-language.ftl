@@ -14,6 +14,7 @@ chat-language-entity-whisper-wrap-message = [font size=11]{$prefix}[italic]{$spa
 chat-language-entity-whisper-wrap-message-singular = [font size=11]{$prefix}[italic]{$space}{$verb}[/italic]"[BubbleContent]{$message}[/BubbleContent]"[/font]
 chat-language-entity-whisper-bold = bolditalic
 
+chat-language-entity-radio-wrap-emote = [italic]{$message}[/italic]
 chat-language-entity-radio-wrap-prefix = {$channel} {$language}[bold]{$entityName}[/bold]
 chat-language-entity-radio-wrap-message = [color={$color}]{$prefix} {$verb}{$message}[/color]
 chat-language-entity-radio-wrap-message-singular = [color={$color}]{$prefix} {$verb}"{$message}"[/color]

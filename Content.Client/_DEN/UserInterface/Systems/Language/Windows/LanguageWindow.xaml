@@ -1,0 +1,12 @@
+<windows:LanguageWindow
+    xmlns="https://spacestation14.io"
+    xmlns:windows="clr-namespace:Content.Client._DEN.UserInterface.Systems.Language.Windows"
+    Title="{Loc 'language-window-title'}"
+    MinWidth="400"
+    MinHeight="545">
+    <ScrollContainer>
+        <BoxContainer>
+
+        </BoxContainer>
+    </ScrollContainer>
+</windows:LanguageWindow>

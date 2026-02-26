@@ -30,16 +30,9 @@ public sealed partial class LanguagePrototype : IPrototype
     /// <summary>
     ///     Overrides for the speaking chat suffixes, for example '?' or '!!' makings things asks or yells.
     /// </summary>
-    // Languages replace a lot of the functionality in SpeechComponent, and maybe should completely bypass it
-    // if this code was going to end up upstream.
+    // Languages replace a lot of the functionality in SpeechComponent, and maybe should completely replace it.
     [DataField]
     public Dictionary<string, ProtoId<SpeechVerbPrototype>>? SuffixSpeechVerbs;
-
-    /// <summary>
-    ///     The scrambler to use for this language.
-    /// </summary>
-    [DataField(required: true)]
-    public ILanguageScrambler Scrambler { get; private set; } = default!;
 
     /// <summary>
     ///     The font to use for this language.

@@ -23,7 +23,7 @@ public sealed partial class RadioSystem
     public static readonly ChatSystem.WrapperSet RadioWrapper = new()
     {
         DialogWrapper = "chat-language-entity-speak-wrap-dialog",
-        EmoteWrapper = "chat-language-entity-speak-wrap-emote",
+        EmoteWrapper = "chat-language-entity-radio-wrap-emote",
         LanguageWrapper = "chat-language-entity-speak-wrap-language",
         PrefixWrapper = "chat-language-entity-radio-wrap-prefix",
         MessageWrapper = "chat-language-entity-radio-wrap-message",

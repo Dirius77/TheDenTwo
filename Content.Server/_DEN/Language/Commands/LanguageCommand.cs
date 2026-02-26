@@ -1,9 +1,16 @@
+using System.Text;
 using Content.Server._DEN.Language.EntitySystems;
 using Content.Server.Administration;
 using Content.Shared._DEN.Language;
 using Content.Shared.Administration;
+using Robust.Shared;
+using Robust.Shared.Configuration;
+using Robust.Shared.Console;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Toolshed;
+using Robust.Shared.Toolshed.Syntax;
+using Robust.Shared.Toolshed.TypeParsers;
+using Robust.Shared.Utility;
 
 namespace Content.Server._DEN.Language.Commands;
 
@@ -15,8 +22,8 @@ public sealed partial class LanguageCommand : ToolshedCommand
     [CommandImplementation("add")]
     public EntityUid Add([PipedArgument] EntityUid target,
         ProtoId<LanguagePrototype> language,
-        bool speaks,
-        ProtoId<LanguageFluencyPrototype> fluency)
+        bool speaks = true,
+        [CommandArgument(typeof(FluencyProtoIdParser))] string fluency = "Fluent")
     {
         _language ??= GetSys<LanguageSystem>();
         _language.TryAddLanguage(target, language, speaks, fluency, out var _);
@@ -27,7 +34,7 @@ public sealed partial class LanguageCommand : ToolshedCommand
     [CommandImplementation("remove")]
     public EntityUid Remove([PipedArgument] EntityUid target,
         ProtoId<LanguagePrototype> language,
-        bool all)
+        bool all = false)
     {
         _language ??= GetSys<LanguageSystem>();
 
@@ -76,13 +83,63 @@ public sealed partial class LanguageCommand : ToolshedCommand
     [CommandImplementation("understands")]
     public bool Understands([PipedArgument] EntityUid target,
         ProtoId<LanguagePrototype> language,
-        ProtoId<LanguageFluencyPrototype> minimumFluency,
-        [CommandInverted] bool inverted)
+        [CommandInverted] bool inverted,
+        [CommandArgument(typeof(FluencyProtoIdParser))] string minimumFluency = "Unfamiliar")
     {
         _language ??= GetSys<LanguageSystem>();
 
         var understands = _language.UnderstandsLanguage(target, language, minimumFluency);
 
         return inverted ? !understands : understands;
+    }
+}
+
+// This is the only way I could figure out to make an optional argument that's a ProtoId
+// C# won't convert from a default 'string' to 'ProtoId' in method parameters.
+// This is gross and a copy paste of ProtoIdTypeParser because CommandArgument also won't
+// accept a TypeParser, only a CustomTypeParser :(
+public sealed class FluencyProtoIdParser : CustomTypeParser<string>
+{
+    [Dependency] private readonly IConfigurationManager _config = default!;
+    [Dependency] private readonly IPrototypeManager _proto = default!;
+
+    public override bool TryParse(ParserContext ctx, out string result)
+    {
+        result = "";
+        string? proto;
+
+        // Prototype ids can be specified without quotes, but for backwards compatibility, we also accept strings with
+        // quotes, as previously it **had** to be a string
+        if (ctx.PeekRune() == new Rune('"'))
+        {
+            if (!Toolshed.TryParse(ctx, out proto))
+                return false;
+        }
+        else
+        {
+            proto = ctx.GetWord(ParserContext.IsToken);
+        }
+
+        if (proto is null || !_proto.HasIndex<LanguageFluencyPrototype>(proto))
+        {
+            _proto.TryGetKindFrom<LanguageFluencyPrototype>(out var kind);
+            DebugTools.AssertNotNull(kind);
+
+            ctx.Error = new NotAValidPrototype(proto ?? "[null]", kind!);
+            result = "";
+            return false;
+        }
+
+        result = new(proto);
+        return true;
+    }
+
+    public override CompletionResult? TryAutocomplete(ParserContext ctx, CommandArgument? arg)
+    {
+
+        var hint = ToolshedCommand.GetArgHint(arg, typeof(ProtoId<LanguageFluencyPrototype>));
+        var maxCount = _config.GetCVar(CVars.ToolshedPrototypesAutocompleteLimit);
+        var options = CompletionHelper.PrototypeIdsLimited<LanguageFluencyPrototype>(ctx.Input[ctx.Index..], proto: _proto, maxCount: maxCount);
+        return CompletionResult.FromHintOptions(options, hint);
     }
 }
