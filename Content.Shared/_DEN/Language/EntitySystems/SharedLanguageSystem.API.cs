@@ -25,7 +25,39 @@ public abstract partial class SharedLanguageSystem
 
         var communicator = EnsureComp<LanguageCommunicatorComponent>(target);
 
+        var needsUpdate = communicator.CurrentLanguage != languageEntity.Value;
         communicator.CurrentLanguage = languageEntity;
+        OnLanguageUpdated(languageEntity.Value.AsNullable());
+        if (needsUpdate)
+            Dirty<LanguageCommunicatorComponent>((target, communicator));
+        return true;
+    }
+
+    /// <summary>
+    ///     Tries to set the spoken language to the specified languageEntity.
+    /// </summary>
+    /// <param name="target">Entity to set the language on.</param>
+    /// <param name="languageEntity">The language entity to try to set as the spoken language.</param>
+    /// <returns></returns>
+    [PublicAPI]
+    public bool TrySetLanguage(EntityUid target, Entity<LanguageComponent> languageEntity)
+    {
+        var communicator = EnsureComp<LanguageCommunicatorComponent>(target);
+
+        if (communicator.Languages is not { } languages)
+            return false;
+
+        if (!languages.Contains(languageEntity))
+            return false;
+
+        if (!languageEntity.Comp.Speaks)
+            return false;
+
+        var needsUpdate = communicator.CurrentLanguage != languageEntity;
+        communicator.CurrentLanguage = languageEntity;
+        OnLanguageUpdated(languageEntity.AsNullable());
+        if (needsUpdate)
+            Dirty<LanguageCommunicatorComponent>((target, communicator));
         return true;
     }
 
@@ -80,8 +112,18 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public bool TryRemoveLanguage(EntityUid target, ProtoId<LanguagePrototype> languageProto)
     {
+        if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
+            return false;
+
         if (!TryGetLanguageEntity(target, languageProto, out var languageEntity) || Deleted(languageEntity.Value))
             return false;
+
+        if (communicator.CurrentLanguage is not null && communicator.CurrentLanguage.Value.Equals(languageEntity.Value))
+        {
+            communicator.CurrentLanguage = null;
+            OnLanguageUpdated(languageEntity.Value.AsNullable());
+            Dirty<LanguageCommunicatorComponent>((target, communicator));
+        }
 
         PredictedQueueDel(languageEntity);
         return true;
@@ -97,6 +139,9 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public bool TryRemoveLanguages(EntityUid target, ProtoId<LanguagePrototype> languageProto)
     {
+        if (!TryComp<LanguageCommunicatorComponent>(target, out var communicator))
+            return false;
+
         if (!TryGetLanguageEntities(target, languageProto, out var languageEntities))
             return false;
 
@@ -108,6 +153,14 @@ public abstract partial class SharedLanguageSystem
                 errored = true;
                 continue;
             }
+
+            if (communicator.CurrentLanguage is not null && communicator.CurrentLanguage.Value.Equals(languageEntity))
+            {
+                communicator.CurrentLanguage = null;
+                OnLanguageUpdated(languageEntity.AsNullable());
+                Dirty<LanguageCommunicatorComponent>((target, communicator));
+            }
+
             PredictedQueueDel(languageEntity);
         }
 
@@ -125,7 +178,7 @@ public abstract partial class SharedLanguageSystem
     ///     is for use by systems/entities that need to send radio messages.</param>
     /// <returns>The language entity for the currently spoken language, or null if there are none.</returns>
     [PublicAPI]
-    public Entity<LanguageComponent?>? GetCurrentLanguageEntity(EntityUid target, bool forceDefault = false)
+    public Entity<LanguageComponent>? GetCurrentLanguageEntity(EntityUid target, bool forceDefault = false)
     {
         LanguageCommunicatorComponent? communicator;
         if (!TryComp(target, out communicator))
@@ -149,7 +202,15 @@ public abstract partial class SharedLanguageSystem
             communicator.CurrentLanguage = languageEntities.FirstOrNull(lang => lang.Comp.Speaks);
         }
 
-        return communicator.CurrentLanguage;
+        if (communicator.CurrentLanguage is not null)
+        {
+            if (TryComp<LanguageComponent>(communicator.CurrentLanguage, out var languageComp))
+            {
+                return (communicator.CurrentLanguage.Value, languageComp);
+            }
+            Log.Warning("Currently spoken 'language' is not a language for: " + Name(target));
+        }
+        return null;
     }
 
     /// <summary>s

@@ -7,6 +7,8 @@ namespace Content.Client._DEN.UserInterface.Systems.Language.Windows;
 [GenerateTypedNameReferences]
 public sealed partial class LanguageWindow : DefaultWindow
 {
+    public bool UpdateNeeded;
+
     public LanguageWindow()
     {
         RobustXamlLoader.Load(this);

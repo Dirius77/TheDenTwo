@@ -4,14 +4,13 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._DEN.Language.Components;
 
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true)]
 [Access(typeof(EntitySystems.SharedLanguageSystem))]
 public sealed partial class LanguageCommunicatorComponent : Component
 {
     public const string ContainerId = "languages";
 
     [ViewVariables]
-    [AutoNetworkedField]
     public Container? Languages;
 
     [AutoNetworkedField]

@@ -45,8 +45,6 @@ public sealed partial class RadioSystem
         if (!Resolve(languageEnt, ref languageEnt.Comp))
             return;
 
-        var language = _prototype.Index(languageEnt.Comp.Language);
-
         if (TryComp(uid, out ActorComponent? actor))
         {
             _chat.SendComplexMessageToEntity(
@@ -64,42 +62,6 @@ public sealed partial class RadioSystem
                 args.Channel.LocalizedName,
                 args.Channel.Color
                 );
-
-            // TODO: Put all this shit in one place. (See ChatSystem.Language)
-            var understandEv = new AttemptUnderstandingEvent(uid, language);
-            RaiseLocalEvent(uid, understandEv);
-
-            if (!understandEv.Handled)
-                return;
-
-            var hideLanguage = !language.DisplayInChat;
-            if (understandEv.HideLanguage)
-                hideLanguage = true;
-
-            var understanding = _prototype.Index(SharedLanguageSystem.MinimumFluency);
-            var languageFont = HasComp<LanguageFontSuppressionComponent>(uid) && understanding.Understanding > 0;
-
-            var (unwrappedMsg, wrappedMsg) = _chat.BuildComplexMessage(
-                args.Message,
-                RadioWrapper,
-                language,
-                args.Speech.Bold,
-                hideLanguage,
-                languageFont,
-                args.Name,
-                args.Verb,
-                args.Channel.LocalizedName,
-                args.Channel.Color);
-
-            var chat = new ChatMessage(
-                ChatChannel.Radio,
-                unwrappedMsg,
-                wrappedMsg,
-                NetEntity.Invalid,
-                null);
-            var chatMsg = new MsgChatMessage { Message = chat };
-
-            _netMan.ServerSendMessage(chatMsg, actor.PlayerSession.Channel);
         }
     }
 
@@ -136,7 +98,7 @@ public sealed partial class RadioSystem
             Log.Warning("Default language entity is null! Unable to send message.");
             return;
         }
-        SendLanguageRadioMessage(uid, languageEnt.Value, complex, channel, radioSource);
+        SendLanguageRadioMessage(uid, languageEnt.Value.AsNullable(), complex, channel, radioSource);
     }
 
     public void SendLanguageRadioMessage(EntityUid messageSource,

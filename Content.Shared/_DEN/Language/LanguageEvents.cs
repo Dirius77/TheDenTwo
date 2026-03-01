@@ -1,5 +1,6 @@
 using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared._DEN.Language;
 
@@ -45,4 +46,25 @@ public sealed class LanguageModifyMessageEvent(
     public LanguageFluencyPrototype Understanding = understanding;
     public string Name = name;
     public bool IsWhisper = isWhisper;
+}
+
+public sealed class LanguageAddedToCommunicatorEvent(Entity<LanguageComponent> language) : EntityEventArgs
+{
+    public Entity<LanguageComponent> Language = language;
+}
+
+public sealed class LanguageRemovedFromCommunicatorEvent(Entity<LanguageComponent> language) : EntityEventArgs
+{
+    public Entity<LanguageComponent> Language = language;
+}
+
+[Serializable, NetSerializable]
+public sealed class RequestSetSpokenLanguageEvent : EntityEventArgs
+{
+    public readonly NetEntity LanguageEntity;
+
+    public RequestSetSpokenLanguageEvent(NetEntity languageEntity)
+    {
+        LanguageEntity = languageEntity;
+    }
 }

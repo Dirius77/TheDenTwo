@@ -319,7 +319,7 @@ namespace Content.Server.Singularity.EntitySystems
             var message = Loc.GetString("emitter-" + type + "-broadcast",
             ("location", FormattedMessage.RemoveMarkupOrThrow(_navMap.GetNearestBeaconString(ent.Owner)))
             );
-            _radio.SendRadioMessage(ent.Owner, message, ent.Comp.RadioChannel, ent.Owner);
+            _radio.SendLanguageRadioMessage(ent.Owner, message, ent.Comp.RadioChannel, ent.Owner);
         }
 
         private void OnLockToggled(Entity<EmitterComponent> ent, ref LockToggledEvent args)

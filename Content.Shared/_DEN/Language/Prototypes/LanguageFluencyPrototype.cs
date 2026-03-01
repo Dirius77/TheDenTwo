@@ -8,10 +8,12 @@ public sealed partial class LanguageFluencyPrototype : IPrototype
     [IdDataField] public string ID { get; private set; } = default!;
 
     [DataField(required: true)]
-    private LocId Name = default!;
+    public LocId Name = default!;
 
     [DataField(required: true)]
     public int Understanding;
+
+    public Color Color => Color.InterpolateBetween(Color.Green, Color.Red, (float)(Understanding / 100.0));
 
     public int CompareTo(LanguageFluencyPrototype? other)
     {

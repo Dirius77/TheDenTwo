@@ -75,7 +75,7 @@
         />
     <!-- DEN LANGUAGES -->
     <ui:MenuButton
-        Name="LanguagesButton"
+        Name="LanguageButton"
         Access="Internal"
         Icon="{xe:Tex '/Textures/_DEN/Interface/language-solid-full.svg.192dpi.png'}"
         BoundKey = "{x:Static is:ContentKeyFunctions.OpenLanguageMenu}"

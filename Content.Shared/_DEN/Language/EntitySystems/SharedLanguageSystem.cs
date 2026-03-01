@@ -28,13 +28,30 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentShutdown>(OnLanguageCommunicatorShutdown);
         SubscribeLocalEvent<LanguageCommunicatorComponent, EntInsertedIntoContainerMessage>(
             OnLanguageCommunicatorEntityInserted);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, EntRemovedFromContainerMessage>(
+            OnLanguageCommunicatorEntityRemoved);
 
         SubscribeLocalEvent<LanguageComponent, ComponentShutdown>(OnLanguageShutdown);
+
+        SubscribeAllEvent<RequestSetSpokenLanguageEvent>(OnRequestSetSpokenLanguage);
 
         _cfg.OnValueChanged(DenCCVars.FallbackDefaultLanguage, fallback => _fallbackDefaultLanguage = fallback, true);
         _cfg.OnValueChanged(DenCCVars.DefaultLanguage, lang => _defaultLanguage = lang, true);
 
         _languageQuery = GetEntityQuery<LanguageComponent>();
+    }
+
+    private void OnRequestSetSpokenLanguage(RequestSetSpokenLanguageEvent evt, EntitySessionEventArgs args)
+    {
+        if (args.SenderSession.AttachedEntity is not { } user)
+            return;
+
+        var languageEnt = GetEntity(evt.LanguageEntity);
+
+        if (!TryComp<LanguageComponent>(languageEnt, out var langComp))
+            return;
+
+        TrySetLanguage(user, (languageEnt, langComp));
     }
 
     private void OnLanguageCommunicatorShutdown(Entity<LanguageCommunicatorComponent> ent, ref ComponentShutdown evt)
@@ -56,7 +73,23 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     private void OnLanguageCommunicatorEntityInserted(Entity<LanguageCommunicatorComponent> ent,
         ref EntInsertedIntoContainerMessage args)
     {
+        if (_languageQuery.TryComp(args.Entity, out var langComp))
+        {
+            var addEvt = new LanguageAddedToCommunicatorEvent((args.Entity, langComp));
+            RaiseLocalEvent(ent.Owner, addEvt);
+        }
+    }
 
+    private void OnLanguageCommunicatorEntityRemoved(Entity<LanguageCommunicatorComponent> ent,
+        ref EntRemovedFromContainerMessage args)
+    {
+        if (_languageQuery.TryComp(args.Entity, out var langComp))
+        {
+            OnLanguageRemoved(ent, (args.Entity, langComp));
+
+            var remEvt = new LanguageRemovedFromCommunicatorEvent((args.Entity, langComp));
+            RaiseLocalEvent(ent.Owner, remEvt);
+        }
     }
 
     private void OnLanguageShutdown(Entity<LanguageComponent> ent, ref ComponentShutdown evt)
@@ -67,7 +100,7 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
         foreach (var child in ent.Comp.Children)
         {
-            QueueDel(child);
+            PredictedQueueDel(child);
         }
     }
 
@@ -103,6 +136,10 @@ public abstract partial class SharedLanguageSystem : EntitySystem
             var childEnt = SpawnLanguageEntity(relatedLang, relatedFluency, false);
             childEnt.Comp.Holder = target;
 
+            var childComp = EnsureComp<ChildLanguageComponent>(childEnt);
+            childComp.ParentLanguage = entity;
+            Dirty<ChildLanguageComponent>((childEnt, childComp));
+
             if (!_container.Insert(childEnt.AsType(), languages))
             {
                 failedChild = true;
@@ -112,6 +149,8 @@ public abstract partial class SharedLanguageSystem : EntitySystem
             entity.Comp.Children.Add(childEnt);
             addedEntities.Add(childEnt);
         }
+
+        Dirty(entity);
 
         return failedChild;
     }
@@ -131,5 +170,16 @@ public abstract partial class SharedLanguageSystem : EntitySystem
             EntityManager.AddComponents(languageEnt, language.LanguageComponents);
 
         return (languageEnt, languageComp);
+    }
+
+    protected virtual void OnLanguageRemoved(Entity<LanguageCommunicatorComponent> holder, Entity<LanguageComponent> language)
+    {
+        // Used on the client to update the language UI.
+        // LanguageAdded doesn't exist because the inserted event occurs before the components get added on the client :(
+    }
+
+    public virtual void OnLanguageUpdated(Entity<LanguageComponent?> lang)
+    {
+        // Used on the client to update the language UI.
     }
 }

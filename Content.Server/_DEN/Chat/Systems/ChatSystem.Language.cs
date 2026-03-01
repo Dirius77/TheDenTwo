@@ -56,7 +56,7 @@ public sealed partial class ChatSystem
         Entity<LanguageComponent?>? languageOverride = null)
     {
         // Getting this first makes sure that if the language defaulted to something new it is set for CanSpeak
-        var retrievedLanguage = languageOverride ?? _language.GetCurrentLanguageEntity(source);
+        var retrievedLanguage = languageOverride ?? _language.GetCurrentLanguageEntity(source)?.AsNullable();
         if (retrievedLanguage is null)
         {
             Log.Warning("Entity: " + Name(source) + " attempted to speak without a language.");
@@ -66,8 +66,6 @@ public sealed partial class ChatSystem
         var languageEnt = retrievedLanguage.Value;
         if (!Resolve(languageEnt, ref languageEnt.Comp))
             return;
-
-        // TODO: Fallback language needs an entity.
 
         if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
             return;
@@ -126,7 +124,7 @@ public sealed partial class ChatSystem
             {
                 SendComplexMessageToEntity(source,
                     playerEntity,
-                    languageEnt,
+                    languageEnt.AsNullable(),
                     message,
                     wrappers,
                     whisper ? ChatChannel.Whisper : ChatChannel.Local,
@@ -159,7 +157,7 @@ public sealed partial class ChatSystem
                 null,
                 MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeLanguageEvent(source, languageEnt, message, channel, verb, whisper);
+        var ev = new EntitySpokeLanguageEvent(source, languageEnt.AsNullable(), message, channel, verb, whisper);
         RaiseLocalEvent(source, ev, true);
 
         if (!HasComp<ActorComponent>(source) || hideLog)

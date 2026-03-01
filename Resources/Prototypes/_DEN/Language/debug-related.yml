@@ -1,0 +1,59 @@
+- type: language
+  id: DebugParent
+  name: language-debug-parent
+  displayInChat: true
+  relatedLanguages:
+    DebugChild1: Related
+    DebugChild2: Related
+  languageComponents:
+  - type: SyllableScrambling
+    syllables:
+    - oo
+    - ee
+    - ooo
+    - aa
+    - aaa
+    - ting
+    - tang
+    - wala
+    - walla
+    - bing
+    - bang
+
+- type: language
+  id: DebugChild1
+  name: language-debug-child-1
+  displayInChat: true
+  languageComponents:
+  - type: SyllableScrambling
+    syllables:
+    - oo
+    - ee
+    - ooo
+    - aa
+    - aaa
+    - ting
+    - tang
+    - wala
+    - walla
+    - bing
+    - bang
+
+- type: language
+  id: DebugChild2
+  name: language-debug-child-2
+  displayInChat: true
+  languageComponents:
+  - type: SyllableScrambling
+    syllables:
+    - oo
+    - ee
+    - ooo
+    - aa
+    - aaa
+    - ting
+    - tang
+    - wala
+    - walla
+    - bing
+    - bang
