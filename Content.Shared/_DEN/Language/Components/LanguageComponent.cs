@@ -21,7 +21,7 @@ public sealed partial class LanguageComponent : Component
     [ViewVariables(VVAccess.ReadOnly)]
     public bool Speaks;
 
-    // The entity currently holding this language. This will be null for the default language as it is shared by every entity.
+    // The entity currently holding this language.
     [AutoNetworkedField]
     [ViewVariables(VVAccess.ReadOnly)]
     public EntityUid? Holder;

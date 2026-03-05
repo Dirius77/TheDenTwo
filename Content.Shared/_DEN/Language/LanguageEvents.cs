@@ -1,5 +1,6 @@
 using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
+using Content.Shared.Inventory;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._DEN.Language;
@@ -15,10 +16,10 @@ public sealed class LanguageRelayedEvent<TEvent>(EntityUid owner, TEvent args) :
 }
 
 /// <summary>
-///
+///     Called on an entity when it is attempting to understand a particular language.
 /// </summary>
-/// <param name="sender"></param>
-/// <param name="language"></param>
+/// <param name="sender">The entity sending the message</param>
+/// <param name="language">The language being spoken</param>
 public sealed class AttemptUnderstandingEvent(EntityUid sender, LanguagePrototype language)
     : HandledEntityEventArgs, IKnownLanguagesRelayEvent
 {
@@ -36,7 +37,8 @@ public sealed class LanguageModifyMessageEvent(
     LanguagePrototype language,
     LanguageFluencyPrototype understanding,
     string name,
-    bool isWhisper)
+    string verb,
+    ChatChannel chatChannel)
     : EntityEventArgs, ISpokenLanguageRelayEvent
 {
     public EntityUid Sender = sender;
@@ -45,17 +47,28 @@ public sealed class LanguageModifyMessageEvent(
     public LanguagePrototype Language = language;
     public LanguageFluencyPrototype Understanding = understanding;
     public string Name = name;
-    public bool IsWhisper = isWhisper;
+    public string Verb = verb;
+    public ChatChannel Channel = chatChannel;
 }
 
-public sealed class LanguageAddedToCommunicatorEvent(Entity<LanguageComponent> language) : EntityEventArgs
+public sealed class LanguageAddedToCommunicatorEvent(Entity<LanguageComponent> language) : EntityEventArgs, IInventoryRelayEvent
 {
+    public SlotFlags TargetSlots { get; } = SlotFlags.All;
+
     public Entity<LanguageComponent> Language = language;
 }
 
-public sealed class LanguageRemovedFromCommunicatorEvent(Entity<LanguageComponent> language) : EntityEventArgs
+public sealed class LanguageRemovedFromCommunicatorEvent(Entity<LanguageComponent> language) : EntityEventArgs, IInventoryRelayEvent
 {
+    public SlotFlags TargetSlots { get; } = SlotFlags.All;
+
     public Entity<LanguageComponent> Language = language;
+}
+
+public sealed class TransformLanguageEvent(EntityUid sender, ComplexChatMessage message) : EntityEventArgs, ISpokenLanguageRelayEvent
+{
+    public EntityUid Sender = sender;
+    public ComplexChatMessage Message = message;
 }
 
 [Serializable, NetSerializable]

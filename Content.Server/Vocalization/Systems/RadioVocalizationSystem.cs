@@ -23,12 +23,14 @@ public sealed partial class RadioVocalizationSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<RadioVocalizerComponent, VocalizeEvent>(OnVocalize);
+        //SubscribeLocalEvent<RadioVocalizerComponent, VocalizeEvent>(OnVocalize); // DEN: Obsolete for VocalizeLanguageEvent
+        InitializeLanguage(); // DEN: Languages
     }
 
     /// <summary>
     /// Called whenever an entity with a VocalizerComponent tries to speak
     /// </summary>
+    [Obsolete("Obsolete, use OnVocalizeLanguage instead.", true)] // DEN: Languages
     private void OnVocalize(Entity<RadioVocalizerComponent> entity, ref VocalizeEvent args)
     {
         if (args.Handled)

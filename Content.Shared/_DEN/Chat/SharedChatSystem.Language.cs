@@ -1,14 +1,15 @@
 using System.Linq;
+using Content.Shared._DEN.Language;
 using Content.Shared.Speech;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
 namespace Content.Shared.Chat;
 
 public abstract partial class SharedChatSystem
 {
-    public const char DetailedPrefix = '!';
 
-    // TODO: Something better than this, especially if languages start controlling this.
+    // TODO: Kill the other spot where this is getting called from and more this into WhisperMuffle (if we even keep using it)
     public ComplexChatMessage ObfuscateComplexChatMessage(ComplexChatMessage message, float amount)
     {
         var newParts = new List<(ChatPart, string)>();
@@ -28,15 +29,35 @@ public abstract partial class SharedChatSystem
         return new ComplexChatMessage(message, newParts);
     }
 
-    public SpeechVerbPrototype GetComplexSpeechVerb(EntityUid source, ComplexChatMessage message)
+    public SpeechVerbPrototype GetComplexSpeechVerb(EntityUid source, ComplexChatMessage message, LanguagePrototype language, ChatChannel channel)
     {
-        // We won't even actually use this in this case.
-        if (message.IsDetailed)
-            return _prototypeManager.Index(DefaultSpeechVerb);
+        var lastDialog = message.Parts.LastOrDefault(p => p.Item1 == ChatPart.Dialog).Item2;
 
-        var firstDialog = message.Parts.FirstOrDefault(p => p.Item1 == ChatPart.Dialog).Item2;
+        SpeechVerbPrototype? current = null;
+        Dictionary<LocId, ProtoId<SpeechVerbPrototype>>? currentSuffixVerbs = null;
+        if (language.SpeechVerbs is { } speechVerbs)
+        {
+            if (speechVerbs.TryGetValue(channel, out var channelVerbs))
+            {
+                current = _prototypeManager.Index(channelVerbs.DefaultVerb);
+                currentSuffixVerbs = channelVerbs.SuffixSpeechVerbs;
+            }
+        }
 
-        return GetSpeechVerb(source, firstDialog);
+        if (currentSuffixVerbs is not null)
+        {
+            foreach (var (str, id) in currentSuffixVerbs)
+            {
+                var proto = _prototypeManager.Index(id);
+                if (lastDialog.EndsWith(Loc.GetString(str)) && proto.Priority >= (current?.Priority ?? 0))
+                {
+                    current = proto;
+                }
+            }
+        }
+
+        // if no applicable suffix verb return the normal one used by the entity
+        return current ?? GetSpeechVerb(source, lastDialog);
     }
 }
 

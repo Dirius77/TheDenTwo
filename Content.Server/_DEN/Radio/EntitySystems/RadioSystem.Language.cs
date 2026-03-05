@@ -2,9 +2,7 @@ using Content.Server._DEN.Language.EntitySystems;
 using Content.Server.Chat.Systems;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
-using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
-using Content.Shared.Construction.Steps;
 using Content.Shared.Database;
 using Content.Shared.Radio;
 using Content.Shared.Radio.Components;
@@ -20,19 +18,14 @@ public sealed partial class RadioSystem
 {
     [Dependency] private readonly LanguageSystem _language = default!;
 
-    public static readonly ChatSystem.WrapperSet RadioWrapper = new()
-    {
-        DialogWrapper = "chat-language-entity-speak-wrap-dialog",
-        EmoteWrapper = "chat-language-entity-radio-wrap-emote",
-        LanguageWrapper = "chat-language-entity-speak-wrap-language",
-        PrefixWrapper = "chat-language-entity-radio-wrap-prefix",
-        MessageWrapper = "chat-language-entity-radio-wrap-message",
-        SingularMessageWrapper = "chat-language-entity-radio-wrap-message-singular", // Radio doesn't really use this but it means I don't need special logic.
-        BoldType = "chat-language-entity-speak-bold",
-    };
+    private EntityQuery<RadioTransmittableComponent> _radioLang;
+
+    public static readonly ProtoId<LanguageWrapperPrototype> RadioWrapper = "RadioWrapper";
 
     private void InitializeLanguage()
     {
+        _radioLang = GetEntityQuery<RadioTransmittableComponent>();
+
         SubscribeLocalEvent<IntrinsicRadioReceiverComponent, RadioReceiveLanguageEvent>(OnIntrinsicLanguageReceive);
         SubscribeLocalEvent<IntrinsicRadioTransmitterComponent, EntitySpokeLanguageEvent>(OnIntrinsicSpeakLanguage);
     }
@@ -52,12 +45,11 @@ public sealed partial class RadioSystem
                 uid,
                 args.LanguageEnt,
                 args.Message,
-                RadioWrapper,
+                _prototype.Index(RadioWrapper),
                 ChatChannel.Radio,
                 args.Name,
                 args.Verb,
                 args.Speech.Bold,
-                false,
                 false,
                 args.Channel.LocalizedName,
                 args.Channel.Color
@@ -69,10 +61,10 @@ public sealed partial class RadioSystem
         IntrinsicRadioTransmitterComponent component,
         EntitySpokeLanguageEvent args)
     {
-        if (args.Channel != null && component.Channels.Contains(args.Channel.ID))
+        if (args.RadioChannel != null && component.Channels.Contains(args.RadioChannel.ID) && _radioLang.HasComp(args.LanguageEnt))
         {
-            SendLanguageRadioMessage(uid, args.LanguageEnt, args.Message, args.Channel, uid);
-            args.Channel = null;
+            SendLanguageRadioMessage(uid, args.LanguageEnt, args.Message, args.RadioChannel, uid);
+            args.RadioChannel = null;
         }
     }
 
@@ -119,11 +111,13 @@ public sealed partial class RadioSystem
         var name = evt.VoiceName;
         name = FormattedMessage.EscapeText(name);
 
+        var language = _prototype.Index(languageEnt.Comp.Language);
+
         SpeechVerbPrototype speech;
         if (evt.SpeechVerb != null && _prototype.Resolve(evt.SpeechVerb, out var evntProto))
             speech = evntProto;
         else
-            speech = _chat.GetComplexSpeechVerb(messageSource, message);
+            speech = _chat.GetComplexSpeechVerb(messageSource, message, language, ChatChannel.Radio);
 
         var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
 
@@ -139,8 +133,6 @@ public sealed partial class RadioSystem
         var sourceServerExempt = _exemptQuery.HasComp(radioSource);
 
         var radioQuery = EntityQueryEnumerator<ActiveRadioComponent, TransformComponent>();
-
-        var language = _prototype.Index(languageEnt.Comp.Language);
 
         while (canSend && radioQuery.MoveNext(out var receiver, out var radio, out var transform))
         {
@@ -168,7 +160,7 @@ public sealed partial class RadioSystem
         }
 
         var (unwrappedMessage, wrappedMessage) = _chat.BuildComplexMessage(message,
-            RadioWrapper,
+            _prototype.Index(RadioWrapper),
             language,
             speech.Bold,
             language.DisplayInChat,

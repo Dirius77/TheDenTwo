@@ -10,15 +10,15 @@ public sealed class ListenLanguageEvent : EntityEventArgs
     public readonly Entity<LanguageComponent?> LanguageEnt;
     public readonly EntityUid Source;
     public readonly string Verb;
-    public readonly bool Whisper;
+    public readonly ChatChannel Channel;
 
-    public ListenLanguageEvent(ComplexChatMessage msg, EntityUid source, Entity<LanguageComponent?> languageEnt, string verb, bool whisper)
+    public ListenLanguageEvent(ComplexChatMessage msg, EntityUid source, Entity<LanguageComponent?> languageEnt, string verb, ChatChannel channel)
     {
         Message = msg;
         Source = source;
         LanguageEnt = languageEnt;
         Verb = verb;
-        Whisper = whisper;
+        Channel = channel;
     }
 }
 

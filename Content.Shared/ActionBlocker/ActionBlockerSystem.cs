@@ -19,7 +19,7 @@ namespace Content.Shared.ActionBlocker
     /// Utility methods to check if a specific entity is allowed to perform an action.
     /// </summary>
     [UsedImplicitly]
-    public sealed class ActionBlockerSystem : EntitySystem
+    public sealed partial class ActionBlockerSystem : EntitySystem // DEN: Made partial
     {
         [Dependency] private readonly SharedContainerSystem _container = default!;
 
@@ -146,6 +146,7 @@ namespace Content.Shared.ActionBlocker
             return !itemEv.Cancelled;
         }
 
+        [Obsolete("Use CanSpeakLanguage instead", true)] // DEN: Make obsolete
         public bool CanSpeak(EntityUid uid)
         {
             // This one is used as broadcast

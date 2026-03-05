@@ -25,11 +25,12 @@ public abstract partial class SharedLanguageSystem
 
         var communicator = EnsureComp<LanguageCommunicatorComponent>(target);
 
-        var needsUpdate = communicator.CurrentLanguage != languageEntity.Value;
+        if (communicator.CurrentLanguage == languageEntity.Value)
+            return true;
+
         communicator.CurrentLanguage = languageEntity;
-        OnLanguageUpdated(languageEntity.Value.AsNullable());
-        if (needsUpdate)
-            Dirty<LanguageCommunicatorComponent>((target, communicator));
+        communicator.LastSpokenLanguage = languageProto;
+        Dirty<LanguageCommunicatorComponent>((target, communicator));
         return true;
     }
 
@@ -53,11 +54,12 @@ public abstract partial class SharedLanguageSystem
         if (!languageEntity.Comp.Speaks)
             return false;
 
-        var needsUpdate = communicator.CurrentLanguage != languageEntity;
+        if (communicator.CurrentLanguage == languageEntity)
+            return true;
+
         communicator.CurrentLanguage = languageEntity;
-        OnLanguageUpdated(languageEntity.AsNullable());
-        if (needsUpdate)
-            Dirty<LanguageCommunicatorComponent>((target, communicator));
+        communicator.LastSpokenLanguage = languageEntity.Comp.Language;
+        Dirty<LanguageCommunicatorComponent>((target, communicator));
         return true;
     }
 
@@ -73,7 +75,7 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public bool TryAddLanguage(EntityUid target,
         ProtoId<LanguagePrototype> language,
-        out List<EntityUid> languageEntities)
+        out List<Entity<LanguageComponent>> languageEntities)
     {
         return TryAddLanguage(target, language,true, DefaultLanguageFluency, out languageEntities);
     }
@@ -93,7 +95,7 @@ public abstract partial class SharedLanguageSystem
         ProtoId<LanguagePrototype> languageProto,
         bool speaks,
         ProtoId<LanguageFluencyPrototype> fluencyProto,
-        out List<EntityUid> languageEntities)
+        out List<Entity<LanguageComponent>> languageEntities)
     {
         languageEntities = [];
 
@@ -121,7 +123,6 @@ public abstract partial class SharedLanguageSystem
         if (communicator.CurrentLanguage is not null && communicator.CurrentLanguage.Value.Equals(languageEntity.Value))
         {
             communicator.CurrentLanguage = null;
-            OnLanguageUpdated(languageEntity.Value.AsNullable());
             Dirty<LanguageCommunicatorComponent>((target, communicator));
         }
 
@@ -157,7 +158,6 @@ public abstract partial class SharedLanguageSystem
             if (communicator.CurrentLanguage is not null && communicator.CurrentLanguage.Value.Equals(languageEntity))
             {
                 communicator.CurrentLanguage = null;
-                OnLanguageUpdated(languageEntity.AsNullable());
                 Dirty<LanguageCommunicatorComponent>((target, communicator));
             }
 
@@ -199,7 +199,15 @@ public abstract partial class SharedLanguageSystem
             if (!TryGetLanguageEntities(target, out var languageEntities))
                 return null;
 
-            communicator.CurrentLanguage = languageEntities.FirstOrNull(lang => lang.Comp.Speaks);
+            var spokenLanguages = languageEntities.FindAll(lang => lang.Comp.Speaks);
+            if (communicator.LastSpokenLanguage is { } lastSpoken)
+            {
+                communicator.CurrentLanguage = spokenLanguages.FirstOrNull(lang => lang.Comp.Language == lastSpoken);
+            }
+
+            communicator.CurrentLanguage ??= spokenLanguages.FirstOrNull();
+            if (communicator.CurrentLanguage is not null)
+                Dirty(target, communicator);
         }
 
         if (communicator.CurrentLanguage is not null)

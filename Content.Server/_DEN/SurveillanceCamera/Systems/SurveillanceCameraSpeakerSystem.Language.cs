@@ -47,9 +47,9 @@ public sealed partial class SurveillanceCameraSpeakerSystem
             args.Message,
             ChatSystem.SpeakWrapper,
             ChatTransmitRange.GhostRangeLimit,
+            ChatChannel.Whisper,
             null,
             name,
-            true,
             verbOverride: args.Verb,
             languageOverride: args.LanguageEnt);
     }

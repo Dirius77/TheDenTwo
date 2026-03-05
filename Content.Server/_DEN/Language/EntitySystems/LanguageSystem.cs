@@ -1,11 +1,12 @@
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
+using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._DEN.Language.EntitySystems;
 
-public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.SharedLanguageSystem
+public sealed partial class LanguageSystem : SharedLanguageSystem
 {
     [Dependency] private readonly IPrototypeManager _proto = default!;
 
@@ -15,6 +16,25 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
 
         SubscribeLocalEvent<LanguageComponent, LanguageRelayedEvent<AttemptUnderstandingEvent>>(
             OnAttemptUnderstandingRelay);
+
+        SubscribeNetworkEvent<HideFontsMessage>(OnHideFontsRequest);
+    }
+
+    private void OnHideFontsRequest(HideFontsMessage msg, EntitySessionEventArgs args)
+    {
+        var senderSession = args.SenderSession;
+
+        if (senderSession.AttachedEntity is not { } senderEnt)
+            return;
+
+        if (msg.Hide)
+        {
+            AddComp<LanguageFontSuppressionComponent>(senderEnt);
+        }
+        else
+        {
+            RemComp<LanguageFontSuppressionComponent>(senderEnt);
+        }
     }
 
     private void OnAttemptUnderstandingRelay(Entity<LanguageComponent> ent,
@@ -39,12 +59,15 @@ public sealed partial class LanguageSystem : Shared._DEN.Language.EntitySystems.
         LanguagePrototype language,
         LanguageFluencyPrototype understanding,
         string originalName,
-        bool isWhisper,
-        out string name)
+        string originalVerb,
+        ChatChannel chatChannel,
+        out string name,
+        out string verb)
     {
-        var ev = new LanguageModifyMessageEvent(sender, listener, originalMessage, language, understanding, originalName, isWhisper);
+        var ev = new LanguageModifyMessageEvent(sender, listener, originalMessage, language, understanding, originalName, originalVerb, chatChannel);
         RaiseLocalEvent(languageEntity, ev);
         name = ev.Name;
+        verb = ev.Verb;
         return ev.Message;
     }
 }

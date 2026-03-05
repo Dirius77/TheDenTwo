@@ -60,4 +60,4 @@ public sealed partial class ParrotMemoryComponent : Component
 }
 
 [Serializable, NetSerializable]
-public record struct SpeechMemory(NetUserId? NetUserId, string Message, ProtoId<LanguagePrototype> Language); // DEN: Languages
+public record struct SpeechMemory(NetUserId? NetUserId, string Message, NetEntity Language); // DEN: Languages

@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Speech;
 
@@ -6,14 +7,21 @@ namespace Content.Server.Speech;
 
 public sealed partial class SpeechSoundSystem
 {
+    private EntityQuery<AudibleComponent> _audibleQuery;
+
     private void InitializeLanguage()
     {
+        _audibleQuery = GetEntityQuery<AudibleComponent>();
+
         SubscribeLocalEvent<SpeechComponent, EntitySpokeLanguageEvent>(OnEntitySpokeLanguage);
     }
 
     private void OnEntitySpokeLanguage(EntityUid uid, SpeechComponent component, EntitySpokeLanguageEvent args)
     {
         if (component.SpeechSounds == null)
+            return;
+
+        if (!_audibleQuery.HasComponent(args.LanguageEnt))
             return;
 
         var currentTime = _gameTiming.CurTime;

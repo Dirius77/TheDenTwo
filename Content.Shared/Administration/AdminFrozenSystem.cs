@@ -13,7 +13,7 @@ using Content.Shared.Throwing;
 namespace Content.Shared.Administration;
 
 // TODO deduplicate with BlockMovementComponent
-public sealed class AdminFrozenSystem : EntitySystem
+public sealed partial class AdminFrozenSystem : EntitySystem // DEN: Make partial
 {
     [Dependency] private readonly ActionBlockerSystem _blocker = default!;
     [Dependency] private readonly PullingSystem _pulling = default!;
@@ -31,9 +31,11 @@ public sealed class AdminFrozenSystem : EntitySystem
         SubscribeLocalEvent<AdminFrozenComponent, AttackAttemptEvent>(OnAttempt);
         SubscribeLocalEvent<AdminFrozenComponent, ChangeDirectionAttemptEvent>(OnAttempt);
         SubscribeLocalEvent<AdminFrozenComponent, EmoteAttemptEvent>(OnEmoteAttempt);
-        SubscribeLocalEvent<AdminFrozenComponent, SpeakAttemptEvent>(OnSpeakAttempt);
+        //SubscribeLocalEvent<AdminFrozenComponent, SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Switch to language event
         SubscribeLocalEvent<AdminFrozenComponent, InGameOocMessageAttemptEvent>(OnInGameOocMessageAttempt);
         SubscribeLocalEvent<InGameOocMessageAttemptEvent>(OnInGameOocMessageAttemptBroadcast);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     /// <summary>
@@ -51,6 +53,7 @@ public sealed class AdminFrozenSystem : EntitySystem
         args.Cancelled = true;
     }
 
+    [Obsolete("Use OnSpeakLanguageAttempt instead", true)] // DEN: Languages
     private void OnSpeakAttempt(EntityUid uid, AdminFrozenComponent component, SpeakAttemptEvent args)
     {
         if (!component.Muted)

@@ -1,7 +1,5 @@
 using Content.Server.Chat.Systems;
-using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
-using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
 using Content.Shared.Radio.Components;
 using Robust.Shared.Player;
@@ -14,20 +12,24 @@ public sealed partial class HeadsetSystem
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly ChatSystem _chat = default!;
 
+    private EntityQuery<RadioTransmittableComponent> _radioLang;
+
     private void InitializeLanguage()
     {
-        SubscribeLocalEvent<HeadsetComponent, RadioReceiveLanguageEvent>(OnHeadsetReceiveLanguage);
+        _radioLang = GetEntityQuery<RadioTransmittableComponent>();
 
+        SubscribeLocalEvent<HeadsetComponent, RadioReceiveLanguageEvent>(OnHeadsetReceiveLanguage);
         SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeLanguageEvent>(OnSpeakLanguage);
     }
 
     private void OnSpeakLanguage(EntityUid uid, WearingHeadsetComponent component, EntitySpokeLanguageEvent args)
     {
-        if (args.Channel != null
+        if (args.RadioChannel != null
             && TryComp(component.Headset, out EncryptionKeyHolderComponent? keys)
-            && keys.Channels.Contains(args.Channel.ID))
+            && keys.Channels.Contains(args.RadioChannel.ID)
+            && _radioLang.HasComponent(args.LanguageEnt))
         {
-            _radio.SendLanguageRadioMessage(uid, args.LanguageEnt, args.Message, args.Channel, component.Headset);
+            _radio.SendLanguageRadioMessage(uid, args.LanguageEnt, args.Message, args.RadioChannel, component.Headset);
         }
     }
 
@@ -48,12 +50,11 @@ public sealed partial class HeadsetSystem
                 parent,
                 args.LanguageEnt,
                 args.Message,
-                RadioSystem.RadioWrapper,
+                _prototype.Index(RadioSystem.RadioWrapper),
                 ChatChannel.Radio,
                 args.Name,
                 args.Verb,
                 args.Speech.Bold,
-                false,
                 false,
                 args.Channel.LocalizedName,
                 args.Channel.Color);

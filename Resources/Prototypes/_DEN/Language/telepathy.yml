@@ -1,0 +1,16 @@
+- type: language
+  id: Telepathic
+  name: language-telepathic
+  fontColor: PaleVioletRed
+  fontId: BoxRound
+  wrapperOverrides:
+    Local: TelepathyWrapper
+  languageComponents:
+  - type: ReplaceSpeakerName
+    replaceName: TELEPATHIC
+  - type: ChatChannelWhitelist
+    blacklist: [ Whisper ]
+    failureMessages: [ language-telepathic-dont-whisper ]
+  - type: Gestalt
+  - type: MinimumFluency
+    minimum: Fluent

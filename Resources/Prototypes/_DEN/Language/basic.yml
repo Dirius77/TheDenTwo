@@ -3,6 +3,11 @@
   name: language-basic
   displayInChat: true
   languageComponents:
+  - type: SpeechTransformable
+  - type: RadioTransmittable
+  - type: Audible
+  - type: WhisperMuffle
+    muffle: true
   - type: SyllableScrambling
     syllables:
     - a

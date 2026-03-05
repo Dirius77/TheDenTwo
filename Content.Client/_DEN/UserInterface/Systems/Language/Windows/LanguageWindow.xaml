@@ -6,7 +6,7 @@
     MinWidth="400"
     MinHeight="545">
     <BoxContainer Orientation="Vertical">
-        <Label Text="{Loc 'language-ui-language-currently-speaking'}"></Label>
+        <Label Text="{Loc 'language-ui-language-currently-speaking'}" Margin="2"></Label>
         <PanelContainer Name="CurrentlySpeaking" Access="Public">
         </PanelContainer>
         <controls:HLine Color="#404040" Thickness="4"/>

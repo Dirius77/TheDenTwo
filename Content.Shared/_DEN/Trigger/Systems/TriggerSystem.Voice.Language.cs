@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Speech;
 using Content.Shared.Chat;
 using Content.Shared.Database;
@@ -11,8 +12,12 @@ public sealed partial class TriggerSystem
 {
     [Dependency] private readonly IPrototypeManager _proto = default!;
 
+    private EntityQuery<AudibleComponent> _audibleQuery;
+
     private void InitializeLanguage()
     {
+        _audibleQuery = GetEntityQuery<AudibleComponent>();
+
         SubscribeLocalEvent<TriggerOnVoiceComponent, ListenLanguageEvent>(OnListenLanguage);
     }
 
@@ -20,6 +25,9 @@ public sealed partial class TriggerSystem
     {
         var languageEnt = args.LanguageEnt;
         if (!Resolve(languageEnt, ref languageEnt.Comp))
+            return;
+
+        if (!_audibleQuery.HasComponent(languageEnt))
             return;
 
         var language = _proto.Index(languageEnt.Comp.Language);

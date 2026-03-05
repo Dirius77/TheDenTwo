@@ -1,7 +1,11 @@
+using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
+using Content.Shared.Fax;
+using Content.Shared.GameTicking;
 using Robust.Client.Player;
+using Robust.Shared.Player;
 using Robust.Shared.Timing;
 
 namespace Content.Client._DEN.Language.EntitySystems;
@@ -9,25 +13,41 @@ namespace Content.Client._DEN.Language.EntitySystems;
 public sealed class LanguageSystem : SharedLanguageSystem
 {
     [Dependency] private readonly IPlayerManager _playerManager = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
 
-    public event Action? OnLanguageUpdate;
+    public event Action<Entity<LanguageComponent>>? OnLanguageEntityUpdate;
+    public event Action<Entity<LanguageComponent>?>? OnLanguageCommunicatorUpdate;
 
     public override void Initialize()
     {
         base.Initialize();
 
+        _cfg.OnValueChanged(DenCCVars.HideLanguageFonts, SetHideLanguageFonts);
+        _playerManager.LocalPlayerAttached += OnLocalPlayerAttached;
+
         SubscribeLocalEvent<LanguageComponent, AfterAutoHandleStateEvent>(OnLanguageComponentHandleState);
         SubscribeLocalEvent<LanguageCommunicatorComponent, AfterAutoHandleStateEvent>(OnLanguageCommunicatorHandleState);
     }
 
+    private void OnLocalPlayerAttached(EntityUid newEntity)
+    {
+        RaiseNetworkEvent(new HideFontsMessage(_cfg.GetCVar(DenCCVars.HideLanguageFonts)));
+    }
+
+    private void SetHideLanguageFonts(bool hide)
+    {
+        RaiseNetworkEvent(new HideFontsMessage(hide));
+    }
+
     public void TrySetSpokenLanguage(Entity<LanguageComponent> lang)
     {
-        if (_playerManager.LocalEntity is null )
+        if (_playerManager.LocalEntity is not { } localEnt ||
+            !TryComp<LanguageCommunicatorComponent>(localEnt, out var localComm))
             return;
 
         var request = new RequestSetSpokenLanguageEvent(GetNetEntity(lang));
-        RaisePredictiveEvent(request);
+        RaiseNetworkEvent(request);
+
+        OnLanguageCommunicatorUpdate?.Invoke(lang);
     }
 
     private void OnLanguageComponentHandleState(Entity<LanguageComponent> ent, ref AfterAutoHandleStateEvent evt)
@@ -39,12 +59,26 @@ public sealed class LanguageSystem : SharedLanguageSystem
         ref AfterAutoHandleStateEvent evt)
     {
         if (_playerManager.LocalEntity == ent)
-            OnLanguageUpdate?.Invoke();
+        {
+            var currLang = GetCurrentLanguageEntity(ent);
+            OnLanguageCommunicatorUpdate?.Invoke(currLang);
+        }
     }
 
     protected override void OnLanguageRemoved(Entity<LanguageCommunicatorComponent> holder, Entity<LanguageComponent> language)
     {
-        LanguageUpdated(language);
+        if (_playerManager.LocalEntity == holder)
+        {
+            OnLanguageEntityUpdate?.Invoke(language);
+        }
+    }
+
+    public Entity<LanguageCommunicatorComponent>? GetLocalCommunicator()
+    {
+        if (_playerManager.LocalEntity is { } localEnt && TryComp<LanguageCommunicatorComponent>(localEnt, out var localCommunicator))
+            return (localEnt,  localCommunicator);
+
+        return null;
     }
 
     public override void OnLanguageUpdated(Entity<LanguageComponent?> lang)
@@ -57,7 +91,9 @@ public sealed class LanguageSystem : SharedLanguageSystem
 
     private void LanguageUpdated(Entity<LanguageComponent> ent)
     {
-        if (_playerManager.LocalEntity == ent.Comp.Holder)
-            OnLanguageUpdate?.Invoke();
+        if (_playerManager.LocalEntity is { } localEnt && localEnt == ent.Comp.Holder)
+        {
+            OnLanguageEntityUpdate?.Invoke(ent);
+        }
     }
 }

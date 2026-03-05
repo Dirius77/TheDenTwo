@@ -2,7 +2,8 @@
 
 namespace Content.Shared.Speech
 {
-    public sealed class SpeakAttemptEvent : CancellableEntityEventArgs, ISpokenLanguageRelayEvent // DEN: Languages
+    [Obsolete("Use SpeakLanguageAttemptEvent instead", true)] // DEN: languages
+    public sealed class SpeakAttemptEvent : CancellableEntityEventArgs
     {
         public SpeakAttemptEvent(EntityUid uid)
         {

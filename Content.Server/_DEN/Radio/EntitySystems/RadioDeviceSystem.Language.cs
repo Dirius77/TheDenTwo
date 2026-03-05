@@ -1,4 +1,6 @@
+using Content.Server.Chat.Systems;
 using Content.Server.Power.EntitySystems;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Speech;
 using Content.Shared.Chat;
 using Content.Shared.Radio.Components;
@@ -7,8 +9,12 @@ namespace Content.Server.Radio.EntitySystems;
 
 public sealed partial class RadioDeviceSystem
 {
+    private EntityQuery<RadioTransmittableComponent> _radioLang;
+
     private void InitializeLanguage()
     {
+        _radioLang = GetEntityQuery<RadioTransmittableComponent>();
+
         SubscribeLocalEvent<RadioMicrophoneComponent, ListenLanguageEvent>(OnListenLanguage);
         SubscribeLocalEvent<RadioMicrophoneComponent, ListenLanguageAttemptEvent>(OnAttemptListenLanguage);
 
@@ -30,7 +36,8 @@ public sealed partial class RadioDeviceSystem
         ListenLanguageAttemptEvent args)
     {
         if (component.PowerRequired && !this.IsPowered(uid, EntityManager)
-            || component.UnobstructedRequired && !_interaction.InRangeUnobstructed(args.Source, uid, 0))
+            || component.UnobstructedRequired && !_interaction.InRangeUnobstructed(args.Source, uid, 0)
+            || !_radioLang.HasComp(args.LanguageEnt))
         {
             args.Cancel();
         }
@@ -52,11 +59,11 @@ public sealed partial class RadioDeviceSystem
 
         _chat.SendEntityComplexSpeech(uid,
             args.Message,
-            RadioSystem.RadioWrapper,
+            ChatSystem.WhisperWrapper,
             ChatTransmitRange.GhostRangeLimit,
+            ChatChannel.Whisper,
             null,
             name,
-            true,
             verbOverride: args.Verb,
             languageOverride: args.LanguageEnt);
     }

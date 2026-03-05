@@ -2,15 +2,19 @@ using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language.Components;
 using Robust.Shared.Configuration;
 using Robust.Shared.Containers;
+using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
 
 public abstract partial class SharedLanguageSystem : EntitySystem
 {
-    [Dependency] private readonly IConfigurationManager _cfg = default!;
+    [Dependency] protected readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly SharedContainerSystem _container = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
+    [Dependency] private readonly INetManager _netMan = default!;
+    [Dependency] protected readonly IGameTiming _timing = default!;
 
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
     public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
@@ -54,12 +58,6 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         TrySetLanguage(user, (languageEnt, langComp));
     }
 
-    private void OnLanguageCommunicatorShutdown(Entity<LanguageCommunicatorComponent> ent, ref ComponentShutdown evt)
-    {
-        if (ent.Comp.Languages is { } container)
-            _container.ShutdownContainer(container);
-    }
-
     private void OnLanguageCommunicatorInit(Entity<LanguageCommunicatorComponent> ent, ref ComponentInit evt)
     {
         ent.Comp.Languages = _container.EnsureContainer<Container>(ent, LanguageCommunicatorComponent.ContainerId);
@@ -68,6 +66,12 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         {
             TryAddLanguage(ent, language, speaks, fluency, out _);
         }
+    }
+
+    private void OnLanguageCommunicatorShutdown(Entity<LanguageCommunicatorComponent> ent, ref ComponentShutdown evt)
+    {
+        if (ent.Comp.Languages is { } container)
+            _container.ShutdownContainer(container);
     }
 
     private void OnLanguageCommunicatorEntityInserted(Entity<LanguageCommunicatorComponent> ent,
@@ -108,10 +112,9 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         ProtoId<LanguagePrototype> languageProto,
         ProtoId<LanguageFluencyPrototype> fluencyProto,
         bool speaks,
-        out List<EntityUid> addedEntities)
+        out List<Entity<LanguageComponent>> addedEntities)
     {
         addedEntities = new();
-
         if (!_proto.TryIndex(languageProto, out var language) || !_proto.TryIndex(fluencyProto, out var fluency))
             return false;
 
@@ -119,14 +122,18 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         if (communicator.Languages is not { } languages)
             return false;
 
+        // The client can't predict spawning entities
+        if (_netMan.IsClient)
+            return true;
+
         var entity = SpawnLanguageEntity(languageProto, fluencyProto, speaks);
         entity.Comp.Holder = target;
         if (!_container.Insert(entity.AsType(), languages))
             return false;
 
+        addedEntities.Add(entity);
         if (fluency < _proto.Index(MaximumFluency))
         {
-            addedEntities.Add(entity);
             return true;
         }
 
@@ -152,7 +159,7 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
         Dirty(entity);
 
-        return failedChild;
+        return !failedChild;
     }
 
     private Entity<LanguageComponent> SpawnLanguageEntity(ProtoId<LanguagePrototype> languageProto,

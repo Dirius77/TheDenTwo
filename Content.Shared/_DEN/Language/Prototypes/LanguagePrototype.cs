@@ -1,10 +1,13 @@
+using Content.Shared.Chat;
 using Content.Shared.Speech;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Array;
 
 namespace Content.Shared._DEN.Language;
 
 [Prototype]
-public sealed partial class LanguagePrototype : IPrototype
+public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
 
@@ -22,17 +25,10 @@ public sealed partial class LanguagePrototype : IPrototype
     public string LocalizedDescription => Loc.GetString(Description);
 
     /// <summary>
-    ///     Override the base speaking verb for the language.
+    ///     Speech verb overrides per channel, with optional suffix verbs.
     /// </summary>
     [DataField]
-    public ProtoId<SpeechVerbPrototype>? SpeechVerb;
-
-    /// <summary>
-    ///     Overrides for the speaking chat suffixes, for example '?' or '!!' makings things asks or yells.
-    /// </summary>
-    // Languages replace a lot of the functionality in SpeechComponent, and maybe should completely replace it.
-    [DataField]
-    public Dictionary<string, ProtoId<SpeechVerbPrototype>>? SuffixSpeechVerbs;
+    public Dictionary<ChatChannel, LanguageSpeechVerbs>? SpeechVerbs;
 
     /// <summary>
     ///     The font to use for this language.
@@ -65,6 +61,9 @@ public sealed partial class LanguagePrototype : IPrototype
     [DataField]
     public ProtoId<LanguageFluencyPrototype> UnderstandingForDisplay = "Unfamiliar";
 
+    [DataField]
+    public Dictionary<ChatChannel, ProtoId<LanguageWrapperPrototype>>? WrapperOverrides;
+
     /// <summary>
     ///     Languages that are related to this language. If a speaker is completely Fluent in this language, then
     ///     they will also be able to understand the related languages in the specified amount.
@@ -80,7 +79,20 @@ public sealed partial class LanguagePrototype : IPrototype
     [AlwaysPushInheritance]
     public ComponentRegistry? LanguageComponents;
 
+    [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<LanguagePrototype>))]
+    public string[]? Parents { get; private set; }
+
     [NeverPushInheritance]
     [AbstractDataField]
     public bool Abstract { get; private set; }
+}
+
+[Serializable, NetSerializable, DataDefinition]
+public sealed partial class LanguageSpeechVerbs
+{
+    [DataField]
+    public ProtoId<SpeechVerbPrototype>? DefaultVerb;
+
+    [DataField]
+    public Dictionary<LocId, ProtoId<SpeechVerbPrototype>>? SuffixSpeechVerbs;
 }

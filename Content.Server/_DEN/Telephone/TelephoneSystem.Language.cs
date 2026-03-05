@@ -9,6 +9,7 @@ using Content.Shared.Database;
 using Content.Shared.Mind.Components;
 using Content.Shared.Speech;
 using Content.Shared.Telephone;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Utility;
 
@@ -16,19 +17,16 @@ namespace Content.Server.Telephone;
 
 public sealed partial class TelephoneSystem
 {
-    public static readonly ChatSystem.WrapperSet TelephoneWrapper = new()
-    {
-        DialogWrapper = "chat-language-entity-speak-wrap-dialog",
-        EmoteWrapper = "chat-language-entity-speak-wrap-emote",
-        LanguageWrapper = "chat-language-entity-speak-wrap-language",
-        PrefixWrapper = "chat-language-entity-telephone-wrap-prefix",
-        MessageWrapper = "chat-language-entity-telephone-wrap-message",
-        SingularMessageWrapper = "chat-language-entity-telephone-wrap-message-singular",
-        BoldType = "chat-language-entity-speak-bold",
-    };
+    public static readonly ProtoId<LanguageWrapperPrototype> TelephoneWrapper = "TelephoneWrapper";
+
+    private EntityQuery<AudibleComponent> _audibleQuery;
+    private EntityQuery<LineOfSightLanguageComponent> _losQuery;
 
     private void InitializeLanguage()
     {
+        _audibleQuery = GetEntityQuery<AudibleComponent>();
+        _losQuery = GetEntityQuery<LineOfSightLanguageComponent>();
+
         SubscribeLocalEvent<TelephoneComponent, ListenLanguageAttemptEvent>(OnAttemptLanguageListen);
         SubscribeLocalEvent<TelephoneComponent, ListenLanguageEvent>(OnLanguageListen);
         SubscribeLocalEvent<TelephoneComponent, TelephoneMessageLanguageReceivedEvent>(OnTelephoneMessageLanguageReceived);
@@ -47,20 +45,19 @@ public sealed partial class TelephoneSystem
 
     private void OnLanguageListen(Entity<TelephoneComponent> entity, ref ListenLanguageEvent args)
     {
-        Log.Debug("Language Listen on Telephone.");
         if (args.Source == entity.Owner)
             return;
-        Log.Debug("Args.Source == Entity.Owner is false yay.");
 
         // Everything else in the chat code checks for ActorComponent...
         if (!HasComp<MindContainerComponent>(args.Source))
             return;
-        Log.Debug("Has mind container yippee.");
 
         if (!_recentChatMessages.Add((args.Source, args.Message.OriginalMessage, entity)))
             return;
 
-        SendTelephoneLanguageMessage(args.Source, args.LanguageEnt, args.Message, entity);
+        // Only transmit spoken languages, or, in the case of holopads, sign and spoken.
+        if (_audibleQuery.HasComp(args.LanguageEnt) || entity.Comp.TransmitsVisuals && _losQuery.HasComp(args.LanguageEnt))
+            SendTelephoneLanguageMessage(args.Source, args.LanguageEnt, args.Message, entity);
     }
 
     private void OnTelephoneMessageLanguageReceived(Entity<TelephoneComponent> entity,
@@ -89,12 +86,11 @@ public sealed partial class TelephoneSystem
             : ChatTransmitRange.GhostRangeLimit;
         var whisper = entity.Comp.SpeakerVolume == TelephoneVolume.Whisper;
 
-        _chat.SendEntityComplexSpeech(speaker, args.Message, TelephoneWrapper, range, null, name, whisper, languageOverride: args.LanguageEnt);
+        _chat.SendEntityComplexSpeech(speaker, args.Message, TelephoneWrapper, range, whisper ? ChatChannel.Whisper : ChatChannel.Local, null, name, languageOverride: args.LanguageEnt);
     }
 
     private void SendTelephoneLanguageMessage(EntityUid messageSource, Entity<LanguageComponent?> languageEnt, ComplexChatMessage message, Entity<TelephoneComponent> source)
     {
-        Log.Debug("OUGH! Telephone message wowie.");
         // This method assumes that you've already checked that this
         // telephone is able to transmit messages and that it can
         // send messages to any telephones linked to it
@@ -113,7 +109,7 @@ public sealed partial class TelephoneSystem
         if (ev.SpeechVerb != null && _prototype.Resolve(ev.SpeechVerb, out var evntProto))
             speech = evntProto;
         else
-            speech = _chat.GetComplexSpeechVerb(messageSource, message);
+            speech = _chat.GetComplexSpeechVerb(messageSource, message, language, ChatChannel.Radio);
 
         var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
 
@@ -130,7 +126,7 @@ public sealed partial class TelephoneSystem
         }
 
         var (unwrappedMessage, wrappedMessage) = _chat.BuildComplexMessage(message,
-            TelephoneWrapper,
+            _prototype.Index(TelephoneWrapper),
             language,
             speech.Bold,
             language.DisplayInChat,

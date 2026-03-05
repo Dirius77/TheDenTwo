@@ -1,0 +1,44 @@
+- type: language
+  id: Sign
+  name: language-sign
+  displayInChat: true
+  speechVerbs:
+    Local:
+      defaultVerb: SignVerbDefault
+    Whisper:
+      defaultVerb: SignVerbWhisper
+  wrapperOverrides:
+    Local: SignWrapper
+  languageComponents:
+  - type: LineOfSightLanguage
+  - type: VisualName
+  - type: WhisperMuffle
+    muffle: true
+  - type: SyllableScrambling
+    syllables:
+    - "--"
+    - "---"
+  - type: MinimumFluency
+    minimum: Related
+    replacements:
+      Emote:
+      - language-sign-understanding-failure-1
+      - language-sign-understanding-failure-2
+      - language-sign-understanding-failure-3
+      - language-sign-understanding-failure-4
+
+- type: speechVerb
+  id: SignVerbDefault
+  name: language-speech-verb-sign-default
+  speechVerbStrings:
+  - language-speech-verb-sign-1
+  - language-speech-verb-sign-2
+  - language-speech-verb-sign-3
+
+- type: speechVerb
+  id: SignVerbWhisper
+  name: language-speech-verb-sign-whisper
+  speechVerbStrings:
+  - language-speech-verb-sign-whisper-1
+  - language-speech-verb-sign-whisper-2
+  - language-speech-verb-sign-whisper-3

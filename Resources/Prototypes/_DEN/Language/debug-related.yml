@@ -1,59 +1,57 @@
 - type: language
+  id: DebugGroupAbstract
+  abstract: true
+  languageComponents:
+  - type: SpeechTransformable
+  - type: RadioTransmittable
+  - type: Audible
+  - type: WhisperMuffle
+    muffle: true
+  - type: SyllableScrambling
+    syllables:
+    - oo
+    - ee
+    - ooo
+    - aa
+    - aaa
+    - ting
+    - tang
+    - wala
+    - walla
+    - bing
+    - bang
+
+- type: language
+  parent: DebugGroupAbstract
   id: DebugParent
   name: language-debug-parent
   displayInChat: true
   relatedLanguages:
     DebugChild1: Related
     DebugChild2: Related
-  languageComponents:
-  - type: SyllableScrambling
-    syllables:
-    - oo
-    - ee
-    - ooo
-    - aa
-    - aaa
-    - ting
-    - tang
-    - wala
-    - walla
-    - bing
-    - bang
 
 - type: language
+  parent: DebugGroupAbstract
   id: DebugChild1
   name: language-debug-child-1
   displayInChat: true
-  languageComponents:
-  - type: SyllableScrambling
-    syllables:
-    - oo
-    - ee
-    - ooo
-    - aa
-    - aaa
-    - ting
-    - tang
-    - wala
-    - walla
-    - bing
-    - bang
 
 - type: language
+  parent: DebugGroupAbstract
   id: DebugChild2
   name: language-debug-child-2
   displayInChat: true
   languageComponents:
   - type: SyllableScrambling
     syllables:
-    - oo
-    - ee
-    - ooo
     - aa
-    - aaa
-    - ting
-    - tang
-    - wala
-    - walla
-    - bing
-    - bang
+    - ee
+    - oo
+    - uu
+    - yy
+    - b
+    - kl
+    - le
+    - kw
+    - lp
+    - plw

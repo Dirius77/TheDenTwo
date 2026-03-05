@@ -6,3 +6,4 @@ language-ui-language-currently-speaking = Currently Speaking:
 language-ui-speak-language = Speak
 
 language-child-language-examine = Understanding this language because of its similarity to {$parent}.
+language-sourced-from-translator = This language is being translated by a translator.

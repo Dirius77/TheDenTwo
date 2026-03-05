@@ -45,7 +45,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         //SubscribeLocalEvent<ParrotListenerComponent, ListenEvent>(OnListen); // DEN: Obsolete, see ParrotMemorySystem.Language
         //SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveRelayEvent>(OnHeadsetReceive); // DEN: Obsolete, see ParrotMemorySystem.Language
 
-        SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeEvent>(OnTryVocalize);
+        //SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeEvent>(OnTryVocalize); // DEN: Obsolete, see ParrotMemorySystem.Language
 
         InitializeLanguage(); // DEN: Languages
     }
@@ -82,6 +82,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
     /// Called when an entity with a ParrotMemoryComponent tries to vocalize.
     /// This function picks a message from memory and sets the event to handled
     /// </summary>
+    [Obsolete("Obsolete, use OnTryVocalizeLanguage instead.", true)] // DEN: Languages
     private void OnTryVocalize(Entity<ParrotMemoryComponent> entity, ref TryVocalizeEvent args)
     {
         // return if this was already handled

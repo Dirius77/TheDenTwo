@@ -8,6 +8,9 @@ namespace Content.Server.SurveillanceCamera;
 
 public sealed partial class SurveillanceCameraMicrophoneSystem
 {
+    private readonly EntityQuery<AudibleComponent> _audibleQuery = default!;
+    private readonly EntityQuery<LineOfSightLanguageComponent> _losQuery = default!;
+
     private void InitializeLanguage()
     {
         SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenLanguageEvent>(RelayEntityLanguageMessage);
@@ -18,7 +21,9 @@ public sealed partial class SurveillanceCameraMicrophoneSystem
         SurveillanceCameraMicrophoneComponent microphone,
         ListenLanguageAttemptEvent args)
     {
-        if (_whitelistSystem.IsWhitelistPass(microphone.Blacklist, args.Source))
+        if (_whitelistSystem.IsWhitelistPass(microphone.Blacklist, args.Source)
+            || !_audibleQuery.HasComponent(args.LanguageEnt)
+            || !_losQuery.HasComponent(args.LanguageEnt))
             args.Cancel();
     }
 

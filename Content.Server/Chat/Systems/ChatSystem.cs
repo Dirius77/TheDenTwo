@@ -227,7 +227,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         // DEN: Complex message parsing.
         if (needsRadio)
         {
-            SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, channel, nameOverride, true, hideLog, ignoreActionBlocker);
+            SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, ChatChannel.Whisper, channel, nameOverride, hideLog, ignoreActionBlocker);
             return;
         }
 
@@ -236,13 +236,14 @@ public sealed partial class ChatSystem : SharedChatSystem
         {
             case InGameICChatType.Speak:
                 // DEN: Complex Speech and language
-                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, range, null, nameOverride, false, hideLog, ignoreActionBlocker);
-                //SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, range, ChatChannel.Local, null, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
-                SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, null, nameOverride, true, hideLog, ignoreActionBlocker);
+                // DEN: Complex Speech and language
+                SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, ChatChannel.Whisper, null, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Emote:
+                // TODO: Make this also handle complex messages I guess.
                 SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
                 break;
         }

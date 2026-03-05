@@ -9,15 +9,17 @@ using Content.Shared.Speech.Muting;
 
 namespace Content.Server.Speech.Muting
 {
-    public sealed class MutingSystem : EntitySystem
+    public sealed partial class MutingSystem : EntitySystem // DEN: Make Partial
     {
         [Dependency] private readonly PopupSystem _popupSystem = default!;
         public override void Initialize()
         {
             base.Initialize();
-            SubscribeLocalEvent<MutedComponent, SpeakAttemptEvent>(OnSpeakAttempt);
+            //SubscribeLocalEvent<MutedComponent, SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Switch to language based speech instead.
             SubscribeLocalEvent<MutedComponent, EmoteEvent>(OnEmote, before: new[] { typeof(VocalSystem), typeof(MumbleAccentSystem) });
             SubscribeLocalEvent<MutedComponent, ScreamActionEvent>(OnScreamAction, before: new[] { typeof(VocalSystem) });
+
+            InitializeLanguage(); // DEN: Languages
         }
 
         private void OnEmote(EntityUid uid, MutedComponent component, ref EmoteEvent args)
@@ -44,6 +46,7 @@ namespace Content.Server.Speech.Muting
         }
 
 
+        [Obsolete("Use OnSpeakLanguageAttempt instead", true)] // DEN: Switch to language based speech.
         private void OnSpeakAttempt(EntityUid uid, MutedComponent component, SpeakAttemptEvent args)
         {
             // TODO something better than this.

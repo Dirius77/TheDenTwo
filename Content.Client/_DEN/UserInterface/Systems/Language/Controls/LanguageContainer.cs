@@ -18,11 +18,14 @@ public sealed class LanguageContainer : Control
 
     public event Action? SpeakPressed;
 
-    private Entity<LanguageComponent>? LanguageEnt { get; set; }
+    public Entity<LanguageComponent>? LanguageEnt { get; private set; }
 
     private Label _languageName;
     private Button _languageButton;
     private RichTextLabel _description;
+    private BoxContainer _header;
+
+    private bool CurrentlySpoken;
 
     public LanguageContainer(IEntityManager entities, IPlayerManager player, IPrototypeManager proto, LanguageSystem language)
     {
@@ -34,9 +37,10 @@ public sealed class LanguageContainer : Control
         var container = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Vertical,
+            HorizontalExpand = true,
         };
 
-        var header = new BoxContainer
+        _header = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Horizontal,
             HorizontalExpand = true,
@@ -51,10 +55,10 @@ public sealed class LanguageContainer : Control
         _languageButton = new Button { Text = Loc.GetString("language-ui-speak-language") };
         _languageButton.OnPressed += _ => SpeakPressed?.Invoke();
 
-        header.AddChild(_languageName);
-        header.AddChild(_languageButton);
+        _header.AddChild(_languageName);
+        _header.AddChild(_languageButton);
 
-        container.AddChild(header);
+        container.AddChild(_header);
 
         var cbody = new CollapsibleBody
         {
@@ -87,6 +91,8 @@ public sealed class LanguageContainer : Control
         wrapper.AddChild(container);
 
         AddChild(wrapper);
+
+        SpeakPressed += OnLanguageChosen;
     }
 
     public void UpdateLanguage(Entity<LanguageComponent> language)
@@ -95,10 +101,18 @@ public sealed class LanguageContainer : Control
         UpdateData();
     }
 
-    public void SetCurrentSpoken()
+    public void SetCurrentSpoken(bool current)
     {
-        _languageButton.Pressed = true;
-        _languageButton.Disabled = true;
+        if (current)
+        {
+            if (_header.Children.Contains(_languageButton))
+                _header.RemoveChild(_languageButton);
+        }
+        else
+        {
+            if (!_header.Children.Contains(_languageButton))
+                _header.AddChild(_languageButton);
+        }
     }
 
     private void UpdateData()
@@ -124,8 +138,6 @@ public sealed class LanguageContainer : Control
         _entities.EventBus.RaiseLocalEvent(LanguageEnt.Value, ev);
 
         _description.SetMessage(ev.GetTotalMessage());
-
-        SpeakPressed += OnLanguageChosen;
     }
 
     private void OnLanguageChosen()

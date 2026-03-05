@@ -62,7 +62,7 @@ public sealed partial class SleepingSystem : EntitySystem
         SubscribeLocalEvent<SleepingComponent, ComponentInit>(OnCompInit);
         SubscribeLocalEvent<SleepingComponent, ComponentRemove>(OnComponentRemoved);
         SubscribeLocalEvent<SleepingComponent, RejuvenateEvent>(OnRejuvenate);
-        SubscribeLocalEvent<SleepingComponent, SpeakAttemptEvent>(OnSpeakAttempt);
+        //SubscribeLocalEvent<SleepingComponent, SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Languages
         SubscribeLocalEvent<SleepingComponent, CanSeeAttemptEvent>(OnSeeAttempt);
         SubscribeLocalEvent<SleepingComponent, PointAttemptEvent>(OnPointAttempt);
         SubscribeLocalEvent<SleepingComponent, SlipAttemptEvent>(OnSlip);
@@ -78,6 +78,8 @@ public sealed partial class SleepingSystem : EntitySystem
         SubscribeLocalEvent<SleepingComponent, EmoteAttemptEvent>(OnEmoteAttempt);
 
         SubscribeLocalEvent<SleepingComponent, BeforeForceSayEvent>(OnChangeForceSay, after: new []{typeof(PainNumbnessSystem)});
+
+        InitializeLanguage();
     }
 
     private void OnUnbuckleAttempt(Entity<SleepingComponent> ent, ref UnbuckleAttemptEvent args)
@@ -161,6 +163,7 @@ public sealed partial class SleepingSystem : EntitySystem
         _blindableSystem.UpdateIsBlind(ent.Owner);
     }
 
+    [Obsolete("Use OnSpeakLanguageAttempt instead", true)] // DEN: Switch to OnSpeakLanguageAttempt
     private void OnSpeakAttempt(Entity<SleepingComponent> ent, ref SpeakAttemptEvent args)
     {
         // TODO reduce duplication of this behavior with MobStateSystem somehow

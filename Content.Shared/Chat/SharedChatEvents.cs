@@ -1,3 +1,4 @@
+using Content.Shared._DEN.Language;
 using Content.Shared.Inventory;
 using Content.Shared.Radio;
 using Content.Shared.Speech;
@@ -9,7 +10,7 @@ namespace Content.Shared.Chat;
 /// This event should be sent everytime an entity talks (Radio, local chat, etc...).
 /// The event is sent to both the entity itself, and all clothing (For stuff like voice masks).
 /// </summary>
-public sealed class TransformSpeakerNameEvent : EntityEventArgs, IInventoryRelayEvent
+public sealed class TransformSpeakerNameEvent : EntityEventArgs, IInventoryRelayEvent, ISpokenLanguageRelayEvent // DEN: Language
 {
     public SlotFlags TargetSlots { get; } = SlotFlags.WITHOUT_POCKET;
     public EntityUid Sender;

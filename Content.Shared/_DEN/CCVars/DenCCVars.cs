@@ -31,4 +31,7 @@ public sealed class DenCCVars
     /// </summary>
     public static readonly CVarDef<string> DefaultLanguage =
         CVarDef.Create("languages.default_language", "Basic", CVar.ARCHIVE);
+
+    public static readonly CVarDef<bool> HideLanguageFonts =
+        CVarDef.Create("languages.hide_fonts", false, CVar.CLIENTONLY | CVar.ARCHIVE);
 }

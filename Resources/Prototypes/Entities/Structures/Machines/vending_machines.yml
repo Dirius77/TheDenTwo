@@ -106,6 +106,10 @@
     price: 100
   - type: Appearance
   - type: WiresVisuals
+  # DEN: Languages
+  - type: LanguageCommunicator
+    languages:
+      Basic: [ true, Fluent ]
 
 - type: entity
   id: VendingMachineWallmount
@@ -170,6 +174,10 @@
     enabled: false
     usesApcPower: true
   - type: Rotatable
+  # DEN: Languages
+  - type: LanguageCommunicator
+    languages:
+      Basic: [ true, Fluent ]
 
 # Vending machines
 

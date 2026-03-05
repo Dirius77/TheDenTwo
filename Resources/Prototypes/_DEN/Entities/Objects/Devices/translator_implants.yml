@@ -1,0 +1,10 @@
+- type: entity
+  parent: BaseSubdermalImplant
+  id: DebugTranslatorImplant
+  name: debug translator implant
+  description: A translator implant for the 'DebugParent' language from Basic
+  components:
+  - type: Translator
+    requires: Basic
+    grants:
+      DebugParent: [ true, Fluent ]

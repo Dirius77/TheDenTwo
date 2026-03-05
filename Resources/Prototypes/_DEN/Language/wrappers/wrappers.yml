@@ -1,0 +1,59 @@
+- type: languageWrapper
+  id: SpeakWrapper
+  dialog: chat-language-entity-speak-wrap-dialog
+  emote: chat-language-entity-speak-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-speak-wrap-prefix
+  message: chat-language-entity-speak-wrap-message
+  singularMessage: chat-language-entity-speak-wrap-message-singular
+  boldType: chat-language-entity-speak-bold
+
+- type: languageWrapper
+  id: WhisperWrapper
+  dialog: chat-language-entity-whisper-wrap-dialog
+  emote: chat-language-entity-whisper-wrap-emote
+  language: chat-language-entity-whisper-wrap-language
+  prefix: chat-language-entity-whisper-wrap-prefix
+  message: chat-language-entity-whisper-wrap-message
+  singularMessage: chat-language-entity-whisper-wrap-message-singular
+  boldType: chat-language-entity-whisper-bold
+
+- type: languageWrapper
+  id: RadioWrapper
+  dialog: chat-language-entity-speak-wrap-dialog
+  emote: chat-language-entity-radio-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-radio-wrap-prefix
+  message: chat-language-entity-radio-wrap-message
+  singularMessage: chat-language-entity-radio-wrap-message-singular
+  boldType: chat-language-entity-speak-bold
+
+- type: languageWrapper
+  id: TelephoneWrapper
+  dialog: chat-language-entity-speak-wrap-dialog
+  emote: chat-language-entity-speak-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-telephone-wrap-prefix
+  message: chat-language-entity-telephone-wrap-message
+  singularMessage: chat-language-entity-telephone-wrap-message-singular
+  boldType: chat-language-entity-speak-bold
+
+- type: languageWrapper
+  id: TelepathyWrapper
+  dialog: chat-language-entity-speak-wrap-dialog
+  emote: chat-language-entity-speak-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-telepathy-wrap-prefix
+  message: chat-language-entity-telepathy-wrap-message
+  singularMessage: chat-language-entity-telepathy-wrap-message-singular
+  boldType: char-language-entity-speak-bold
+
+- type: languageWrapper
+  id: SignWrapper
+  dialog: chat-language-entity-sign-wrap-dialog
+  emote: chat-language-entity-sign-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-speak-wrap-prefix
+  message: chat-language-entity-sign-wrap-message
+  singularMessage: chat-language-entity-sign-wrap-message-singular
+  boldType: chat-language-entity-whisper-bold

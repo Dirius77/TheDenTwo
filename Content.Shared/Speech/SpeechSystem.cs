@@ -1,12 +1,13 @@
 namespace Content.Shared.Speech
 {
-    public sealed class SpeechSystem : EntitySystem
+    public sealed partial class SpeechSystem : EntitySystem // DEN: Make partial
     {
         public override void Initialize()
         {
             base.Initialize();
 
-            SubscribeLocalEvent<SpeakAttemptEvent>(OnSpeakAttempt);
+            //SubscribeLocalEvent<SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Switch to OnSpeakLanguageAttempt
+            InitializeLanguage(); // DEN: Languages
         }
 
         public void SetSpeech(EntityUid uid, bool value, SpeechComponent? component = null)
@@ -24,6 +25,7 @@ namespace Content.Shared.Speech
             Dirty(uid, component);
         }
 
+        [Obsolete("Use OnSpeakLanguageAttempt instead", true)] // DEN: Mark obsolete for OnSpeakLanguageAttempt
         private void OnSpeakAttempt(SpeakAttemptEvent args)
         {
             if (!TryComp(args.Uid, out SpeechComponent? speech) || !speech.Enabled)

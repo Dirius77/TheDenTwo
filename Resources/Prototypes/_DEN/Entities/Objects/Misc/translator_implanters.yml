@@ -1,0 +1,13 @@
+- type: entity
+  abstract: true
+  parent: BaseImplantOnlyImplanter
+  id: BaseTranslatorImplanter
+  name: tanslator implanter
+
+- type: entity
+  parent: BaseTranslatorImplanter
+  id: DebugTranslatorImplanter
+  name: debug translator implanter
+  components:
+  - type: Implanter
+    implant: DebugTranslatorImplant

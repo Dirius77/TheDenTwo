@@ -1,8 +1,10 @@
 using System.Linq;
 using Content.Server.Animals.Components;
 using Content.Server.Radio;
+using Content.Server.Vocalization.Systems;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
+using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared._DEN.Speech;
 using Content.Shared.Animals.Components;
 using Content.Shared.Chat;
@@ -16,16 +18,22 @@ namespace Content.Server.Animals.Systems;
 public sealed partial class ParrotMemorySystem
 {
     [Dependency] private readonly IPrototypeManager _proto = default!;
+    [Dependency] private readonly SharedLanguageSystem _language = default!;
+
+    private EntityQuery<AudibleComponent> _audibleQuery;
 
     private void InitializeLanguage()
     {
+        _audibleQuery = GetEntityQuery<AudibleComponent>();
+
         SubscribeLocalEvent<ParrotListenerComponent, ListenLanguageEvent>(OnLanguageListen);
         SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveLanguageRelayEvent>(OnHeadsetReceiveLanguage);
+        SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeLanguageEvent>(OnTryVocalizeLanguage);
     }
 
     private void OnLanguageListen(Entity<ParrotListenerComponent> entity, ref ListenLanguageEvent args)
     {
-        if (args.Whisper)
+        if (args.Channel != ChatChannel.Local)
             return;
         TryLearnLanguage(entity.Owner, args.LanguageEnt, args.Message, args.Source);
     }
@@ -40,6 +48,24 @@ public sealed partial class ParrotMemorySystem
         TryLearnLanguage(entity.Owner, languageEnt, message, source);
     }
 
+    private void OnTryVocalizeLanguage(Entity<ParrotMemoryComponent> entity, ref TryVocalizeLanguageEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        if (entity.Comp.SpeechMemories.Count == 0)
+            return;
+
+        var memory = _random.Pick(entity.Comp.SpeechMemories);
+
+        args.Message = memory.Message;
+        var language = GetEntity(memory.Language);
+        if (TryComp<LanguageComponent>(language, out var langComp))
+            args.Language = (language, langComp);
+
+        args.Handled = true;
+    }
+
     private void TryLearnLanguage(Entity<ParrotMemoryComponent?, ParrotListenerComponent?> entity,
         Entity<LanguageComponent?> languageEnt,
         ComplexChatMessage incomingMessage,
@@ -49,6 +75,9 @@ public sealed partial class ParrotMemorySystem
             return;
 
         if (!Resolve(languageEnt, ref languageEnt.Comp))
+            return;
+
+        if (!_audibleQuery.HasComponent(languageEnt))
             return;
 
         if (!_whitelist.CheckBoth(source, entity.Comp2.Blacklist, entity.Comp2.Whitelist))
@@ -100,7 +129,24 @@ public sealed partial class ParrotMemorySystem
             sourceNetUserId = mind.UserId;
         }
 
-        var newMemory = new SpeechMemory(sourceNetUserId, message, language);
+        EntityUid spokenLanguage;
+        if (_language.SpeaksLanguage(entity, language.ID, out var spokenEnt))
+        {
+            spokenLanguage = spokenEnt.Value;
+        }
+        else
+        {
+            if (!_language.TryAddLanguage(entity, language.ID, out var addedLangs))
+            {
+                Log.Warning("Failed to teach " + Name(entity) + " language: " + language.Name);
+                return;
+            }
+            // If TryAddLanguage returned true this will have at least one language.
+            spokenLanguage = addedLangs.First();
+        }
+
+
+        var newMemory = new SpeechMemory(sourceNetUserId, message, GetNetEntity(spokenLanguage));
 
         if (entity.Comp.SpeechMemories.Count < entity.Comp.MaxSpeechMemory)
         {
