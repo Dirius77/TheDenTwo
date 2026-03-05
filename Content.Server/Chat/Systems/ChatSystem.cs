@@ -189,7 +189,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             message = message[1..];
         }
 
-        bool shouldCapitalize = (desiredType != InGameICChatType.Emote);
+        bool shouldCapitalize = (desiredType == InGameICChatType.Emote);
         bool shouldPunctuate = _configurationManager.GetCVar(CCVars.ChatPunctuation);
         // Capitalizing the word I only happens in English, so we check language here
         bool shouldCapitalizeTheWordI = (!CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Parent.Name == "en")
@@ -227,7 +227,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         // DEN: Complex message parsing.
         if (needsRadio)
         {
-            SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, ChatChannel.Whisper, channel, nameOverride, hideLog, ignoreActionBlocker);
+            SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, ChatChannel.Whisper, range, channel, nameOverride, hideLog, ignoreActionBlocker);
             return;
         }
 
@@ -236,15 +236,15 @@ public sealed partial class ChatSystem : SharedChatSystem
         {
             case InGameICChatType.Speak:
                 // DEN: Complex Speech and language
-                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, range, ChatChannel.Local, null, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, ChatChannel.Local, range, null, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
                 // DEN: Complex Speech and language
-                SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, range, ChatChannel.Whisper, null, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, ChatChannel.Whisper, range, null, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Emote:
-                // TODO: Make this also handle complex messages I guess.
-                SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
+                // DEN: Complex Speech.
+                SendEntityComplexEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
                 break;
         }
     }

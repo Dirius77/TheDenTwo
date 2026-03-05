@@ -7,7 +7,7 @@ namespace Content.Shared.Chat;
 public sealed class EntitySpokeLanguageEvent : EntityEventArgs
 {
     public readonly EntityUid Source;
-    public readonly Entity<LanguageComponent?> LanguageEnt;
+    public readonly Entity<LanguageComponent> LanguageEnt;
     public readonly ComplexChatMessage Message;
     public readonly string Verb;
     public readonly ChatChannel ChatChannel;
@@ -18,7 +18,7 @@ public sealed class EntitySpokeLanguageEvent : EntityEventArgs
     /// </summary>
     public RadioChannelPrototype? RadioChannel;
 
-    public EntitySpokeLanguageEvent(EntityUid source, Entity<LanguageComponent?> languageEnt, ComplexChatMessage message, RadioChannelPrototype? radioChannel, string verb, ChatChannel chatChannel)
+    public EntitySpokeLanguageEvent(EntityUid source, Entity<LanguageComponent> languageEnt, ComplexChatMessage message, RadioChannelPrototype? radioChannel, string verb, ChatChannel chatChannel)
     {
         Source = source;
         Message = message;

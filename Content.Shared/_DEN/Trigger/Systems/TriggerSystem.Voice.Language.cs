@@ -24,8 +24,6 @@ public sealed partial class TriggerSystem
     private void OnListenLanguage(Entity<TriggerOnVoiceComponent> ent, ref ListenLanguageEvent args)
     {
         var languageEnt = args.LanguageEnt;
-        if (!Resolve(languageEnt, ref languageEnt.Comp))
-            return;
 
         if (!_audibleQuery.HasComponent(languageEnt))
             return;

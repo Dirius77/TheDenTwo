@@ -11,7 +11,7 @@ namespace Content.Server.Telephone;
 [ByRefEvent]
 public readonly record struct TelephoneMessageLanguageSentEvent(
     ComplexChatMessage Message,
-    Entity<LanguageComponent?> LanguageEnt,
+    Entity<LanguageComponent> LanguageEnt,
     EntityUid MessageSource);
 
 /// <summary>
@@ -20,7 +20,7 @@ public readonly record struct TelephoneMessageLanguageSentEvent(
 [ByRefEvent]
 public readonly record struct TelephoneMessageLanguageReceivedEvent(
     ComplexChatMessage Message,
-    Entity<LanguageComponent?> LanguageEnt,
+    Entity<LanguageComponent> LanguageEnt,
     string Verb,
     string Name,
     EntityUid MessageSource,

@@ -42,3 +42,13 @@
   - language-speech-verb-sign-whisper-1
   - language-speech-verb-sign-whisper-2
   - language-speech-verb-sign-whisper-3
+
+- type: languageWrapper
+  id: SignWrapper
+  dialog: chat-language-entity-sign-wrap-dialog
+  emote: chat-language-entity-sign-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-speak-wrap-prefix
+  message: chat-language-entity-sign-wrap-message
+  singularMessage: chat-language-entity-sign-wrap-message-singular
+  boldType: chat-language-entity-whisper-bold

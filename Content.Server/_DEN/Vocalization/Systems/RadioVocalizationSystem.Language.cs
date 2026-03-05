@@ -35,16 +35,15 @@ public sealed partial class RadioVocalizationSystem
             return false;
 
         var radioChannel = _proto.Index(channel);
-        var cmplxMessage = new ComplexChatMessage(message, "\"", false, false, false);
+        var cmplxMessage = _chat.ConvertMessageToComplex(message);
 
         _chat.SendEntityComplexSpeech(
             entity,
             cmplxMessage,
             ChatSystem.WhisperWrapper,
-            ChatTransmitRange.Normal,
             ChatChannel.Whisper,
-            radioChannel
-            );
+            ChatTransmitRange.Normal,
+            radioChannel);
 
         return true;
     }

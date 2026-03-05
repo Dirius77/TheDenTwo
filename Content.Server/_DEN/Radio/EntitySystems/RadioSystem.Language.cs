@@ -34,10 +34,6 @@ public sealed partial class RadioSystem
         IntrinsicRadioReceiverComponent component,
         ref RadioReceiveLanguageEvent args)
     {
-        var languageEnt = args.LanguageEnt;
-        if (!Resolve(languageEnt, ref languageEnt.Comp))
-            return;
-
         if (TryComp(uid, out ActorComponent? actor))
         {
             _chat.SendComplexMessageToEntity(
@@ -90,18 +86,15 @@ public sealed partial class RadioSystem
             Log.Warning("Default language entity is null! Unable to send message.");
             return;
         }
-        SendLanguageRadioMessage(uid, languageEnt.Value.AsNullable(), complex, channel, radioSource);
+        SendLanguageRadioMessage(uid, languageEnt.Value, complex, channel, radioSource);
     }
 
     public void SendLanguageRadioMessage(EntityUid messageSource,
-        Entity<LanguageComponent?> languageEnt,
+        Entity<LanguageComponent> languageEnt,
         ComplexChatMessage message,
         RadioChannelPrototype channel,
         EntityUid radioSource)
     {
-        if (!Resolve(languageEnt, ref languageEnt.Comp))
-            return;
-
         if (!_messages.Add(message.OriginalMessage))
             return;
 

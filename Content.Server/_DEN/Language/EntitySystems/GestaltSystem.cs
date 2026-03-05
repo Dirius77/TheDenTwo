@@ -1,9 +1,14 @@
 using Content.Server.Chat.Systems;
+using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
+using Content.Shared._DEN.Speech;
 using Content.Shared.Ghost;
+using Content.Shared.Mobs.Systems;
+using Content.Shared.Popups;
 using Content.Shared.Whitelist;
 using Robust.Server.Player;
+using Robust.Shared.Random;
 
 namespace Content.Server._DEN.Language.EntitySystems;
 
@@ -12,6 +17,9 @@ public sealed partial class GestaltSystem : EntitySystem
     [Dependency] private readonly SharedLanguageSystem _language = default!;
     [Dependency] private readonly IPlayerManager _playerManager = default!;
     [Dependency] private readonly EntityWhitelistSystem _whitelist = default!;
+    [Dependency] private readonly MobStateSystem _mobState = default!;
+    [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
+    [Dependency] private readonly IRobustRandom _random = default!;
 
     private EntityQuery<GestaltComponent> _gestaltQuery;
 
@@ -20,6 +28,42 @@ public sealed partial class GestaltSystem : EntitySystem
         _gestaltQuery = GetEntityQuery<GestaltComponent>();
 
         SubscribeLocalEvent<ExpandICChatRecipientsEvent>(OnExpandICChatRecipients);
+        SubscribeLocalEvent<GestaltComponent, LanguageRelayedEvent<SpeakLanguageAttemptEvent>>(OnSpeakLanguageAttempt);
+    }
+
+    private void OnSpeakLanguageAttempt(Entity<GestaltComponent> entity, ref LanguageRelayedEvent<SpeakLanguageAttemptEvent> args)
+    {
+        var gestalt = entity.Comp;
+
+        if (!gestalt.RequiresHost)
+            return;
+
+        var foundHost = false;
+        if (gestalt.HostWhitelist is { } whitelist)
+        {
+            var hostQuery = EntityQueryEnumerator<GestaltHostComponent>();
+            while (hostQuery.MoveNext(out var host, out var _))
+            {
+                if (!_whitelist.IsWhitelistPass(whitelist, host) || !_mobState.IsAlive(host))
+                    continue;
+
+                foundHost = true;
+                break;
+            }
+        }
+        else
+        {
+            foundHost = true;
+        }
+
+        if (!foundHost)
+        {
+            if (gestalt.MissingHostPopups.Count != 0)
+            {
+                _popupSystem.PopupEntity(Loc.GetString(_random.Pick(gestalt.MissingHostPopups)), args.Owner, args.Owner);
+            }
+            args.Args.Cancel();
+        }
     }
 
     private void OnExpandICChatRecipients(ExpandICChatRecipientsEvent args)
@@ -29,31 +73,6 @@ public sealed partial class GestaltSystem : EntitySystem
 
         if (!_gestaltQuery.TryGetComponent(spokenLangEnt, out var gestalt))
             return;
-
-        if (gestalt.RequiresHost)
-        {
-            var foundHost = false;
-            if (gestalt.HostWhitelist is { } whitelist)
-            {
-                var hostQuery = EntityQueryEnumerator<GestaltHostComponent>();
-                while (hostQuery.MoveNext(out var host, out var _))
-                {
-                    if (!_whitelist.IsWhitelistPass(whitelist, host))
-                        continue;
-
-                    foundHost = true;
-                    break;
-                }
-            }
-            else
-            {
-                foundHost = true;
-                Log.Warning("Gestalt wants a host but has no host whitelist, defaulting to success.");
-            }
-
-            if (!foundHost)
-                return;
-        }
 
         var ghostHearing = GetEntityQuery<GhostHearingComponent>();
         var xforms = GetEntityQuery<TransformComponent>();

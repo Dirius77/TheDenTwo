@@ -57,8 +57,8 @@ public sealed partial class VocalizationSystem
 
         // I skip the CanSpeak check because TrySendInGameICMessage does chat check anyway and it's not necessarily
         // trivial with languages, doing it twice is pointless.
-        var cmplxMessage = new ComplexChatMessage(message, "\"", false, false, false);
-        _chat.SendEntityComplexSpeech(entity, cmplxMessage, ChatSystem.SpeakWrapper, entity.Comp.HideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, ChatChannel.Local);
+        var cmplxMessage = _chat.ConvertMessageToComplex(message);
+        _chat.SendEntityComplexSpeech(entity, cmplxMessage, ChatSystem.SpeakWrapper, ChatChannel.Local, entity.Comp.HideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, languageOverride: language);
     }
 }
 

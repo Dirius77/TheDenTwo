@@ -1,3 +1,8 @@
+chat-language-entity-me-wrap-message = [italic]{$spacing}{ PROPER($entity) ->
+    *[false] The {$entityName}{$spacingClose}{$space}{$message}[/italic]
+     [true] {CAPITALIZE($entityName)}{$spacingClose}{$space}{$message}[/italic]
+    }
+
 chat-language-entity-speak-wrap-dialog = [font="{$fontType}" size={$fontSize}][color={$fontColor}]{$style}{$message}{$styleClose}[/color][/font]
 chat-language-entity-speak-wrap-emote = {$message}
 chat-language-entity-speak-wrap-language = [font size=11][color={$color}][bold]({$language}) [/bold][/color][/font]

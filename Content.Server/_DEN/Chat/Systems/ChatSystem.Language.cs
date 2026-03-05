@@ -5,13 +5,15 @@ using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
 using Content.Shared.Database;
+using Content.Shared.IdentityManagement;
 using Content.Shared.Radio;
+using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
+using Robust.Shared.Utility;
 
 namespace Content.Server.Chat.Systems;
-
 
 public sealed partial class ChatSystem
 {
@@ -23,28 +25,25 @@ public sealed partial class ChatSystem
     public void SendEntityComplexSpeech(EntityUid source,
         ComplexChatMessage originalMessage,
         ProtoId<LanguageWrapperPrototype> wrapperProto,
-        ChatTransmitRange range,
         ChatChannel chatChannel,
+        ChatTransmitRange range,
         RadioChannelPrototype? radioChannel = null,
         string? nameOverride = null,
         bool hideLog = false,
         bool ignoreActionBlocker = false,
         string? verbOverride = null,
-        Entity<LanguageComponent?>? languageOverride = null)
+        Entity<LanguageComponent>? languageOverride = null)
     {
         // Getting this first makes sure that if the language defaulted to something new it is set for CanSpeak
-        var retrievedLanguage = languageOverride ?? _language.GetCurrentLanguageEntity(source)?.AsNullable();
-        if (retrievedLanguage is null)
+        var retrievedLanguage = languageOverride ?? _language.GetCurrentLanguageEntity(source);
+        if (retrievedLanguage is not { } languageEnt)
         {
             Log.Warning("Entity: " + Name(source) + " attempted to speak without a language.");
             return;
         }
 
-        var languageEnt = retrievedLanguage.Value;
-        if (!Resolve(languageEnt, ref languageEnt.Comp))
-            return;
-
-        if (!_actionBlocker.CanSpeakLanguage(source, (languageEnt, languageEnt.Comp), chatChannel) && !ignoreActionBlocker)
+        if (!_actionBlocker.CanSpeakLanguage(source, (languageEnt, languageEnt.Comp), chatChannel) &&
+            !ignoreActionBlocker)
             return;
 
         var language = _prototypeManager.Index(languageEnt.Comp.Language);
@@ -71,23 +70,19 @@ public sealed partial class ChatSystem
                 speech = proto;
         }
 
-        string verb;
-        if (verbOverride != null)
-        {
-            verb = verbOverride;
-        }
-        else
-        {
-            verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
-        }
+        name = FormattedMessage.EscapeText(name);
 
-        if (language.WrapperOverrides is { } wrapperOverrides
-            && wrapperOverrides.TryGetValue(chatChannel, out var wrapperOverride))
+        var verb = verbOverride ?? Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
+
+        if (language.WrapperOverrides is { } wrapperOverrides &&
+            wrapperOverrides.TryGetValue(chatChannel, out var wrapperOverride))
             wrapperProto = wrapperOverride;
 
         var wrapper = _prototypeManager.Index(wrapperProto);
 
-        foreach (var (session, data) in GetRecipients(source, chatChannel == ChatChannel.Whisper ? WhisperMuffledRange : VoiceRange))
+        // TODO: It's still weird that this is hardcoded, but you can expand it anyway so it's not the end of the world.
+        foreach (var (session, data) in GetRecipients(source,
+                     chatChannel == ChatChannel.Whisper ? WhisperMuffledRange : VoiceRange))
         {
             var entRange = MessageRangeCheck(session, data, range);
             if (entRange == MessageRangeCheckResult.Disallowed)
@@ -105,7 +100,7 @@ public sealed partial class ChatSystem
             {
                 SendComplexMessageToEntity(source,
                     playerEntity,
-                    languageEnt.AsNullable(),
+                    languageEnt,
                     message,
                     wrapper,
                     chatChannel,
@@ -129,15 +124,14 @@ public sealed partial class ChatSystem
             null,
             null);
 
-        _replay.RecordServerMessage(
-            new ChatMessage(chatChannel,
-                unwrappedMessage,
-                wrappedMessage,
-                GetNetEntity(source),
-                null,
-                MessageRangeHideChatForReplay(range)));
+        _replay.RecordServerMessage(new ChatMessage(chatChannel,
+            unwrappedMessage,
+            wrappedMessage,
+            GetNetEntity(source),
+            null,
+            MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeLanguageEvent(source, languageEnt.AsNullable(), message, radioChannel, verb, chatChannel);
+        var ev = new EntitySpokeLanguageEvent(source, languageEnt, message, radioChannel, verb, chatChannel);
         RaiseLocalEvent(source, ev, true);
 
         if (!HasComp<ActorComponent>(source) || hideLog)
@@ -160,24 +154,36 @@ public sealed partial class ChatSystem
         if (original == unwrappedMessage)
         {
             if (name != Name(source))
-                _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Say from {source} as {name} in {languageName}: {original}.");
+            {
+                _adminLogger.Add(LogType.Chat,
+                    LogImpact.Low,
+                    $"Say from {source} as {name} in {languageName}: {original}.");
+            }
             else
+            {
                 _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Say from {source} in {languageName}: {original}.");
+            }
         }
         else
         {
             if (name != Name(source))
-                _adminLogger.Add(LogType.Chat, LogImpact.Low,
+            {
+                _adminLogger.Add(LogType.Chat,
+                    LogImpact.Low,
                     $"{chatChannel} from {source} as {name} in {languageName}, original: {original}, transformed: {unwrappedMessage}.");
+            }
             else
-                _adminLogger.Add(LogType.Chat, LogImpact.Low,
+            {
+                _adminLogger.Add(LogType.Chat,
+                    LogImpact.Low,
                     $"{chatChannel} from {source} in {languageName}, original: {original}, transformed: {unwrappedMessage}.");
+            }
         }
     }
 
     public void SendComplexMessageToEntity(EntityUid source,
         Entity<ActorComponent?> listener,
-        Entity<LanguageComponent?> speakingEnt,
+        Entity<LanguageComponent> speakingEnt,
         ComplexChatMessage originalMessage,
         LanguageWrapperPrototype wrapper,
         ChatChannel channel,
@@ -189,9 +195,6 @@ public sealed partial class ChatSystem
         Color? color)
     {
         if (!Resolve(listener, ref listener.Comp))
-            return;
-
-        if (!Resolve(speakingEnt, ref speakingEnt.Comp))
             return;
 
         var language = _prototypeManager.Index(speakingEnt.Comp.Language);
@@ -210,6 +213,7 @@ public sealed partial class ChatSystem
         {
             understanding = _prototypeManager.Index(understandEv.Understanding.Value.Comp.Fluency);
         }
+
         message = _language.ModifyMessageWithLanguage(speakingEnt,
             source,
             listener,
@@ -239,10 +243,14 @@ public sealed partial class ChatSystem
             name,
             verb,
             radioChannel,
-            color
-        );
+            color);
 
-        _chatManager.ChatMessageToOne(channel, unwrappedMessage, wrappedMessage, source, hideChat, listener.Comp.PlayerSession.Channel);
+        _chatManager.ChatMessageToOne(channel,
+            unwrappedMessage,
+            wrappedMessage,
+            source,
+            hideChat,
+            listener.Comp.PlayerSession.Channel);
     }
 
     // Returns the unwrapped message, as well as a wrapped version of the message based on the provided settings.
@@ -259,9 +267,11 @@ public sealed partial class ChatSystem
     {
         var langStr = "";
         if (!hideLanguage)
+        {
             langStr = Loc.GetString(wrapper.Language,
                 ("language", language.LocalizedAbbreviation),
                 ("color", language.FontColor));
+        }
 
         var prefix = Loc.GetString(wrapper.Prefix,
             ("language", langStr),
@@ -310,8 +320,7 @@ public sealed partial class ChatSystem
                 else
                 {
                     unwrappedBuilder.Append(part);
-                    wrappedBuilder.Append(Loc.GetString(wrapper.Emote,
-                        ("message", part)));
+                    wrappedBuilder.Append(Loc.GetString(wrapper.Emote, ("message", part)));
                 }
             }
         }
@@ -327,6 +336,69 @@ public sealed partial class ChatSystem
         return (unwrappedBuilder.ToString(), wrapResult);
     }
 
+    private void SendEntityComplexEmote(EntityUid source,
+        string action,
+        ChatTransmitRange range,
+        string? nameOverride,
+        bool hideLog = false,
+        bool checkEmote = true,
+        bool ignoreActionBlocker = false,
+        NetUserId? author = null)
+    {
+        if (!_actionBlocker.CanEmote(source) && !ignoreActionBlocker)
+            return;
+
+        var isDetailed = action.StartsWith("!");
+        if (isDetailed)
+            action = action[1..];
+
+        var useSpace = !(action.StartsWith("'") || action.StartsWith(",")) || isDetailed;
+
+        var ent = Identity.Entity(source, EntityManager);
+        string name;
+        if (nameOverride != null)
+        {
+            name = nameOverride;
+        }
+        else
+        {
+            // This may cause languages to interfere with a person's name even though they're emoting?
+            // It's probably fine...
+            // The other option is that pAIs don't inherit plushie names while emoting.
+            // It DOES also make the voicemask work for changing your emote name.
+            // Prebase has this.
+            var nameEv = new TransformSpeakerNameEvent(source, Name(ent));
+            RaiseLocalEvent(source, nameEv);
+            name = nameEv.VoiceName;
+        }
+        name = FormattedMessage.EscapeText(name);
+
+        var wrappedMessage = Loc.GetString("chat-language-entity-me-wrap-message",
+            ("entity", ent),
+            ("entityName", name),
+            ("spacing", isDetailed ? "(" : ""),
+            ("spacingClose", isDetailed ? ")" : ""),
+            ("space", useSpace ? " " : ""),
+            ("message", action));
+
+        if (checkEmote &&
+            !TryEmoteChatInput(source, action))
+            return;
+
+        SendInVoiceRange(ChatChannel.Emotes, action, wrappedMessage, source, range, author);
+        if (!hideLog)
+        {
+            if (name != Name(source))
+            {
+                _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Emote from {source} as {name}: {action}");
+            }
+            else
+            {
+                _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Emote from {source}: {action}");
+            }
+        }
+    }
+
     private ComplexChatMessage TransformComplexSpeech(EntityUid sender, ComplexChatMessage message)
     {
         var transformEvt = new TransformLanguageEvent(sender, message);
@@ -335,30 +407,7 @@ public sealed partial class ChatSystem
         return transformEvt.Message;
     }
 
-    private ComplexChatMessage ConvertMessageToComplex(string message)
-    {
-        var isDetailed = false;
-        var needsSpacing = true;
-        var needsSeparation = false;
-        if (message.StartsWith('!'))
-        {
-            isDetailed = true;
-            message = message[1..].Trim();
-            if (message.StartsWith('"'))
-            {
-                needsSeparation = true;
-            }
-            else if (message.StartsWith(',') || message.StartsWith('\''))
-            {
-                needsSpacing = false;
-            }
-        }
-
-        return new ComplexChatMessage(message, "\"", isDetailed, needsSpacing, needsSeparation);
-    }
-
-    private ComplexChatMessage SanitizeComplexMessage(
-        EntityUid source,
+    private ComplexChatMessage SanitizeComplexMessage(EntityUid source,
         ComplexChatMessage message,
         out List<string> emoteStrs,
         bool shouldCapitalize = true,
@@ -389,25 +438,5 @@ public sealed partial class ChatSystem
         }
 
         return new ComplexChatMessage(message, newParts);
-    }
-
-    public static string CoalesceComplexMessage(ComplexChatMessage msg)
-    {
-        var builder = new StringBuilder();
-        foreach (var (kind, part) in msg.Parts)
-        {
-            if (kind == ChatPart.Dialog)
-            {
-                builder.Append(msg.Delimiter);
-                builder.Append(part);
-                builder.Append(msg.Delimiter);
-            }
-            else
-            {
-                builder.Append(part);
-            }
-        }
-
-        return builder.ToString();
     }
 }

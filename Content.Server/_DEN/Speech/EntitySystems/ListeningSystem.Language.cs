@@ -21,7 +21,7 @@ public sealed partial class ListeningSystem
         PingLanguageListeners(ev.Source, ev.LanguageEnt, ev.Message, ev.Verb, ev.ChatChannel);
     }
 
-    public void PingLanguageListeners(EntityUid source, Entity<LanguageComponent?> languageEnt, ComplexChatMessage message, string verb, ChatChannel channel)
+    public void PingLanguageListeners(EntityUid source, Entity<LanguageComponent> languageEnt, ComplexChatMessage message, string verb, ChatChannel channel)
     {
         // TODO whispering / audio volume? Microphone sensitivity?
         // for now, whispering just arbitrarily reduces the listener's max range.

@@ -67,14 +67,11 @@ public sealed partial class ParrotMemorySystem
     }
 
     private void TryLearnLanguage(Entity<ParrotMemoryComponent?, ParrotListenerComponent?> entity,
-        Entity<LanguageComponent?> languageEnt,
+        Entity<LanguageComponent> languageEnt,
         ComplexChatMessage incomingMessage,
         EntityUid source)
     {
         if (!Resolve(entity, ref entity.Comp1, ref entity.Comp2))
-            return;
-
-        if (!Resolve(languageEnt, ref languageEnt.Comp))
             return;
 
         if (!_audibleQuery.HasComponent(languageEnt))

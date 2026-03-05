@@ -7,7 +7,7 @@ using Content.Shared.Speech;
 namespace Content.Server.Radio;
 
 [ByRefEvent]
-public readonly record struct RadioReceiveLanguageEvent(ComplexChatMessage Message, Entity<LanguageComponent?> LanguageEnt, SpeechVerbPrototype Speech, string Name, string Verb, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource);
+public readonly record struct RadioReceiveLanguageEvent(ComplexChatMessage Message, Entity<LanguageComponent> LanguageEnt, SpeechVerbPrototype Speech, string Name, string Verb, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource);
 
 [ByRefEvent]
 public readonly record struct HeadsetRadioReceiveLanguageRelayEvent(RadioReceiveLanguageEvent RelayedEvent);

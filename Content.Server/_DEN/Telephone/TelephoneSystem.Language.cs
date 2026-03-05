@@ -86,17 +86,14 @@ public sealed partial class TelephoneSystem
             : ChatTransmitRange.GhostRangeLimit;
         var whisper = entity.Comp.SpeakerVolume == TelephoneVolume.Whisper;
 
-        _chat.SendEntityComplexSpeech(speaker, args.Message, TelephoneWrapper, range, whisper ? ChatChannel.Whisper : ChatChannel.Local, null, name, languageOverride: args.LanguageEnt);
+        _chat.SendEntityComplexSpeech(speaker, args.Message, TelephoneWrapper, whisper ? ChatChannel.Whisper : ChatChannel.Local, range, null, name, languageOverride: args.LanguageEnt);
     }
 
-    private void SendTelephoneLanguageMessage(EntityUid messageSource, Entity<LanguageComponent?> languageEnt, ComplexChatMessage message, Entity<TelephoneComponent> source)
+    private void SendTelephoneLanguageMessage(EntityUid messageSource, Entity<LanguageComponent> languageEnt, ComplexChatMessage message, Entity<TelephoneComponent> source)
     {
         // This method assumes that you've already checked that this
         // telephone is able to transmit messages and that it can
         // send messages to any telephones linked to it
-        if (!Resolve(languageEnt, ref languageEnt.Comp))
-            return;
-
         var language = _prototype.Index(languageEnt.Comp.Language);
 
         var ev = new TransformSpeakerNameEvent(messageSource, MetaData(messageSource).EntityName);

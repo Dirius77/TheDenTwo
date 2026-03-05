@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using Content.Shared._DEN.Language;
 using Content.Shared.Speech;
 using Robust.Shared.Prototypes;
@@ -58,6 +59,28 @@ public abstract partial class SharedChatSystem
 
         // if no applicable suffix verb return the normal one used by the entity
         return current ?? GetSpeechVerb(source, lastDialog);
+    }
+
+    public ComplexChatMessage ConvertMessageToComplex(string message)
+    {
+        var isDetailed = false;
+        var needsSpacing = true;
+        var needsSeparation = false;
+        if (message.StartsWith('!'))
+        {
+            isDetailed = true;
+            message = message[1..].Trim();
+            if (message.StartsWith('"'))
+            {
+                needsSeparation = true;
+            }
+            else if (message.StartsWith(',') || message.StartsWith('\''))
+            {
+                needsSpacing = false;
+            }
+        }
+
+        return new ComplexChatMessage(message, "\"", isDetailed, needsSpacing, needsSeparation);
     }
 }
 

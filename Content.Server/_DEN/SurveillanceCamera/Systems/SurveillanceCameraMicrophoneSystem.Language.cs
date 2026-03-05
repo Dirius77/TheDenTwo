@@ -41,12 +41,12 @@ public sealed partial class SurveillanceCameraMicrophoneSystem
 public sealed class SurveillanceCameraSpeechLanguageSendEvent : EntityEventArgs
 {
     public EntityUid Speaker { get; }
-    public Entity<LanguageComponent?> LanguageEnt { get; }
+    public Entity<LanguageComponent> LanguageEnt { get; }
     public ComplexChatMessage Message { get; }
     public string Verb { get; }
 
     public SurveillanceCameraSpeechLanguageSendEvent(EntityUid speaker,
-        Entity<LanguageComponent?> languageEnt,
+        Entity<LanguageComponent> languageEnt,
         ComplexChatMessage message,
         string verb)
     {

@@ -14,3 +14,13 @@
   - type: Gestalt
   - type: MinimumFluency
     minimum: Fluent
+
+- type: languageWrapper
+  id: TelepathyWrapper
+  dialog: chat-language-entity-speak-wrap-dialog
+  emote: chat-language-entity-speak-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-telepathy-wrap-prefix
+  message: chat-language-entity-telepathy-wrap-message
+  singularMessage: chat-language-entity-telepathy-wrap-message-singular
+  boldType: char-language-entity-speak-bold
