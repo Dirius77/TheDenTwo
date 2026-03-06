@@ -2,11 +2,8 @@ using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
-using Content.Shared.Fax;
-using Content.Shared.GameTicking;
+using Robust.Shared.Containers;
 using Robust.Client.Player;
-using Robust.Shared.Player;
-using Robust.Shared.Timing;
 
 namespace Content.Client._DEN.Language.EntitySystems;
 

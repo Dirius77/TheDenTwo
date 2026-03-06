@@ -1,4 +1,4 @@
-﻿# base
+# base
 
 - type: entity
   id: VendingMachine
@@ -107,6 +107,9 @@
   - type: Appearance
   - type: WiresVisuals
   # DEN: Languages
+  - type: ContainerContainer
+    containers:
+      languages: !type:Container
   - type: LanguageCommunicator
     languages:
       Basic: [ true, Fluent ]
@@ -175,6 +178,9 @@
     usesApcPower: true
   - type: Rotatable
   # DEN: Languages
+  - type: ContainerContainer
+    containers:
+      languages: !type:Container
   - type: LanguageCommunicator
     languages:
       Basic: [ true, Fluent ]

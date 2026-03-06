@@ -8,7 +8,6 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 public sealed partial class WhisperMuffleSystem : EntitySystem
 {
     [Dependency] private readonly ExamineSystemShared _examine = default!;
-    [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly SharedChatSystem _chat = default!;
 
     private EntityQuery<TransformComponent> _xforms;

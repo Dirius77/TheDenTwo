@@ -11,10 +11,10 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 public abstract partial class SharedLanguageSystem : EntitySystem
 {
     [Dependency] protected readonly IConfigurationManager _cfg = default!;
-    [Dependency] private readonly SharedContainerSystem _container = default!;
+    [Dependency] protected readonly SharedContainerSystem _container = default!;
+    [Dependency] protected readonly IGameTiming _timing = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly INetManager _netMan = default!;
-    [Dependency] protected readonly IGameTiming _timing = default!;
 
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
     public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
@@ -28,7 +28,8 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorInit);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorCompInit);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, MapInitEvent>(OnLanguageCommunicatorMapInit);
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentShutdown>(OnLanguageCommunicatorShutdown);
         SubscribeLocalEvent<LanguageCommunicatorComponent, EntInsertedIntoContainerMessage>(
             OnLanguageCommunicatorEntityInserted);
@@ -58,13 +59,16 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         TrySetLanguage(user, (languageEnt, langComp));
     }
 
-    private void OnLanguageCommunicatorInit(Entity<LanguageCommunicatorComponent> ent, ref ComponentInit evt)
+    private void OnLanguageCommunicatorCompInit(Entity<LanguageCommunicatorComponent> ent, ref ComponentInit evt)
     {
         ent.Comp.Languages = _container.EnsureContainer<Container>(ent, LanguageCommunicatorComponent.ContainerId);
+    }
 
+    private void OnLanguageCommunicatorMapInit(Entity<LanguageCommunicatorComponent> ent, ref MapInitEvent evt)
+    {
         foreach (var (language, (speaks, fluency)) in ent.Comp.BaseLanguages)
         {
-            TryAddLanguage(ent, language, speaks, fluency, out _);
+            TryAddLanguage(ent, language, speaks, fluency, out var lang);
         }
     }
 
