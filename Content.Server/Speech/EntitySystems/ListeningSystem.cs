@@ -15,14 +15,19 @@ public sealed partial class ListeningSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<EntitySpokeEvent>(OnSpeak);
+
+        InitializeLanguage(); // DEN: Languages
+
+        //SubscribeLocalEvent<EntitySpokeEvent>(OnSpeak); // DEN: Languages, see EntitySpokeLanguageEvent
     }
 
+    [Obsolete("Use OnSpeakLanguage instead.", true)] // DEN: Languages
     private void OnSpeak(EntitySpokeEvent ev)
     {
         PingListeners(ev.Source, ev.Message, ev.ObfuscatedMessage);
     }
 
+    [Obsolete("Use PingListenersLanguage instead.", true)] // DEN: Languages
     public void PingListeners(EntityUid source, string message, string? obfuscatedMessage)
     {
         // TODO whispering / audio volume? Microphone sensitivity?

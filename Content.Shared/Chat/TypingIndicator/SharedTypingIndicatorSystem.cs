@@ -31,7 +31,7 @@ public abstract partial class SharedTypingIndicatorSystem : EntitySystem
         SubscribeLocalEvent<TypingIndicatorClothingComponent, ClothingGotUnequippedEvent>(OnGotUnequipped);
         SubscribeLocalEvent<TypingIndicatorClothingComponent, InventoryRelayedEvent<BeforeShowTypingIndicatorEvent>>(BeforeShow);
 
-        SubscribeAllEvent<TypingChangedEvent>(OnTypingChanged);
+        SubscribeAllEvent<TypingChangedEvent>(OnTypingLanguageChanged); // DEN: Languages
     }
 
     private void OnPlayerAttached(PlayerAttachedEvent ev)
@@ -63,6 +63,7 @@ public abstract partial class SharedTypingIndicatorSystem : EntitySystem
         args.Args.TryUpdateTimeAndIndicator(entity.Comp.TypingIndicatorPrototype, entity.Comp.GotEquippedTime);
     }
 
+    [Obsolete("Use OnTypingLanguageChanged instead.", true)] // DEN: Languages, I dunno what to name this function.
     private void OnTypingChanged(TypingChangedEvent ev, EntitySessionEventArgs args)
     {
         var uid = args.SenderSession.AttachedEntity;

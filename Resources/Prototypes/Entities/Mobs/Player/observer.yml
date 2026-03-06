@@ -106,6 +106,7 @@
     radius: 6
     castShadows: false
     enabled: false
+  - type: UniversalLanguageSpeaker # DEN: Languages, Ghosts speak everything.
 
 # proto for player ghosts specifically
 - type: entity

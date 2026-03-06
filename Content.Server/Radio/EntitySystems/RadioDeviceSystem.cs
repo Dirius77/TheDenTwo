@@ -37,18 +37,20 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
         SubscribeLocalEvent<RadioMicrophoneComponent, ComponentInit>(OnMicrophoneInit);
         SubscribeLocalEvent<RadioMicrophoneComponent, ExaminedEvent>(OnExamine);
         SubscribeLocalEvent<RadioMicrophoneComponent, ActivateInWorldEvent>(OnActivateMicrophone);
-        SubscribeLocalEvent<RadioMicrophoneComponent, ListenEvent>(OnListen);
-        SubscribeLocalEvent<RadioMicrophoneComponent, ListenAttemptEvent>(OnAttemptListen);
+        //SubscribeLocalEvent<RadioMicrophoneComponent, ListenEvent>(OnListen); // DEN: Languages
+        //SubscribeLocalEvent<RadioMicrophoneComponent, ListenAttemptEvent>(OnAttemptListen); // DEN: Languages
         SubscribeLocalEvent<RadioMicrophoneComponent, PowerChangedEvent>(OnPowerChanged);
 
         SubscribeLocalEvent<RadioSpeakerComponent, ComponentInit>(OnSpeakerInit);
         SubscribeLocalEvent<RadioSpeakerComponent, ActivateInWorldEvent>(OnActivateSpeaker);
-        SubscribeLocalEvent<RadioSpeakerComponent, RadioReceiveEvent>(OnReceiveRadio);
+        // SubscribeLocalEvent<RadioSpeakerComponent, RadioReceiveEvent>(OnReceiveRadio); // DEN: Languages
 
         SubscribeLocalEvent<IntercomComponent, EncryptionChannelsChangedEvent>(OnIntercomEncryptionChannelsChanged);
         SubscribeLocalEvent<IntercomComponent, ToggleIntercomMicMessage>(OnToggleIntercomMic);
         SubscribeLocalEvent<IntercomComponent, ToggleIntercomSpeakerMessage>(OnToggleIntercomSpeaker);
         SubscribeLocalEvent<IntercomComponent, SelectIntercomChannelMessage>(OnSelectIntercomChannel);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     public override void Update(float frameTime)
@@ -149,6 +151,7 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
         }
     }
 
+    [Obsolete("Use OnListenLanguage instead.", true)] // DEN: Languages
     private void OnListen(EntityUid uid, RadioMicrophoneComponent component, ListenEvent args)
     {
         if (HasComp<RadioSpeakerComponent>(args.Source))
@@ -159,6 +162,7 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
             _radio.SendRadioMessage(args.Source, args.Message, channel, uid);
     }
 
+    [Obsolete("Use OnAttemptListenLanguage instead.", true)] // DEN: Languages
     private void OnAttemptListen(EntityUid uid, RadioMicrophoneComponent component, ListenAttemptEvent args)
     {
         if (component.PowerRequired && !this.IsPowered(uid, EntityManager)
@@ -168,6 +172,7 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
         }
     }
 
+    [Obsolete("Use OnReceiveLanguageRadio instead.", true)] // DEN: Languages
     private void OnReceiveRadio(EntityUid uid, RadioSpeakerComponent component, ref RadioReceiveEvent args)
     {
         if (uid == args.RadioSource)

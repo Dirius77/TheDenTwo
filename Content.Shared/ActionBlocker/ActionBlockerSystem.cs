@@ -141,6 +141,7 @@ namespace Content.Shared.ActionBlocker
             return !itemEv.Cancelled;
         }
 
+        [Obsolete("Use CanSpeakLanguage instead.", true)] // DEN: Languages
         public bool CanSpeak(EntityUid uid)
         {
             // This one is used as broadcast

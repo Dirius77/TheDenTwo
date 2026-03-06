@@ -1,0 +1,30 @@
+- type: languageFluency
+  id: Fluent
+  name: fluency-fluent
+  understanding: 100
+
+- type: languageFluency
+  id: Great
+  name: fluency-great
+  understanding: 75
+
+- type: languageFluency
+  id: Good
+  name: fluency-good
+  understanding: 50
+
+- type: languageFluency
+  id: Poor
+  name: fluency-poor
+  understanding: 25
+
+# Languages that are related to each other have a related fluency.
+- type: languageFluency
+  id: Related
+  name: fluency-related
+  understanding: 20
+
+- type: languageFluency
+  id: Unfamiliar
+  name: fluency-unfamiliar
+  understanding: 0

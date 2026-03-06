@@ -12,6 +12,8 @@ namespace Content.Server.Chat.Systems;
 
 public sealed partial class ChatSystem
 {
+    
+    [Obsolete("Use SendEntityComplexSpeech instead.", true)] // DEN: Languages
     private void SendEntitySpeak(
         EntityUid source,
         string originalMessage,
@@ -84,6 +86,7 @@ public sealed partial class ChatSystem
         }
     }
 
+    [Obsolete("Use SendEntityComplexSpeech instead.", true)] // DEN: Languages
     private void SendEntityWhisper(
         EntityUid source,
         string originalMessage,

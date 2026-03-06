@@ -136,7 +136,7 @@ public sealed partial class RoboticsConsoleSystem : SharedRoboticsConsoleSystem
         _deviceNetwork.QueuePacket(ent, args.Address, payload);
 
         var message = Loc.GetString(ent.Comp.DestroyMessage, ("name", data.Name));
-        _radio.SendRadioMessage(ent, message, ent.Comp.RadioChannel, ent);
+        _radio.SendLanguageRadioMessage(ent, message, ent.Comp.RadioChannel, ent); // DEN: Languages
         _adminLogger.Add(LogType.Action, LogImpact.Extreme, $"{ToPrettyString(args.Actor):user} destroyed borg {data.Name} with address {args.Address}");
 
         ent.Comp.NextDestroy = now + ent.Comp.DestroyCooldown;

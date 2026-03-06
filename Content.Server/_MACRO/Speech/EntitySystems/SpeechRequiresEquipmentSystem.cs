@@ -1,5 +1,6 @@
 using Content.Server._MACRO.Speech.Components;
 using Content.Server.Speech.Components;
+using Content.Shared._DEN.Speech;
 using Content.Shared.Inventory;
 using Content.Shared.Popups;
 using Content.Shared.Speech;
@@ -17,10 +18,10 @@ public sealed partial class SpeechRequiresEquipmentSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<SpeechRequiresEquipmentComponent, SpeakAttemptEvent>(OnSpeechAttempt);
+        SubscribeLocalEvent<SpeechRequiresEquipmentComponent, SpeakLanguageAttemptEvent>(OnSpeechAttempt); // DEN: Languages
     }
 
-    public void OnSpeechAttempt(Entity<SpeechRequiresEquipmentComponent> ent, ref SpeakAttemptEvent args)
+    public void OnSpeechAttempt(Entity<SpeechRequiresEquipmentComponent> ent, ref SpeakLanguageAttemptEvent args) // DEN: Languages
     {
         if (_inventory.TryGetContainerSlotEnumerator(ent.Owner, out var enumerator, SlotFlags.WITHOUT_POCKET))
         {

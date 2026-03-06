@@ -42,10 +42,12 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
 
         SubscribeLocalEvent<ParrotListenerComponent, MapInitEvent>(ListenerOnMapInit);
 
-        SubscribeLocalEvent<ParrotListenerComponent, ListenEvent>(OnListen);
-        SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveRelayEvent>(OnHeadsetReceive);
+        //SubscribeLocalEvent<ParrotListenerComponent, ListenEvent>(OnListen); // DEN: Languages, see ListenLanguageEvent
+        //SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveRelayEvent>(OnHeadsetReceive); // DEN: Languages, see HeadsetRadioReceiveLanguageRelayEvent
 
-        SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeEvent>(OnTryVocalize);
+        //SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeEvent>(OnTryVocalize); // DEN: Languages, see TryVocalizeLanguageEvent
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnErase(ref EraseEvent args)
@@ -60,12 +62,14 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
             Log.Warning($"Entity {ToPrettyString(entity)} has a ParrotListenerComponent but was not given an ActiveListenerComponent");
     }
 
+    [Obsolete("Use OnLanguageListen instead.")] // DEN: Languages
     private void OnListen(Entity<ParrotListenerComponent> entity, ref ListenEvent args)
     {
 
         TryLearn(entity.Owner, args.Message, args.Source);
     }
 
+    [Obsolete("Use OnHeadsetReceiveLanguage instead.")] // DEN: Languages
     private void OnHeadsetReceive(Entity<ParrotListenerComponent> entity, ref HeadsetRadioReceiveRelayEvent args)
     {
         var message = args.RelayedEvent.Message;
@@ -78,6 +82,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
     /// Called when an entity with a ParrotMemoryComponent tries to vocalize.
     /// This function picks a message from memory and sets the event to handled
     /// </summary>
+    [Obsolete("Use OnTryVocalizeLanguage instead.", true)] // DEN: Languages
     private void OnTryVocalize(Entity<ParrotMemoryComponent> entity, ref TryVocalizeEvent args)
     {
         // return if this was already handled
@@ -142,15 +147,17 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
             return;
 
         // actually commit this message to memory
-        Learn((entity, entity.Comp1), message, source);
+        //Learn((entity, entity.Comp1), message, source); DEN: Languages
     }
 
+    /* DEN: Languages
     /// <summary>
     /// Actually learn a message and commit it to memory
     /// </summary>
     /// <param name="entity">Entity learning a new word</param>
     /// <param name="message">Message to learn</param>
     /// <param name="source">Source EntityUid of the message</param>
+    [Obsolete("Use LearnLanguage instead.")] // DEN: Languages
     private void Learn(Entity<ParrotMemoryComponent> entity, string message, EntityUid source)
     {
         // log a low-priority chat type log to the admin logger
@@ -176,6 +183,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         var replaceIdx = _random.Next(entity.Comp.SpeechMemories.Count);
         entity.Comp.SpeechMemories[replaceIdx] = newMemory;
     }
+    */
 
     /// <summary>
     /// Delete all messages from a specified player on all ParrotMemoryComponents

@@ -19,7 +19,9 @@ namespace Content.Server.Speech
         {
             base.Initialize();
 
-            SubscribeLocalEvent<SpeechComponent, EntitySpokeEvent>(OnEntitySpoke);
+            InitializeLanguage(); // DEN: Languages
+
+            //SubscribeLocalEvent<SpeechComponent, EntitySpokeEvent>(OnEntitySpoke); // DEN: Languages, see EntitySpokeLanguageEvent
         }
 
         public SoundSpecifier? GetSpeechSound(Entity<SpeechComponent> ent, string message)
@@ -67,6 +69,7 @@ namespace Content.Server.Speech
             return contextSound;
         }
 
+        [Obsolete("Use OnEntitySpokeLanguage instead", true)] // DEN: Languages
         private void OnEntitySpoke(EntityUid uid, SpeechComponent component, EntitySpokeEvent args)
         {
             if (component.SpeechSounds == null)

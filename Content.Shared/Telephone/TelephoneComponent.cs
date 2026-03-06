@@ -180,12 +180,14 @@ public record struct TelephoneCallEndedEvent();
 /// <summary>
 /// Raised when a chat message is sent by a telephone to another
 /// </summary>
+[Obsolete("Use TelephoneMessageLanguageSentEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
 public readonly record struct TelephoneMessageSentEvent(string Message, MsgChatMessage ChatMsg, EntityUid MessageSource);
 
 /// <summary>
 /// Raised when a chat message is received by a telephone from another
 /// </summary>
+[Obsolete("Use TelephoneMessageLanguageReceivedEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
 public readonly record struct TelephoneMessageReceivedEvent(string Message, MsgChatMessage ChatMsg, EntityUid MessageSource, Entity<TelephoneComponent> TelephoneSource);
 

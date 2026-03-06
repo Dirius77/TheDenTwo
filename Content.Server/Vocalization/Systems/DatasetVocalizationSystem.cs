@@ -15,9 +15,12 @@ public sealed partial class DatasetVocalizationSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<DatasetVocalizerComponent, TryVocalizeEvent>(OnTryVocalize);
+        //SubscribeLocalEvent<DatasetVocalizerComponent, TryVocalizeEvent>(OnTryVocalize); // DEN: Languages, see TryVocalizeLanguageEvent
+
+        InitializeLanguage(); // DEN: Languages
     }
 
+    [Obsolete("Obsolete, use OnTryVocalizeLanguage instead.", true)] // DEN: Languages
     private void OnTryVocalize(Entity<DatasetVocalizerComponent> ent, ref TryVocalizeEvent args)
     {
         if (args.Handled)

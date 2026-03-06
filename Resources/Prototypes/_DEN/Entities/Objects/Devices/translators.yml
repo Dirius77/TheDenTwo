@@ -1,0 +1,46 @@
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: BaseTranslatorUnpowered
+  name: translator
+  description: Translates languages
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/Devices/translator.rsi
+    state: icon
+    layers:
+    - state: icon
+    - state: translator
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+      shader: unshaded
+      visible: false
+  - type: Appearance
+  - type: ItemToggle
+  - type: GenericVisualizer
+    visuals:
+      enum.ToggleableVisuals.Enabled:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+  - type: BatteryVisuals
+  - type: StaticPrice
+    price: 50
+
+- type: entity
+  abstract: true
+  parent: [ BaseTranslatorUnpowered, PowerCellSlotMediumItem ]
+  id: BaseTranslatorPowered
+  name: translator
+  description: Translates languages
+  components:
+  - type: ToggleCellDraw
+
+- type: entity
+  parent: BaseTranslatorPowered
+  id: DebugTranslator
+  name: debug translator
+  components:
+  - type: Translator
+    requires: Basic
+    grants:
+      DebugParent: [ true, Fluent ]

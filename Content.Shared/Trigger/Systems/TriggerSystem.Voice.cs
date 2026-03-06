@@ -1,9 +1,11 @@
+using Content.Shared._DEN.Language;
 using Content.Shared.Trigger.Components.Triggers;
 using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
 using Content.Shared.Database;
 using Content.Shared.Examine;
 using Content.Shared.Verbs;
+using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Trigger.Systems;
 
@@ -13,8 +15,10 @@ public sealed partial class TriggerSystem
     {
         SubscribeLocalEvent<TriggerOnVoiceComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<TriggerOnVoiceComponent, ExaminedEvent>(OnVoiceExamine);
-        SubscribeLocalEvent<TriggerOnVoiceComponent, ListenEvent>(OnListen);
+        //SubscribeLocalEvent<TriggerOnVoiceComponent, ListenEvent>(OnListen); // DEN: Languages, see ListenLanguageEvent
         SubscribeLocalEvent<TriggerOnVoiceComponent, GetVerbsEvent<AlternativeVerb>>(OnVoiceGetAltVerbs);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnMapInit(Entity<TriggerOnVoiceComponent> ent, ref MapInitEvent args)
@@ -40,9 +44,17 @@ public sealed partial class TriggerSystem
         else if (component.InspectInitializedLoc != null && !string.IsNullOrWhiteSpace(component.KeyPhrase))
         {
             args.PushText(Loc.GetString(component.InspectInitializedLoc.Value, ("keyphrase", component.KeyPhrase)));
+            // DEN: Display what language was recorded.
+            if (component.KeyLanguage is { } keyLangId)
+            {
+                var keyLang = _proto.Index(keyLangId);
+                args.PushText(Loc.GetString("language-trigger-on-voice-examine", ("language", keyLang.Abbreviation)));
+            }
         }
     }
 
+    /* // DEN: Gotta comment this all out because it doesn't compile anymore.
+    [Obsolete("Use OnListenLanguage instead.", true)] // DEN: Languages
     private void OnListen(Entity<TriggerOnVoiceComponent> ent, ref ListenEvent args)
     {
         var component = ent.Comp;
@@ -77,6 +89,7 @@ public sealed partial class TriggerSystem
             RaiseLocalEvent(ent, ref voice);
         }
     }
+    */
 
     private void OnVoiceGetAltVerbs(Entity<TriggerOnVoiceComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
     {
@@ -168,9 +181,10 @@ public sealed partial class TriggerSystem
     /// <summary>
     /// Stop recording and set the current keyphrase message.
     /// </summary>
-    public void FinishRecording(Entity<TriggerOnVoiceComponent> ent, EntityUid source, string message)
+    public void FinishRecording(Entity<TriggerOnVoiceComponent> ent, EntityUid source, string message, ProtoId<LanguagePrototype> language) // DEN: Languages
     {
         ent.Comp.KeyPhrase = message;
+        ent.Comp.KeyLanguage = language; // DEN: Languages
         ent.Comp.IsRecording = false;
         Dirty(ent);
 
@@ -186,6 +200,7 @@ public sealed partial class TriggerSystem
     public void ClearRecording(Entity<TriggerOnVoiceComponent> ent)
     {
         ent.Comp.KeyPhrase = null;
+        ent.Comp.KeyLanguage = null; // DEN: Languages
         ent.Comp.IsRecording = false;
         Dirty(ent);
         RemComp<ActiveListenerComponent>(ent);
@@ -200,6 +215,7 @@ public sealed partial class TriggerSystem
             return;
 
         ent.Comp.KeyPhrase = Loc.GetString(ent.Comp.DefaultKeyPhrase);
+        ent.Comp.KeyLanguage = ent.Comp.DefaultKeyLanguage; // DEN: Languages
         ent.Comp.IsRecording = false;
         Dirty(ent);
         UpdateListening(ent);

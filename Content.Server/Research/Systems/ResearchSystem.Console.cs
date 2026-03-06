@@ -54,7 +54,7 @@ public sealed partial class ResearchSystem
                 ("amount", technologyPrototype.Cost),
                 ("approver", _identity.GetIdentityShortInfo(act, uid) ?? string.Empty)
             );
-            _radio.SendRadioMessage(uid, message, component.AnnouncementChannel, uid, escapeMarkup: false);
+            _radio.SendLanguageRadioMessage(uid, message, component.AnnouncementChannel, uid, escapeMarkup: false); // DEN: Languages
         }
 
         SyncClientWithServer(uid);

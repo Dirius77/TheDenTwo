@@ -1,0 +1,5 @@
+- type: localizedDataset
+  id: CommonWords
+  values:
+    prefix: common-words-dataset-
+    count: 1000

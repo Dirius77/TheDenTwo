@@ -16,9 +16,11 @@ public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ComponentInit>(OnInit);
-        SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenEvent>(RelayEntityMessage);
-        SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenAttemptEvent>(CanListen);
+        //SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenEvent>(RelayEntityMessage); // DEN: Languages, see ListenLanguageEvent
+        //SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenAttemptEvent>(CanListen); // DEN: Language, see ListenLanguageAttemptEvent
         SubscribeLocalEvent<ExpandICChatRecipientsEvent>(OnExpandRecipients);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnExpandRecipients(ExpandICChatRecipientsEvent ev)
@@ -58,6 +60,7 @@ public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem
             RemCompDeferred<ActiveListenerComponent>(uid);
     }
 
+    [Obsolete("Use CanListenLanguage instead.", true)] // DEN: Languages
     public void CanListen(EntityUid uid, SurveillanceCameraMicrophoneComponent microphone, ListenAttemptEvent args)
     {
         // TODO maybe just make this a part of ActiveListenerComponent?
@@ -65,6 +68,7 @@ public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem
             args.Cancel();
     }
 
+    [Obsolete("Use RelayEntityLanguageMessage instead.", true)] // DEN: Languages
     public void RelayEntityMessage(EntityUid uid, SurveillanceCameraMicrophoneComponent component, ListenEvent args)
     {
         if (!TryComp(uid, out SurveillanceCameraComponent? camera))
@@ -95,6 +99,7 @@ public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem
     }
 }
 
+[Obsolete("Use SurveillanceCameraSpeechLanguageSendEvent instead.", true)] // DEN: Languages
 public sealed class SurveillanceCameraSpeechSendEvent : EntityEventArgs
 {
     public EntityUid Speaker { get; }

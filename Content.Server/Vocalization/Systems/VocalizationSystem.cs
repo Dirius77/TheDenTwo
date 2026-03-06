@@ -25,7 +25,8 @@ public sealed partial class VocalizationSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<VocalizerComponent, MapInitEvent>(OnMapInit);
-        SubscribeLocalEvent<VocalizerRequiresPowerComponent, TryVocalizeEvent>(OnRequiresPowerTryVocalize);
+        //SubscribeLocalEvent<VocalizerRequiresPowerComponent, TryVocalizeEvent>(OnRequiresPowerTryVocalize); // DEN: Languages, see TryVocalizeLanguageEvent
+        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnMapInit(Entity<VocalizerComponent> ent, ref MapInitEvent args)
@@ -33,6 +34,7 @@ public sealed partial class VocalizationSystem : EntitySystem
         ent.Comp.NextVocalizeInterval = _random.Next(ent.Comp.MinVocalizeInterval, ent.Comp.MaxVocalizeInterval);
     }
 
+    [Obsolete("Use OnRequiresPowerTryVocalizeLanguage instead.", true)] // DEN: Languages
     private void OnRequiresPowerTryVocalize(Entity<VocalizerRequiresPowerComponent> ent, ref TryVocalizeEvent args)
     {
         if (!TryComp<ApcPowerReceiverComponent>(ent, out var receiver))
@@ -45,6 +47,7 @@ public sealed partial class VocalizationSystem : EntitySystem
     /// Try speaking by raising a TryVocalizeEvent
     /// This event is passed to systems adding a message to it and setting it to handled
     /// </summary>
+    [Obsolete("Use TrySpeakLanguage instead.", true)] // DEN: Languages
     private void TrySpeak(Entity<VocalizerComponent> entity)
     {
         var tryVocalizeEvent = new TryVocalizeEvent();
@@ -70,6 +73,7 @@ public sealed partial class VocalizationSystem : EntitySystem
     /// <summary>
     /// Actually say something.
     /// </summary>
+    [Obsolete("Use SpeakLanguage instead.", true)] // DEN: Languages
     private void Speak(Entity<VocalizerComponent> entity, string message)
     {
         // raise a VocalizeEvent
@@ -115,7 +119,7 @@ public sealed partial class VocalizationSystem : EntitySystem
                 vocalizer.NextVocalizeInterval = _gameTiming.CurTime + randomSpeakInterval;
 
             // try to speak
-            TrySpeak((uid, vocalizer));
+            TrySpeakLanguage((uid, vocalizer)); // DEN: Languages
         }
     }
 }
@@ -125,6 +129,7 @@ public sealed partial class VocalizationSystem : EntitySystem
 /// </summary>
 /// <param name="Message">Message to send, this is null when the event is just fired and should be set by a system</param>
 /// <param name="Handled">Whether the message was handled by a system</param>
+[Obsolete("Use TryVocalizeLanguageEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
 public record struct TryVocalizeEvent(string? Message = null, bool Handled = false, bool Cancelled = false);
 
@@ -134,5 +139,6 @@ public record struct TryVocalizeEvent(string? Message = null, bool Handled = fal
 /// </summary>
 /// <param name="Message">Message to send</param>
 /// <param name="Handled">Whether the message was handled by a system</param>
+[Obsolete("Use VocalizeLanguageEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
 public record struct VocalizeEvent(string Message, bool Handled = false);

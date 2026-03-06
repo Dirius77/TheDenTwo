@@ -16,10 +16,11 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<HeadsetComponent, RadioReceiveEvent>(OnHeadsetReceive);
+        //SubscribeLocalEvent<HeadsetComponent, RadioReceiveEvent>(OnHeadsetReceive); // DEN: Languages, see RadioReceiveLanguageEvent
         SubscribeLocalEvent<HeadsetComponent, EncryptionChannelsChangedEvent>(OnKeysChanged);
 
-        SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeEvent>(OnSpeak);
+        InitializeLanguage(); // DEN: Languages
+        //SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeEvent>(OnSpeak); // DEN: Languages, see EntitySpokeLanguageEvent
     }
 
     private void OnKeysChanged(EntityUid uid, HeadsetComponent component, EncryptionChannelsChangedEvent args)
@@ -42,6 +43,7 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
             EnsureComp<ActiveRadioComponent>(uid).Channels = new(keyHolder.Channels);
     }
 
+    [Obsolete("Use OnSpeakLanguage instead.")] // DEN: Languages
     private void OnSpeak(EntityUid uid, WearingHeadsetComponent component, EntitySpokeEvent args)
     {
         if (args.Channel != null
@@ -95,6 +97,7 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
         }
     }
 
+    [Obsolete("Use OnHeadsetReceiveLanguage instead.", true)] // DEN: Languages
     private void OnHeadsetReceive(EntityUid uid, HeadsetComponent component, ref RadioReceiveEvent args)
     {
         // TODO: change this when a code refactor is done

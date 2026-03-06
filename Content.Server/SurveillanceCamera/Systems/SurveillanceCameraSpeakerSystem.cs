@@ -21,9 +21,12 @@ public sealed partial class SurveillanceCameraSpeakerSystem : EntitySystem
     /// <inheritdoc/>
     public override void Initialize()
     {
-        SubscribeLocalEvent<SurveillanceCameraSpeakerComponent, SurveillanceCameraSpeechSendEvent>(OnSpeechSent);
+        //SubscribeLocalEvent<SurveillanceCameraSpeakerComponent, SurveillanceCameraSpeechSendEvent>(OnSpeechSent); // DEN: Languages, see SurveillanceCameraSpeechLanguageSendEvent (sorry)
+
+        InitializeLanguage(); // DEN: Languages
     }
 
+    [Obsolete("Use OnSpeechLanguageSent instead.", true)] // DEN: Languages
     private void OnSpeechSent(EntityUid uid, SurveillanceCameraSpeakerComponent component,
         SurveillanceCameraSpeechSendEvent args)
     {
