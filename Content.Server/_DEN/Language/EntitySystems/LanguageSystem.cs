@@ -1,3 +1,4 @@
+using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
@@ -27,13 +28,20 @@ public sealed partial class LanguageSystem : SharedLanguageSystem
         if (senderSession.AttachedEntity is not { } senderEnt)
             return;
 
-        if (msg.Hide)
+        switch (msg.Hide)
         {
-            EnsureComp<LanguageFontSuppressionComponent>(senderEnt);
-        }
-        else
-        {
-            RemComp<LanguageFontSuppressionComponent>(senderEnt);
+            case HideLanguageFontSetting.All:
+                EnsureComp<LanguageFontSuppressionComponent>(senderEnt, out var comp);
+                comp.AllFonts = true;
+                break;
+            case HideLanguageFontSetting.Understood:
+                EnsureComp<LanguageFontSuppressionComponent>(senderEnt, out var comp2);
+                comp2.AllFonts = false;
+                break;
+            default:
+            case HideLanguageFontSetting.None:
+                RemComp<LanguageFontSuppressionComponent>(senderEnt);
+                break;
         }
     }
 

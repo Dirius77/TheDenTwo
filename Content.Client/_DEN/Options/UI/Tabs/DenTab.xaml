@@ -7,7 +7,7 @@
             <BoxContainer Orientation="Vertical" Margin="8 8 8 8" VerticalExpand="True">
                 <Label Text="{Loc 'ui-options-language-related'}"
                        StyleClasses="LabelKeyText"/>
-                <CheckBox Name="HideLanguageFonts" Text="{Loc 'ui-options-language-hide-fonts'}"/>
+                <ui:OptionDropDown Name="HideLanguageFonts" Title="{Loc 'ui-options-language-hide-fonts'}"/>
             </BoxContainer>
         </ScrollContainer>
         <ui:OptionsTabControlRow Name="Control" Access="Public" />

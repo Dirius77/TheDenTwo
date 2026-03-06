@@ -30,7 +30,7 @@ public sealed class LanguageSystem : SharedLanguageSystem
         RaiseNetworkEvent(new HideFontsMessage(_cfg.GetCVar(DenCCVars.HideLanguageFonts)));
     }
 
-    private void SetHideLanguageFonts(bool hide)
+    private void SetHideLanguageFonts(HideLanguageFontSetting hide)
     {
         RaiseNetworkEvent(new HideFontsMessage(hide));
     }

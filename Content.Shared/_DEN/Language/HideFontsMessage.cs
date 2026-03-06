@@ -1,3 +1,4 @@
+using Content.Shared._DEN.CCVars;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._DEN.Language;
@@ -5,9 +6,9 @@ namespace Content.Shared._DEN.Language;
 [Serializable, NetSerializable]
 public sealed class HideFontsMessage : EntityEventArgs
 {
-    public bool Hide { get; }
+    public HideLanguageFontSetting Hide { get; }
 
-    public HideFontsMessage(bool hide)
+    public HideFontsMessage(HideLanguageFontSetting hide)
     {
         Hide = hide;
     }

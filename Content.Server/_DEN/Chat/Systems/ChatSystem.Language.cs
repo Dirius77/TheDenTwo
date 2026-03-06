@@ -229,7 +229,12 @@ public sealed partial class ChatSystem
         if (message.Parts.Count == 0)
             return;
 
-        var useLanguageFont = !HasComp<LanguageFontSuppressionComponent>(listener);
+        var hasMaxUnderstanding = understanding >= _prototypeManager.Index(SharedLanguageSystem.MaximumFluency);
+        var useLanguageFont = true;
+        if (TryComp<LanguageFontSuppressionComponent>(listener, out var suppression))
+        {
+            useLanguageFont = suppression.AllFonts || hasMaxUnderstanding;
+        }
         var hideLanguage = !(language.DisplayInChat &&
                              _prototypeManager.Index(language.UnderstandingForDisplay) <= understanding) ||
                            understandEv.HideLanguage;
