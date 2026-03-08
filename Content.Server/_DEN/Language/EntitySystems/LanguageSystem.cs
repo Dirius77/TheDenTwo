@@ -3,6 +3,7 @@ using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
+using Content.Shared.Mind;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._DEN.Language.EntitySystems;
@@ -10,6 +11,7 @@ namespace Content.Server._DEN.Language.EntitySystems;
 public sealed partial class LanguageSystem : SharedLanguageSystem
 {
     [Dependency] private readonly IPrototypeManager _proto = default!;
+    [Dependency] private readonly SharedMindSystem _mindSystem = default!;
 
     public override void Initialize()
     {
@@ -28,19 +30,22 @@ public sealed partial class LanguageSystem : SharedLanguageSystem
         if (senderSession.AttachedEntity is not { } senderEnt)
             return;
 
+        if (!_mindSystem.TryGetMind(senderEnt, out var mind, out var mindComp))
+            return;
+
         switch (msg.Hide)
         {
             case HideLanguageFontSetting.All:
-                EnsureComp<LanguageFontSuppressionComponent>(senderEnt, out var comp);
+                EnsureComp<LanguageFontSuppressionComponent>(mind, out var comp);
                 comp.AllFonts = true;
                 break;
             case HideLanguageFontSetting.Understood:
-                EnsureComp<LanguageFontSuppressionComponent>(senderEnt, out var comp2);
+                EnsureComp<LanguageFontSuppressionComponent>(mind, out var comp2);
                 comp2.AllFonts = false;
                 break;
             default:
             case HideLanguageFontSetting.None:
-                RemComp<LanguageFontSuppressionComponent>(senderEnt);
+                RemComp<LanguageFontSuppressionComponent>(mind);
                 break;
         }
     }

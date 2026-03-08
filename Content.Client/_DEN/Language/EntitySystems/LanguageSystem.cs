@@ -2,6 +2,7 @@ using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
+using Content.Shared.GameTicking;
 using Robust.Shared.Containers;
 using Robust.Client.Player;
 
@@ -19,13 +20,14 @@ public sealed class LanguageSystem : SharedLanguageSystem
         base.Initialize();
 
         _cfg.OnValueChanged(DenCCVars.HideLanguageFonts, SetHideLanguageFonts);
-        _playerManager.LocalPlayerAttached += OnLocalPlayerAttached;
 
         SubscribeLocalEvent<LanguageComponent, AfterAutoHandleStateEvent>(OnLanguageComponentHandleState);
         SubscribeLocalEvent<LanguageCommunicatorComponent, AfterAutoHandleStateEvent>(OnLanguageCommunicatorHandleState);
+
+        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
     }
 
-    private void OnLocalPlayerAttached(EntityUid newEntity)
+    private void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent evt)
     {
         RaiseNetworkEvent(new HideFontsMessage(_cfg.GetCVar(DenCCVars.HideLanguageFonts)));
     }

@@ -6,6 +6,7 @@ using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared.IdentityManagement;
+using Content.Shared.Mind;
 using Content.Shared.Radio;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
@@ -18,6 +19,7 @@ namespace Content.Server.Chat.Systems;
 public sealed partial class ChatSystem
 {
     [Dependency] private readonly LanguageSystem _language = default!;
+    [Dependency] private readonly SharedMindSystem _mindSystem = default!;
 
     public static readonly ProtoId<LanguageWrapperPrototype> SpeakWrapper = "SpeakWrapper";
     public static readonly ProtoId<LanguageWrapperPrototype> WhisperWrapper = "WhisperWrapper";
@@ -231,9 +233,10 @@ public sealed partial class ChatSystem
 
         var hasMaxUnderstanding = understanding >= _prototypeManager.Index(SharedLanguageSystem.MaximumFluency);
         var useLanguageFont = true;
-        if (TryComp<LanguageFontSuppressionComponent>(listener, out var suppression))
+        if (_mindSystem.TryGetMind(listener, out var mindId, out _) &&
+            TryComp<LanguageFontSuppressionComponent>(mindId, out var suppression))
         {
-            useLanguageFont = suppression.AllFonts || hasMaxUnderstanding;
+                useLanguageFont = !(suppression.AllFonts || hasMaxUnderstanding);
         }
         var hideLanguage = !(language.DisplayInChat &&
                              _prototypeManager.Index(language.UnderstandingForDisplay) <= understanding) ||
