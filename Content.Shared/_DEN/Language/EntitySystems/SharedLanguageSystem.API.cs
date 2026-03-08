@@ -169,6 +169,17 @@ public abstract partial class SharedLanguageSystem
     #endregion
 
     #region Get Methods
+
+    /// <summary>
+    /// Fetches the current default language.
+    /// </summary>
+    /// <returns>The ProtoId of the current default language.</returns>
+    [PublicAPI]
+    public ProtoId<LanguagePrototype> GetDefaultLanguage()
+    {
+        return _defaultLanguage;
+    }
+
     /// <summary>
     ///     Retrieves the currently spoken language of the entity. If the entity isn't currently set to one, but it
     ///     does speak one, then it will be set to the first language it speaks.

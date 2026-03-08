@@ -6,7 +6,7 @@
   displayInChat: true
   wrapperOverrides:
     Local: XenoHivemindWrapper
-  languageComponents:
+  components:
   - type: Gestalt
     requiresHost: true
     hostWhitelist:

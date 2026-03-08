@@ -110,6 +110,13 @@
   - type: Speech
     speechVerb: Robotic
     speechSounds: Pai #couldn't decide if this should be borg or pai sounds so I flipped a coin.
+  # DEN: Languages
+  - type: ContainerContainer
+    containers:
+      languages: !type:Container
+  - type: LanguageCommunicator
+    languages:
+      Basic: [ true, Fluent ]
 
 - type: entity
   parent: [MobSiliconBase, SolutionFireExtinguisherMini]

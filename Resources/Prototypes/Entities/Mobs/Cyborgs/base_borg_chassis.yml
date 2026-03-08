@@ -123,6 +123,7 @@
       cell_slot: !type:ContainerSlot { }
       borg_module: !type:Container { }
       part-container: !type:Container
+      languages: !type:Container { } # DEN: Languages
   - type: PowerCellSlot
     cellSlotId: cell_slot
     fitsInCharger: true
@@ -253,6 +254,10 @@
     requiredMobState:
     - Critical
     - Dead
+  # DEN: Languages
+  - type: LanguageCommunicator
+    languages:
+      Basic: [ true, Fluent ]
 
 - type: entity
   abstract: true

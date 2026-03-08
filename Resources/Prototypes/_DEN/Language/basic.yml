@@ -1,13 +1,9 @@
 - type: language
+  parent: BaseAudible
   id: Basic
   name: language-basic
   displayInChat: true
-  languageComponents:
-  - type: SpeechTransformable
-  - type: RadioTransmittable
-  - type: Audible
-  - type: WhisperMuffle
-    muffle: true
+  components:
   - type: SyllableScrambling
     syllables:
     - a

@@ -7,9 +7,12 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototy
 namespace Content.Shared._DEN.Language;
 
 [Prototype]
+[DataDefinition]
 public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
 {
-    [IdDataField] public string ID { get; private set; } = default!;
+    [ViewVariables]
+    [IdDataField]
+    public string ID { get; private set; } = default!;
 
     [DataField(required: true)]
     public LocId Name = default!;
@@ -20,9 +23,22 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     [ViewVariables(VVAccess.ReadOnly)]
     public LocId Description => Name + "-description";
 
+    [ViewVariables(VVAccess.ReadOnly)]
     public string LocalizedName => Loc.GetString(Name);
+
+    [ViewVariables(VVAccess.ReadOnly)]
     public string LocalizedAbbreviation => Loc.GetString(Abbreviation);
+
+    [ViewVariables(VVAccess.ReadOnly)]
     public string LocalizedDescription => Loc.GetString(Description);
+
+    [ViewVariables]
+    [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<LanguagePrototype>))]
+    public string[]? Parents { get; private set; }
+
+    [NeverPushInheritance]
+    [AbstractDataField]
+    public bool Abstract { get; private set; }
 
     /// <summary>
     ///     Speech verb overrides per channel, with optional suffix verbs.
@@ -75,16 +91,9 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     ///     Other components to add to the language entity. These are used to add language specific effects
     ///     such as being spoken, signed, telepathic, or other such behavior.
     /// </summary>
-    [DataField]
+    [DataField("components")]
     [AlwaysPushInheritance]
-    public ComponentRegistry? LanguageComponents;
-
-    [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<LanguagePrototype>))]
-    public string[]? Parents { get; private set; }
-
-    [NeverPushInheritance]
-    [AbstractDataField]
-    public bool Abstract { get; private set; }
+    public ComponentRegistry LanguageComponents = new();
 }
 
 [Serializable, NetSerializable, DataDefinition]

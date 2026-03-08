@@ -1,12 +1,8 @@
 - type: language
+  parent: BaseAudible
   id: DebugGroupAbstract
   abstract: true
-  languageComponents:
-  - type: SpeechTransformable
-  - type: RadioTransmittable
-  - type: Audible
-  - type: WhisperMuffle
-    muffle: true
+  components:
   - type: SyllableScrambling
     syllables:
     - oo
@@ -41,7 +37,7 @@
   id: DebugChild2
   name: language-debug-child-2
   displayInChat: true
-  languageComponents:
+  components:
   - type: SyllableScrambling
     syllables:
     - aa

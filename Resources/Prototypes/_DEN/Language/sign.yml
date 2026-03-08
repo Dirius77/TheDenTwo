@@ -9,7 +9,7 @@
       defaultVerb: SignVerbWhisper
   wrapperOverrides:
     Local: SignWrapper
-  languageComponents:
+  components:
   - type: LineOfSightLanguage
   - type: VisualName
   - type: WhisperMuffle

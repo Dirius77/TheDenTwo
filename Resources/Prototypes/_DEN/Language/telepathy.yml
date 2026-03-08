@@ -5,7 +5,7 @@
   fontId: BoxRound
   wrapperOverrides:
     Local: TelepathyWrapper
-  languageComponents:
+  components:
   - type: ReplaceSpeakerName
     replaceName: TELEPATHIC
   - type: ChatChannelWhitelist

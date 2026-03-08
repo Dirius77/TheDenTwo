@@ -1,0 +1,4 @@
+- type: language
+  parent: BaseAudible
+  id: Animal
+  name: language-animal
