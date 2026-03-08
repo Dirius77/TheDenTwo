@@ -1,4 +1,3 @@
-using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Speech;
 using Content.Shared.Chat;
@@ -8,11 +7,14 @@ namespace Content.Server.SurveillanceCamera.Systems;
 
 public sealed partial class SurveillanceCameraMicrophoneSystem
 {
-    private readonly EntityQuery<AudibleComponent> _audibleQuery = default!;
-    private readonly EntityQuery<LineOfSightLanguageComponent> _losQuery = default!;
+    private EntityQuery<AudibleComponent> _audibleQuery;
+    private EntityQuery<LineOfSightLanguageComponent> _losQuery;
 
     private void InitializeLanguage()
     {
+        _audibleQuery = GetEntityQuery<AudibleComponent>();
+        _losQuery = GetEntityQuery<LineOfSightLanguageComponent>();
+
         SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenLanguageEvent>(RelayEntityLanguageMessage);
         SubscribeLocalEvent<SurveillanceCameraMicrophoneComponent, ListenLanguageAttemptEvent>(CanListenLanguage);
     }
