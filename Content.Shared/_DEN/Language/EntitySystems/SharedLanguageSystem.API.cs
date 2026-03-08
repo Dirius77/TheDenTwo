@@ -64,6 +64,23 @@ public abstract partial class SharedLanguageSystem
     }
 
     #region Add Methods
+
+    /// <summary>
+    ///     Adds a language entity to the target entity.
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="languageEntity"></param>
+    /// <returns></returns>
+    public bool TryAddLanguage(EntityUid target,
+        Entity<LanguageComponent> languageEntity)
+    {
+        var communicator = EnsureComp<LanguageCommunicatorComponent>(target);
+        if (communicator.Languages is not { } languages)
+            return false;
+
+        return _container.Insert(languageEntity.Owner, languages);
+    }
+
     /// <summary>
     ///     Adds a language to the target entity. The entity will be able to speak and fully understand the language.
     ///     This may add multiple languages if the language has related languages.

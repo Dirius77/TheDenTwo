@@ -4,6 +4,8 @@ using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
 using Content.Shared.Mind;
+using Content.Shared.Polymorph;
+using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._DEN.Language.EntitySystems;
@@ -20,7 +22,24 @@ public sealed partial class LanguageSystem : SharedLanguageSystem
         SubscribeLocalEvent<LanguageComponent, LanguageRelayedEvent<AttemptUnderstandingEvent>>(
             OnAttemptUnderstandingRelay);
 
+        SubscribeLocalEvent<LanguageCommunicatorComponent, PolymorphedEvent>(OnPolymorph);
+
         SubscribeNetworkEvent<HideFontsMessage>(OnHideFontsRequest);
+    }
+
+    private void OnPolymorph(Entity<LanguageCommunicatorComponent> ent, ref PolymorphedEvent evt)
+    {
+        if (!TryGetLanguageEntities(ent, out var languages))
+            return;
+
+        foreach (var language in languages)
+        {
+            if (!HasComp<LanguageFollowsMindComponent>(language))
+                continue;
+
+            _container.TryRemoveFromContainer(language.Owner, true);
+            TryAddLanguage(evt.NewEntity, language);
+        }
     }
 
     private void OnHideFontsRequest(HideFontsMessage msg, EntitySessionEventArgs args)

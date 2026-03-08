@@ -14,6 +14,7 @@
   - type: Gestalt
   - type: MinimumFluency
     minimum: Fluent
+  - type: LanguageFollowsMind
 
 - type: languageWrapper
   id: TelepathyWrapper
