@@ -43,7 +43,8 @@ public sealed partial class RadioVocalizationSystem
             ChatSystem.WhisperWrapper,
             ChatChannel.Whisper,
             ChatTransmitRange.Normal,
-            radioChannel);
+            radioChannel,
+            languageOverride: language);
 
         return true;
     }
