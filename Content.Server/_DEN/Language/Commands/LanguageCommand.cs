@@ -26,7 +26,7 @@ public sealed partial class LanguageCommand : ToolshedCommand
         [CommandArgument(typeof(FluencyProtoIdParser))] string fluency = "Fluent")
     {
         _language ??= GetSys<LanguageSystem>();
-        _language.TryAddLanguage(target, language, speaks, fluency, out var _);
+        _language.TryAddLanguage(target, language, fluency, speaks, out var _);
 
         return target;
     }

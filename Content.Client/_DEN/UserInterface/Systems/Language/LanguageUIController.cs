@@ -244,6 +244,19 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
             _window.NeedsFullRebuild = true;
     }
 
+    private void CheckLanguageEnabled(bool enabled)
+    {
+        if (_window is { IsOpen: true } && !enabled)
+        {
+            _window.Close();
+        }
+
+        if (LanguageButton == null)
+            return;
+
+        LanguageButton.Visible = enabled;
+    }
+
     private void OnPlayerAttached(EntityUid uid)
     {
         NeedsFullRebuild();
@@ -264,6 +277,8 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
         _window = UIManager.CreateWindow<LanguageWindow>();
         _window.OnClose += DeactivateButton;
         _window.OnOpen += ActivateButton;
+
+        CheckLanguageEnabled(_languageSystem.LanguagesEnabled);
 
         CommandBinds.Builder
             .Bind(ContentKeyFunctions.OpenLanguageMenu,
@@ -288,6 +303,7 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
     {
         system.OnLanguageEntityUpdate += OnLanguageUpdated;
         system.OnLanguageCommunicatorUpdate += OnLanguageCommunicatorUpdated;
+        system.OnLanguagesEnabledUpdate += CheckLanguageEnabled;
         _playerManager.LocalPlayerAttached += OnPlayerAttached;
     }
 
@@ -295,6 +311,7 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
     {
         system.OnLanguageEntityUpdate -= OnLanguageUpdated;
         system.OnLanguageCommunicatorUpdate -= OnLanguageCommunicatorUpdated;
+        system.OnLanguagesEnabledUpdate -= CheckLanguageEnabled;
         _playerManager.LocalPlayerAttached -= OnPlayerAttached;
     }
 }

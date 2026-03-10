@@ -3,7 +3,6 @@ using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.GameTicking;
-using Robust.Shared.Containers;
 using Robust.Client.Player;
 
 namespace Content.Client._DEN.Language.EntitySystems;
@@ -14,17 +13,24 @@ public sealed class LanguageSystem : SharedLanguageSystem
 
     public event Action<Entity<LanguageComponent>>? OnLanguageEntityUpdate;
     public event Action<Entity<LanguageComponent>?>? OnLanguageCommunicatorUpdate;
+    public event Action<bool>? OnLanguagesEnabledUpdate;
 
     public override void Initialize()
     {
         base.Initialize();
 
         _cfg.OnValueChanged(DenCCVars.HideLanguageFonts, SetHideLanguageFonts);
+        _cfg.OnValueChanged(DenCCVars.LanguageEnabled, SetLanguageEnabledState);
 
         SubscribeLocalEvent<LanguageComponent, AfterAutoHandleStateEvent>(OnLanguageComponentHandleState);
         SubscribeLocalEvent<LanguageCommunicatorComponent, AfterAutoHandleStateEvent>(OnLanguageCommunicatorHandleState);
 
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
+    }
+
+    private void SetLanguageEnabledState(bool enabled)
+    {
+        OnLanguagesEnabledUpdate?.Invoke(enabled);
     }
 
     private void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent evt)

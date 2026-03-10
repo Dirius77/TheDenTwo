@@ -22,7 +22,7 @@ public sealed class UniversalLanguageSpeakerSystem : EntitySystem
 
     private void OnUniversalLanguageStartup(Entity<UniversalLanguageSpeakerComponent> entity, ref ComponentStartup args)
     {
-        if (_language.TryAddLanguage(entity, Universal, true, SharedLanguageSystem.MaximumFluency, out var langs))
+        if (_language.TryAddLanguage(entity, Universal, SharedLanguageSystem.MaximumFluency, true, out var langs))
         {
             if (langs.FirstOrNull() is { } lang && TryComp<LanguageComponent>(lang, out var langComp))
             {

@@ -4,29 +4,35 @@ using Robust.Shared.Configuration;
 using Robust.Shared.Containers;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Timing;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
 
 public abstract partial class SharedLanguageSystem : EntitySystem
 {
+    public bool LanguagesEnabled { get; private set; }
+
     [Dependency] protected readonly IConfigurationManager _cfg = default!;
     [Dependency] protected readonly SharedContainerSystem _container = default!;
-    [Dependency] protected readonly IGameTiming _timing = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly INetManager _netMan = default!;
 
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
     public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
 
+    public static readonly ProtoId<LanguagePrototype> DisabledLanguage = "Default";
+
     private static ProtoId<LanguagePrototype> _defaultLanguage = "Basic";
     private bool _fallbackDefaultLanguage;
 
     private EntityQuery<LanguageComponent> _languageQuery;
+    private EntityQueryEnumerator<LanguageCommunicatorComponent> _languageCommunicatorQuery;
 
     public override void Initialize()
     {
         base.Initialize();
+
+        _languageQuery = GetEntityQuery<LanguageComponent>();
+        _languageCommunicatorQuery = EntityQueryEnumerator<LanguageCommunicatorComponent>();
 
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorCompInit);
         SubscribeLocalEvent<LanguageCommunicatorComponent, MapInitEvent>(OnLanguageCommunicatorMapInit);
@@ -42,8 +48,26 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
         _cfg.OnValueChanged(DenCCVars.FallbackDefaultLanguage, fallback => _fallbackDefaultLanguage = fallback, true);
         _cfg.OnValueChanged(DenCCVars.DefaultLanguage, lang => _defaultLanguage = lang, true);
+        _cfg.OnValueChanged(DenCCVars.LanguageEnabled, OnLanguageEnableChanged, true);
+    }
 
-        _languageQuery = GetEntityQuery<LanguageComponent>();
+    private void OnLanguageEnableChanged(bool enabled)
+    {
+        LanguagesEnabled = enabled;
+
+        if (!enabled)
+            return;
+
+        while (_languageCommunicatorQuery.MoveNext(out var entity, out _))
+        {
+            if (!TryGetLanguageEntities(entity, DisabledLanguage, out var languages))
+                continue;
+
+            foreach (var lang in languages)
+            {
+                PredictedQueueDel(lang);
+            }
+        }
     }
 
     private void OnRequestSetSpokenLanguage(RequestSetSpokenLanguageEvent evt, EntitySessionEventArgs args)
@@ -53,7 +77,7 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
         var languageEnt = GetEntity(evt.LanguageEntity);
 
-        if (!TryComp<LanguageComponent>(languageEnt, out var langComp))
+        if (!TryComp<LanguageComponent>(languageEnt, out var langComp) || langComp.Holder != user)
             return;
 
         TrySetLanguage(user, (languageEnt, langComp));
@@ -66,9 +90,12 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
     private void OnLanguageCommunicatorMapInit(Entity<LanguageCommunicatorComponent> ent, ref MapInitEvent evt)
     {
+        if (!LanguagesEnabled)
+            return;
+
         foreach (var (language, (speaks, fluency)) in ent.Comp.BaseLanguages)
         {
-            TryAddLanguage(ent, language, speaks, fluency, out var lang);
+            TryAddLanguage(ent, language, fluency, speaks, out _);
         }
     }
 
@@ -177,8 +204,8 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         languageComp.Fluency = fluencyProto;
         languageComp.Language = languageProto;
         languageComp.Speaks = speaks;
-        if (language.LanguageComponents is not null)
-            EntityManager.AddComponents(languageEnt, language.LanguageComponents);
+
+        EntityManager.AddComponents(languageEnt, language.LanguageComponents);
 
         return (languageEnt, languageComp);
     }

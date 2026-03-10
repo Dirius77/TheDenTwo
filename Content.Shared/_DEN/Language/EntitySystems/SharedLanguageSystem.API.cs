@@ -39,7 +39,7 @@ public abstract partial class SharedLanguageSystem
     /// </summary>
     /// <param name="target">Entity to set the language on.</param>
     /// <param name="languageEntity">The language entity to try to set as the spoken language.</param>
-    /// <returns></returns>
+    /// <returns>Whether the operation succeeded.</returns>
     [PublicAPI]
     public bool TrySetLanguage(EntityUid target, Entity<LanguageComponent> languageEntity)
     {
@@ -70,7 +70,8 @@ public abstract partial class SharedLanguageSystem
     /// </summary>
     /// <param name="target"></param>
     /// <param name="languageEntity"></param>
-    /// <returns></returns>
+    /// <returns>Whether the operation succeeded.</returns>
+    [PublicAPI]
     public bool TryAddLanguage(EntityUid target,
         Entity<LanguageComponent> languageEntity)
     {
@@ -94,7 +95,7 @@ public abstract partial class SharedLanguageSystem
         ProtoId<LanguagePrototype> language,
         out List<Entity<LanguageComponent>> languageEntities)
     {
-        return TryAddLanguage(target, language,true, DefaultLanguageFluency, out languageEntities);
+        return TryAddLanguage(target, language, DefaultLanguageFluency, true, out languageEntities);
     }
 
     /// <summary>
@@ -103,15 +104,15 @@ public abstract partial class SharedLanguageSystem
     /// </summary>
     /// <param name="target">The entity to add the language to.</param>
     /// <param name="languageProto">The ID of the language to add.</param>
-    /// <param name="speaks">Whether the target should be able to speak the language.</param>
     /// <param name="fluencyProto">The amount of fluency the target should have with the language.</param>
+    /// <param name="speaks">Whether the target should be able to speak the language.</param>
     /// <param name="languageEntities">The list of added languages.</param>
     /// <returns>Whether the operation succeeded. Note that languages may have still been added if a related language failed.</returns>
     [PublicAPI]
     public bool TryAddLanguage(EntityUid target,
         ProtoId<LanguagePrototype> languageProto,
-        bool speaks,
         ProtoId<LanguageFluencyPrototype> fluencyProto,
+        bool speaks,
         out List<Entity<LanguageComponent>> languageEntities)
     {
         languageEntities = [];
@@ -186,7 +187,6 @@ public abstract partial class SharedLanguageSystem
     #endregion
 
     #region Get Methods
-
     /// <summary>
     /// Fetches the current default language.
     /// </summary>
@@ -208,10 +208,24 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public Entity<LanguageComponent>? GetCurrentLanguageEntity(EntityUid target, bool forceDefault = false)
     {
+        if (!LanguagesEnabled)
+        {
+            if (!TryGetOrAddLanguageEntity(target, DisabledLanguage, out var langEnt))
+            {
+                Log.Warning("Languages are disabled but was unable to add the forced disabled language. This is a bug.");
+                return null;
+            }
+            var comm = EnsureComp<LanguageCommunicatorComponent>(target);
+            comm.CurrentLanguage = langEnt;
+            return langEnt;
+        }
+
+        forceDefault = forceDefault || _fallbackDefaultLanguage;
+
         LanguageCommunicatorComponent? communicator;
         if (!TryComp(target, out communicator))
         {
-            if (forceDefault || _fallbackDefaultLanguage)
+            if (forceDefault)
             {
                 InsertLanguageAndChildren(target, _defaultLanguage, DefaultLanguageFluency, true, out _);
                 communicator = EnsureComp<LanguageCommunicatorComponent>(target); // Should already exist here.
@@ -225,7 +239,16 @@ public abstract partial class SharedLanguageSystem
         if (communicator.CurrentLanguage is null || Deleted(communicator.CurrentLanguage))
         {
             if (!TryGetLanguageEntities(target, out var languageEntities))
-                return null;
+            {
+                if (!forceDefault)
+                    return null;
+
+                InsertLanguageAndChildren(target,
+                    _defaultLanguage,
+                    DefaultLanguageFluency,
+                    true,
+                    out _);
+            }
 
             var spokenLanguages = languageEntities.FindAll(lang => lang.Comp.Speaks);
             if (communicator.LastSpokenLanguage is { } lastSpoken)
@@ -264,7 +287,7 @@ public abstract partial class SharedLanguageSystem
     {
         var languageEnt = GetCurrentLanguageEntity(target);
 
-        return languageEnt?.Comp?.Language;
+        return languageEnt?.Comp.Language;
     }
 
     /// <summary>
@@ -382,6 +405,53 @@ public abstract partial class SharedLanguageSystem
             .Select(item => ((ProtoId<LanguagePrototype>, ProtoId<LanguageFluencyPrototype>, bool)) item));
 
         return true;
+    }
+
+    /// <summary>
+    ///     Tries to retrieve a language from an entity if it already has it. Otherwise, adds the language to the entity
+    ///     and returns that.
+    /// </summary>
+    /// <param name="target">The entity to operate on</param>
+    /// <param name="language">The language to retrieve</param>
+    /// <param name="languageEntity">The language entity returned</param>
+    /// <returns>Whether the operation was successful</returns>
+    [PublicAPI]
+    public bool TryGetOrAddLanguageEntity(EntityUid target,
+        ProtoId<LanguagePrototype> language,
+        [NotNullWhen(true)] out Entity<LanguageComponent>? languageEntity)
+    {
+        return TryGetOrAddLanguageEntity(target, language, DefaultLanguageFluency, true, out languageEntity);
+    }
+
+    /// <summary>
+    ///     Tries to retrieve a language from an entity if it already has it. Otherwise, adds the language to the entity
+    ///     and returns that.
+    /// </summary>
+    /// <param name="target">The entity to operate on</param>
+    /// <param name="language">The language to retrieve</param>
+    /// <param name="fluencyProto">The fluency to add if the entity doesn't have the language</param>
+    /// <param name="speaks">Whether the entity should speak the language if added by default</param>
+    /// <param name="languageEntity">The language entity returned</param>
+    /// <returns>Whether the operation was successful</returns>
+    [PublicAPI]
+    public bool TryGetOrAddLanguageEntity(EntityUid target,
+        ProtoId<LanguagePrototype> language,
+        ProtoId<LanguageFluencyPrototype> fluencyProto,
+        bool speaks,
+        [NotNullWhen(true)] out Entity<LanguageComponent>? languageEntity)
+    {
+        languageEntity = null;
+
+        if (TryGetLanguageEntity(target, language, out languageEntity))
+            return true;
+
+        if (TryAddLanguage(target, language, fluencyProto, speaks, out var langs))
+        {
+            languageEntity = langs.FirstOrNull();
+            return languageEntity != null;
+        }
+
+        return false;
     }
 
     /// <summary>

@@ -1,0 +1,10 @@
+- type: language
+  id: Default
+  name: language-default
+  displayInChat: false
+  components:
+  - type: SpeechTransformable
+  - type: RadioTransmittable
+  - type: Audible
+  - type: WhisperMuffle
+    muffle: true

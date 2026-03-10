@@ -36,6 +36,12 @@ public sealed partial class ChatSystem
         string? verbOverride = null,
         Entity<LanguageComponent>? languageOverride = null)
     {
+        // Eat overrides so we can force the disabled language.
+        if (!_language.LanguagesEnabled)
+        {
+            languageOverride = null;
+        }
+
         // Getting this first makes sure that if the language defaulted to something new it is set for CanSpeak
         var retrievedLanguage = languageOverride ?? _language.GetCurrentLanguageEntity(source);
         if (retrievedLanguage is not { } languageEnt)

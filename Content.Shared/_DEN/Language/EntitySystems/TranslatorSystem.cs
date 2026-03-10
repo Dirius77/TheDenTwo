@@ -125,7 +125,7 @@ public sealed partial class TranslatorSystem : EntitySystem
         List<Entity<LanguageComponent>> languages = [];
         foreach (var (lang, (speaks, fluency)) in ent.Comp.GrantedLanguageProtos)
         {
-            _language.TryAddLanguage(target, lang, speaks, fluency, out var newLangs);
+            _language.TryAddLanguage(target, lang, fluency, speaks, out var newLangs);
             languages.AddRange(newLangs);
         }
         ent.Comp.GrantedLanguages.AddRange(languages);
