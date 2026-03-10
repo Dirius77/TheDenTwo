@@ -1,7 +1,9 @@
 using System.Linq;
 using System.Text;
+using Content.Shared._DEN.CCVars;
 using Content.Shared._DEN.Language;
 using Content.Shared.Speech;
+using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
@@ -9,6 +11,8 @@ namespace Content.Shared.Chat;
 
 public abstract partial class SharedChatSystem
 {
+
+    [Dependency] private readonly IConfigurationManager _cfg = default!;
 
     // TODO: Kill the other spot where this is getting called from and more this into WhisperMuffle (if we even keep using it)
     public ComplexChatMessage ObfuscateComplexChatMessage(ComplexChatMessage message, float amount)
@@ -66,7 +70,7 @@ public abstract partial class SharedChatSystem
         var isDetailed = false;
         var needsSpacing = true;
         var needsSeparation = false;
-        if (message.StartsWith('!'))
+        if (_cfg.GetCVar(DenCCVars.DetailedSpeechEnabled) && message.StartsWith('!'))
         {
             isDetailed = true;
             message = message[1..].Trim();

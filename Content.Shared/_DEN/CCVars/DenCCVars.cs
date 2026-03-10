@@ -15,6 +15,13 @@ public sealed class DenCCVars
         CVarDef.Create("languages.language_enabled", true, CVar.ARCHIVE | CVar.SERVER | CVar.NOTIFY | CVar.REPLICATED);
 
     /// <summary>
+    ///     Whether or not to allow detailed speech, that is, prefixing a message with an ! in order to allow special
+    ///     formatting related to mixed emotes and dialogs in a message, or emoting over the radio.
+    /// </summary>
+    public static readonly CVarDef<bool> DetailedSpeechEnabled =
+        CVarDef.Create("languages.detailed_speech_enabled", true, CVar.ARCHIVE | CVar.SERVER);
+
+    /// <summary>
     ///     The maximum number of message translations to cache at a time.
     ///     The total size will cap out at this times the number of languages times the number of
     ///     different 'understanding' variants in use.
