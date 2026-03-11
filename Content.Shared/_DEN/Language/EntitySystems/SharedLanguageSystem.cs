@@ -25,14 +25,12 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     private bool _fallbackDefaultLanguage;
 
     private EntityQuery<LanguageComponent> _languageQuery;
-    private EntityQueryEnumerator<LanguageCommunicatorComponent> _languageCommunicatorQuery;
 
     public override void Initialize()
     {
         base.Initialize();
 
         _languageQuery = GetEntityQuery<LanguageComponent>();
-        _languageCommunicatorQuery = EntityQueryEnumerator<LanguageCommunicatorComponent>();
 
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorCompInit);
         SubscribeLocalEvent<LanguageCommunicatorComponent, MapInitEvent>(OnLanguageCommunicatorMapInit);
@@ -58,7 +56,8 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         if (!enabled)
             return;
 
-        while (_languageCommunicatorQuery.MoveNext(out var entity, out _))
+        var query = EntityQueryEnumerator<LanguageCommunicatorComponent>();
+        while(query.MoveNext(out var entity, out _))
         {
             if (!TryGetLanguageEntities(entity, DisabledLanguage, out var languages))
                 continue;
