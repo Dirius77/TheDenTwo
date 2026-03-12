@@ -877,6 +877,13 @@
     - Recyclable
   - type: StaticPrice # these are infinitely producible.
     price: 0
+  # DEN: It speaks, it needs languages.
+  - type: ContainerContainer
+    containers:
+      languages: !type:Container
+  - type: LanguageCommunicator
+    languages:
+      Basic: [ true, Fluent ]
 
 - type: entity
   parent: IDCardStandard
