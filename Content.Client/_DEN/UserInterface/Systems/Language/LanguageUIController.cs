@@ -2,13 +2,11 @@ using System.Linq;
 using Content.Client._DEN.Language.EntitySystems;
 using Content.Client._DEN.UserInterface.Systems.Language.Controls;
 using Content.Client._DEN.UserInterface.Systems.Language.Windows;
-using Content.Client.CrewManifest.UI;
 using Content.Client.Gameplay;
 using Content.Client.UserInterface.Controls;
 using Content.Client.UserInterface.Systems.MenuBar.Widgets;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared.Input;
-using Content.Shared.Interaction.Events;
 using JetBrains.Annotations;
 using Robust.Client.Player;
 using Robust.Client.UserInterface;
@@ -254,6 +252,17 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
         if (LanguageButton == null)
             return;
 
+        if (enabled)
+        {
+            CommandBinds.Builder
+                .Bind(ContentKeyFunctions.OpenLanguageMenu,
+                    InputCmdHandler.FromDelegate(_ => ToggleWindow()))
+                .Register<LanguageUIController>();
+        }
+        else
+        {
+            CommandBinds.Unregister<LanguageUIController>();
+        }
         LanguageButton.Visible = enabled;
     }
 
@@ -280,10 +289,6 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
 
         CheckLanguageEnabled(_languageSystem.LanguagesEnabled);
 
-        CommandBinds.Builder
-            .Bind(ContentKeyFunctions.OpenLanguageMenu,
-                InputCmdHandler.FromDelegate(_ => ToggleWindow()))
-            .Register<LanguageUIController>();
 
         NeedsFullRebuild();
     }
@@ -295,8 +300,6 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
             _window.Close();
             _window = null;
         }
-
-        CommandBinds.Unregister<LanguageUIController>();
     }
 
     public void OnSystemLoaded(LanguageSystem system)

@@ -22,6 +22,9 @@
   id: DebugParent
   name: language-debug-parent
   displayInChat: true
+  icon:
+    sprite: "/Textures/Effects/speech.rsi"
+    state: xenoborg0
   relatedLanguages:
     DebugChild1: Related
     DebugChild2: Related

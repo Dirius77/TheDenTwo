@@ -9,6 +9,9 @@
       defaultVerb: SignVerbWhisper
   wrapperOverrides:
     Local: SignWrapper
+  icon:
+    sprite: "/Textures/Effects/speech.rsi"
+    state: clock0
   components:
   - type: LineOfSightLanguage
   - type: VisualName

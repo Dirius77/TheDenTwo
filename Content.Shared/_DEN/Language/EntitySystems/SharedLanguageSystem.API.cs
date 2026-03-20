@@ -312,6 +312,29 @@ public abstract partial class SharedLanguageSystem
     }
 
     /// <summary>
+    ///     Retrieves all the language entities from a target which it speaks.
+    /// </summary>
+    /// <param name="target">The target entities</param>
+    /// <param name="languageEntities">All the language entities on the target which it can speak.</param>
+    /// <returns>Whether any languages were returned.</returns>
+    [PublicAPI]
+    public bool TryGetSpokenLanguageEntities(EntityUid target,
+        out List<Entity<LanguageComponent>> languageEntities)
+    {
+        languageEntities = [];
+
+        if (TryGetLanguageEntities(target, out var languages))
+        {
+            languageEntities.AddRange(
+                from languageEnt in languages
+                where languageEnt.Comp.Speaks
+                select languageEnt);
+        }
+
+        return languageEntities.Count > 0;
+    }
+
+    /// <summary>
     ///     Retrieves all the language entities from a target.
     /// </summary>
     /// <param name="target">The target entity</param>
@@ -359,6 +382,29 @@ public abstract partial class SharedLanguageSystem
         languageEntities.Sort((lhs, rhs) => rhs.Comp.Fluency.CompareTo(lhs.Comp.Fluency));
 
         return languageEntities.Count > 0;
+    }
+
+    /// <summary>
+    ///     Retrieves a list of all the languages which an entity speaks.
+    /// </summary>
+    /// <param name="target">The target entity.</param>
+    /// <param name="languages">The list of spoken languages in the form (LanguageProtoID, FluencyID, speaks)</param>
+    /// <returns>Whether any spoken languages were retrieved.</returns>
+    [PublicAPI]
+    public bool TryGetSpokenLanguages(EntityUid target,
+        out List<(ProtoId<LanguagePrototype>, ProtoId<LanguageFluencyPrototype>, bool)> languages)
+    {
+        languages = [];
+
+        if (TryGetLanguages(target, out var allLangs))
+        {
+            languages.AddRange(
+                from language in allLangs
+                where language.Item3
+                select language);
+        }
+
+        return languages.Count > 0;
     }
 
     /// <summary>

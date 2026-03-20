@@ -3,6 +3,9 @@
   id: Basic
   name: language-basic
   displayInChat: true
+  icon:
+    sprite: "/Textures/Effects/speech.rsi"
+    state: default0
   components:
   - type: SyllableScrambling
     syllables:

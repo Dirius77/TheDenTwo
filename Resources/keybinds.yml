@@ -655,3 +655,7 @@ binds:
 - function: OpenLanguageMenu
   type: State
   key: L
+- function: OpenQuickLanguageMenu
+  type: State
+  key: L
+  mod1: Shift

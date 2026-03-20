@@ -5,6 +5,9 @@
   fontId: BoxRound
   wrapperOverrides:
     Local: TelepathyWrapper
+  icon:
+    sprite: "/Textures/Effects/speech.rsi"
+    state: alien0
   components:
   - type: ReplaceSpeakerName
     replaceName: TELEPATHIC

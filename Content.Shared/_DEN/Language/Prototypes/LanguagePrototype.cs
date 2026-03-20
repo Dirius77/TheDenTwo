@@ -3,6 +3,7 @@ using Content.Shared.Speech;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Array;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._DEN.Language;
 
@@ -31,6 +32,9 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
 
     [ViewVariables(VVAccess.ReadOnly)]
     public string LocalizedDescription => Loc.GetString(Description);
+
+    [DataField]
+    public SpriteSpecifier Icon;
 
     [ViewVariables]
     [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<LanguagePrototype>))]
