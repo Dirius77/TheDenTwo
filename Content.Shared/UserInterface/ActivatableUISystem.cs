@@ -7,6 +7,7 @@ using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Popups;
+using Content.Shared.Storage.EntitySystems;
 using Content.Shared.Verbs;
 using Content.Shared.Whitelist;
 using Robust.Shared.Utility;
@@ -27,9 +28,9 @@ public sealed partial class ActivatableUISystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<ActivatableUIComponent, ComponentStartup>(OnStartup);
-        SubscribeLocalEvent<ActivatableUIComponent, UseInHandEvent>(OnUseInHand);
-        SubscribeLocalEvent<ActivatableUIComponent, ActivateInWorldEvent>(OnActivate);
-        SubscribeLocalEvent<ActivatableUIComponent, InteractUsingEvent>(OnInteractUsing);
+        SubscribeLocalEvent<ActivatableUIComponent, UseInHandEvent>(OnUseInHand, before: [typeof(SharedEntityStorageSystem), typeof(SharedStorageSystem)]); // DEN: Activatable UI before Inventory interactions
+        SubscribeLocalEvent<ActivatableUIComponent, ActivateInWorldEvent>(OnActivate, before: [typeof(SharedEntityStorageSystem), typeof(SharedStorageSystem)]); // DEN: Activatable UI before Inventory interactions
+        SubscribeLocalEvent<ActivatableUIComponent, InteractUsingEvent>(OnInteractUsing, before: [typeof(SharedEntityStorageSystem), typeof(SharedStorageSystem)]); // DEN: Activatable UI before Inventory interactions
         SubscribeLocalEvent<ActivatableUIComponent, HandDeselectedEvent>(OnHandDeselected);
         SubscribeLocalEvent<ActivatableUIComponent, GotUnequippedHandEvent>(OnHandUnequipped);
         SubscribeLocalEvent<ActivatableUIComponent, BoundUIClosedEvent>(OnUIClose);
