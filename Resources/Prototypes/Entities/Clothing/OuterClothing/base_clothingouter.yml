@@ -109,11 +109,11 @@
   id: ClothingOuterStorageToggleableBase
   components:
   - type: ToggleableClothing
-    clothingPrototype: ClothingHeadHatHoodWinterDefault
-    slot: head
+    clothingPrototypes:
+      head: ClothingHeadHatHoodWinterDefault
   - type: ContainerContainer
     containers:
-      toggleable-clothing: !type:ContainerSlot {}
+      toggleable-clothing: !type:Container {}
       storagebase: !type:Container
         ents: []
 
@@ -152,7 +152,7 @@
     action: ActionToggleSuitPiece
   - type: ContainerContainer
     containers:
-      toggleable-clothing: !type:ContainerSlot {}
+      toggleable-clothing: !type:Container {}
   - type: GroupExamine
   - type: Tag
     tags:
@@ -212,7 +212,7 @@
     action: ActionToggleSuitPiece
   - type: ContainerContainer
     containers:
-      toggleable-clothing: !type:ContainerSlot {}
+      toggleable-clothing: !type:Container {}
 
 - type: entity
   parent: ClothingOuterBase
@@ -221,12 +221,12 @@
   abstract: True
   components:
   - type: ToggleableClothing
-    clothingPrototype: ClothingHeadHatHoodWinterDefault
-    slot: head
+    clothingPrototypes:
+      head: ClothingHeadHatHoodWinterDefault
     verbText: toggle-clothing-verb-hood
   - type: ContainerContainer
     containers:
-      toggleable-clothing: !type:ContainerSlot {}
+      toggleable-clothing: !type:Container {}
       storagebase: !type:Container
         ents: []
 
