@@ -1,0 +1,10 @@
+<Control xmlns="https://spacestation14.io"
+                                 xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                 Margin="4">
+    <PanelContainer>
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BorderThickness="2" BorderColor="#4f4f4f" />
+        </PanelContainer.PanelOverride>
+        <EntityPrototypeView Name="EntityView" SetSize="32 32" Stretch="Fill" Scale="2 2" />
+    </PanelContainer>
+</Control>

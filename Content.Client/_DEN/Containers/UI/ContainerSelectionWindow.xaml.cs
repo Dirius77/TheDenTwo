@@ -14,12 +14,13 @@ public sealed partial class ContainerSelectionWindow : FancyWindow
         IoCManager.InjectDependencies(this);
     }
 
-    public void SetWindows(IEnumerable<BoxContainer> containers)
+    public void SetControls(IEnumerable<ContainerSelectionControl> controls)
     {
+        // Remove any old controls to prevent duplicates.
         Options.RemoveAllChildren();
-        foreach (var container in containers)
+        foreach (var control in controls)
         {
-            Options.AddChild(container);
+            Options.AddChild(control);
         }
     }
 }

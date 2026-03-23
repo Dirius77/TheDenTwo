@@ -1,0 +1,24 @@
+- type: entity
+  parent: [ LockerBaseSecure, ContainerSelectionBase ]
+  id: ContainerSelectionLockerDebug
+  name: container selection locker debug
+  description: A debug locker for testing container selection
+  suffix: DEBUG
+  categories: [ Debug, DoNotMap ]
+  components:
+  - type: EntityTableContainerSelection
+    selections:
+      - name: container-selection-group-crowbars
+        containers:
+          entity_storage: !type:AllSelector
+            children:
+            - id: Crowbar
+              amount: 12
+      - name: container-selection-group-plushies
+        containers:
+          entity_storage: !type:AllSelector
+            children:
+            - id: PlushieRGBee
+            - id: PlushieLizard
+            - id: PlushieMoth
+            - id: PlushieVulp

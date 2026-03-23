@@ -29,114 +29,26 @@ public sealed class ContainerSelectionBoundUserInterface : BoundUserInterface
             return;
 
         _window = this.CreateWindow<ContainerSelectionWindow>();
-        var containers = ConvertToContainers(entityTableSelectComp);
-        _window.SetWindows(containers);
+        var controls = ConvertToControls(entityTableSelectComp);
+        _window.SetControls(controls);
         _window.OpenCentered();
 
     }
 
-    private IEnumerable<BoxContainer> ConvertToContainers(EntityTableContainerSelectionComponent entityTableSelectComp)
+    private IEnumerable<ContainerSelectionControl> ConvertToControls(EntityTableContainerSelectionComponent entityTableSelectComp)
     {
-        var containers = new BoxContainer[entityTableSelectComp.Selections.Count];
+        var containers = new ContainerSelectionControl[entityTableSelectComp.Selections.Count];
         var containerIndex = 0;
 
+        // Create a ContainerSelectionControl for each of the possible selections.
         foreach (var selection in entityTableSelectComp.Selections)
         {
-            var container = new BoxContainer
-            {
-                Orientation = BoxContainer.LayoutOrientation.Vertical,
-                HorizontalExpand = true,
-            };
+            var selectionControl = new ContainerSelectionControl();
+            selectionControl.SetData(EntMan, selection.SelectionName, selection.Containers);
+            var curIndex = containerIndex;
+            selectionControl.ChooseButton.OnPressed += _ => MakeSelection(curIndex);
 
-            var innerContainer = new BoxContainer
-            {
-                Orientation = BoxContainer.LayoutOrientation.Vertical,
-                HorizontalExpand = true,
-            };
-
-            var wrapper = new PanelContainer
-            {
-                VerticalExpand = false,
-                HorizontalExpand = false,
-                Margin = new Thickness(4),
-                PanelOverride = new StyleBoxFlat{BorderThickness = new Thickness(2), BorderColor =  Color.FromHex("#2F2F2F")},
-            };
-
-            var header = new BoxContainer
-            {
-                Orientation = BoxContainer.LayoutOrientation.Horizontal,
-                HorizontalExpand = true,
-                Margin = new Thickness(2),
-            };
-
-            var label = new Label
-            {
-                Text = Loc.GetString(selection.SelectionName),
-                HorizontalExpand = true,
-                Margin = new Thickness(4),
-            };
-
-            var button = new Button { Text = Loc.GetString("container-selection-ui-choose-button") };
-            var index = containerIndex;
-            button.OnPressed += _ => MakeSelection(index);
-
-            header.AddChild(label);
-            header.AddChild(button);
-            innerContainer.AddChild(header);
-
-            var cbody = new CollapsibleBody
-            {
-                HorizontalExpand = true,
-                Margin = new Thickness(6f),
-            };
-
-            var body = new GridContainer()
-            {
-                VerticalExpand = false,
-                HorizontalExpand = false,
-                MaxGridWidth = 300f,
-            };
-
-            foreach (var entContainer in selection.Containers)
-            {
-                var ctx = new EntityTableContext();
-                foreach (var (proto, _) in entContainer.Value.ListSpawns(EntMan, _prototypeManager, ctx))
-                {
-                    var entProtoView = new EntityPrototypeView
-                    {
-                        SetSize = new (32f),
-                        Stretch = SpriteView.StretchMode.Fill,
-                        Scale = new(2),
-                    };
-                    entProtoView.SetPrototype(proto);
-
-                    var viewPanel = new PanelContainer
-                    {
-                        VerticalExpand = false,
-                        HorizontalExpand = false,
-                        Margin = new Thickness(4),
-                        PanelOverride = new StyleBoxFlat{BorderColor = Color.FromHex("#4f4f4f"), BorderThickness = new Thickness(2)},
-                    };
-
-                    viewPanel.AddChild(entProtoView);
-
-                    body.AddChild(viewPanel);
-                }
-            }
-
-            cbody.AddChild(body);
-
-            var collapsible = new Collapsible(Loc.GetString("container-selection-ui-contents"), cbody)
-            {
-                Orientation = BoxContainer.LayoutOrientation.Vertical,
-                HorizontalExpand = true,
-                Margin = new Thickness(4),
-            };
-            innerContainer.AddChild(collapsible);
-            wrapper.AddChild(innerContainer);
-            container.AddChild(wrapper);
-
-            containers[containerIndex++] = container;
+            containers[containerIndex++] = selectionControl;
         }
 
         return containers;

@@ -6,6 +6,7 @@ using Content.Shared._DEN.Containers.Events;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Destructible;
 using Content.Shared.EntityTable;
+using Content.Shared.EntityTable.EntitySelectors;
 using Content.Shared.Storage.EntitySystems;
 using Robust.Shared.Containers;
 using Robust.Shared.Map;
@@ -28,7 +29,8 @@ public sealed partial class ContainerSelectionSystem : SharedContainerSelectionS
 
         SubscribeNetworkEvent<ContainerSelectionMessage>(OnContainerSelectionMessage);
 
-        SubscribeLocalEvent<EntityTableContainerSelectionComponent, DestructionEventArgs>(OnDestruction, before: [typeof(SharedStorageSystem)]);
+        SubscribeLocalEvent<EntityTableContainerSelectionComponent, DestructionEventArgs>(OnDestruction,
+            before: [typeof(SharedStorageSystem)]);
     }
 
     private void OnContainerSelectionMessage(ContainerSelectionMessage message, EntitySessionEventArgs args)
@@ -36,13 +38,16 @@ public sealed partial class ContainerSelectionSystem : SharedContainerSelectionS
         if (args.SenderSession.AttachedEntity is not { Valid: true } user)
             return;
 
+        // Is the targeted entity actually one that has an EntityTableContainerSelectionComponent?
         var targetEnt = GetEntity(message.Target);
         if (!TryComp<EntityTableContainerSelectionComponent>(targetEnt, out var comp))
             return;
 
+        // Can the user even reach the container anymore?
         if (!_blockerSystem.CanInteract(user, targetEnt))
             return;
 
+        // Don't allow invalid selections.
         if (comp.Selections.Count < message.SelectionIndex)
             return;
 
@@ -53,8 +58,10 @@ public sealed partial class ContainerSelectionSystem : SharedContainerSelectionS
     private void OnDestruction(Entity<EntityTableContainerSelectionComponent> ent,
         ref DestructionEventArgs args)
     {
-        Log.Debug("Got Destruction Event.");
-
+        // If no selection has been made but our container is destroyed, populate the contents with one of the choices
+        // at random so that the container still has everything someone breaking it open would expect it to have.
+        // There's no reasonable way to provide a selection UI and option on destruction, since it's an instant event
+        // that might not even have a player nearby, so random is the best they get.
         OnSelectionMade(ent, _random.Pick(ent.Comp.Selections));
     }
 
@@ -64,6 +71,7 @@ public sealed partial class ContainerSelectionSystem : SharedContainerSelectionS
         if (TerminatingOrDeleted(ent) || !Exists(ent))
             return;
 
+        // This selection component has already delivered its goods, bail.
         if (ent.Comp.SelectionMade)
             return;
 
@@ -75,30 +83,47 @@ public sealed partial class ContainerSelectionSystem : SharedContainerSelectionS
 
         foreach (var (containerId, table) in selection.Containers)
         {
-            if (!_containers.TryGetContainer(ent, containerId, out var container, containerComp))
-            {
-                Log.Error($"Entity {ToPrettyString(ent)} with a {nameof(EntityTableContainerSelectionComponent)} is missing a container ({containerId}).");
-                continue;
-            }
-
-            var spawns = _entityTable.GetSpawns(table);
-            foreach (var proto in spawns)
-            {
-                var spawn = Spawn(proto, coords);
-                if (!_containers.Insert(spawn, container, containerXform: xform))
-                {
-                    var alreadyContained = container.ContainedEntities.Count > 0
-                        ? string.Join("\n", container.ContainedEntities.Select(e => $"\t - {ToPrettyString(e)}"))
-                        : "< empty >";
-                    Log.Error($"Entity {ToPrettyString(ent)} with a {nameof(EntityTableContainerSelectionComponent)} failed to insert an entity: {ToPrettyString(spawn)}.\nCurrent contents:\n{alreadyContained}");
-                    _transform.AttachToGridOrMap(spawn);
-                    break;
-                }
-            }
+            SpawnTableInTarget(ent, containerComp, xform, containerId, table, coords);
         }
 
+        // Close the UI, mark the selection as made, and let all the clients know so they stop updating the UI.
         _uiSystem.CloseUi(ent.Owner, ContainerSelectionUiKey.Key);
         ent.Comp.SelectionMade = true;
         Dirty(ent, ent.Comp);
+    }
+
+    private void SpawnTableInTarget(EntityUid target,
+        ContainerManagerComponent containerComp,
+        TransformComponent xform,
+        string containerId,
+        EntityTableSelector table,
+        EntityCoordinates coords)
+    {
+        // Does our target container actually exist?
+        if (!_containers.TryGetContainer(target, containerId, out var container, containerComp))
+        {
+            Log.Error(
+                $"Entity {ToPrettyString(target)} with a {nameof(EntityTableContainerSelectionComponent)} is missing a container ({containerId}).");
+            return;
+        }
+
+        // Get the contents we're filling with.
+        var spawns = _entityTable.GetSpawns(table);
+        foreach (var proto in spawns)
+        {
+            // Spawn the entity, try inserting it into the container, if we can't, log an error so someone knows
+            // their entity prototype is overfull and drop it on the ground instead.
+            var spawn = Spawn(proto, coords);
+            if (!_containers.Insert(spawn, container, containerXform: xform))
+            {
+                var alreadyContained = container.ContainedEntities.Count > 0
+                    ? string.Join("\n", container.ContainedEntities.Select(e => $"\t - {ToPrettyString(e)}"))
+                    : "< empty >";
+                Log.Error(
+                    $"Entity {ToPrettyString(target)} with a {nameof(EntityTableContainerSelectionComponent)} failed to insert an entity: {ToPrettyString(spawn)}.\nCurrent contents:\n{alreadyContained}");
+                _transform.AttachToGridOrMap(spawn);
+                break;
+            }
+        }
     }
 }

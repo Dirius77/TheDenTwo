@@ -51,4 +51,10 @@ public sealed partial class BinomialNumberSelector : NumberSelector
 
         return Trials * Chance;
     }
+
+    // DEN: Maximum allows for accurate ListSpawns
+    public override float Maximum()
+    {
+        return Trials;
+    }
 }
