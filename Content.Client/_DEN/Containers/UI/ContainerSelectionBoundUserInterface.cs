@@ -12,8 +12,6 @@ namespace Content.Client._DEN.Containers.UI;
 [UsedImplicitly]
 public sealed class ContainerSelectionBoundUserInterface : BoundUserInterface
 {
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
-
     private ContainerSelectionWindow? _window;
 
     public ContainerSelectionBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
