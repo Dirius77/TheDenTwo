@@ -1,0 +1,75 @@
+- type: entity
+  parent: [Clothing, ContentsExplosionResistanceBase]
+  id: ClothingModsuitStandard
+  name: standard modsuit control
+  description: The controller for a standard model MODsuit.
+  components:
+    - type: Sprite
+      sprite: _DEN/Clothing/Modsuits/Back/standard.rsi
+      state: control
+    - type: Item
+      size: Huge
+    - type: Clothing
+      quickEquip: false
+      slots:
+        - back
+    - type: ContainerContainer
+      containers:
+        toggleable-clothing: !type:Container {}
+    - type: ToggleableClothing
+      requiredSlot:
+        - back
+      clothingPrototypes:
+        head: ClothingModsuitHelmetStandard
+        gloves: ClothingModsuitGauntletsStandard
+        outerClothing: ClothingModsuitChestplateStandard
+        shoes: ClothingModsuitBootsStandard
+
+- type: entity
+  parent: ClothingHandsBase
+  id: ClothingModsuitGauntletsStandard
+  name: standard modsuit gauntlets
+  description: A pair of gauntlets from a standard MODsuit.
+  components:
+    - type: FingerprintMask
+    - type: Sprite
+      sprite: _DEN/Clothing/Modsuits/Hands/standard.rsi
+      state: gauntlets
+    - type: Clothing
+      sprite: _DEN/Clothing/Modsuits/Hands/standard.rsi
+
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingModsuitHelmetStandard
+  name: standard modsuit helmet
+  description: A helmet from a standard MODsuit.
+  components:
+    - type: Sprite
+      sprite: _DEN/Clothing/Modsuits/Head/standard.rsi
+      state: helmet
+    - type: Clothing
+      sprite: _DEN/Clothing/Modsuits/Head/standard.rsi
+
+- type: entity
+  parent: ClothingOuterBase
+  id: ClothingModsuitChestplateStandard
+  name: standard modsuit chestplate
+  description: A chestplate from a standard MODsuit.
+  components:
+    - type: Sprite
+      sprite: _DEN/Clothing/Modsuits/OuterClothing/standard.rsi
+      state: chestplate
+    - type: Clothing
+      sprite: _DEN/Clothing/Modsuits/OuterClothing/standard.rsi
+
+- type: entity
+  parent: ClothingShoesBase
+  id: ClothingModsuitBootsStandard
+  name: standard modsuit boots
+  description: A pair of boots from a standard MODsuit.
+  components:
+    - type: Sprite
+      sprite: _DEN/Clothing/Modsuits/Shoes/standard.rsi
+      state: boots
+    - type: Clothing
+      sprite: _DEN/Clothing/Modsuits/Shoes/standard.rsi
