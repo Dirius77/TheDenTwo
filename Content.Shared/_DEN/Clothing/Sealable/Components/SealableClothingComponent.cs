@@ -10,4 +10,7 @@ public sealed partial class SealableClothingComponent : Component
 
     [DataField] 
     public string? SealedEquippedPrefix;
+    
+    [DataField]
+    public TimeSpan SealDoafterTime = TimeSpan.FromSeconds(1.5);
 }

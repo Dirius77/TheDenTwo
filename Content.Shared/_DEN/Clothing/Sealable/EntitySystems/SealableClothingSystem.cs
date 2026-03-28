@@ -51,7 +51,7 @@ public sealed partial class SealableClothingSystem : EntitySystem
         if (!Resolve(entity, ref entity.Comp))
             return;
         
-        var evt = new ClothingSealStateChanged(state);
+        var evt = new ClothingSealStateChangedEvent(state);
         RaiseLocalEvent(entity, evt);
 
         // Don't do work if the new state isn't different.
@@ -79,7 +79,7 @@ public enum SealedClothingVisuals : byte
 }
 
 [Serializable, NetSerializable]
-public readonly record struct ClothingSealStateChanged(bool IsSealed)
+public readonly record struct ClothingSealStateChangedEvent(bool IsSealed)
 {
     public readonly bool IsSealed = IsSealed;
 };
