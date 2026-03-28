@@ -26,33 +26,24 @@ public sealed partial class ContainerSelectionSystem : SharedContainerSelectionS
     public override void Initialize()
     {
         base.Initialize();
-
-        SubscribeNetworkEvent<ContainerSelectionMessage>(OnContainerSelectionMessage);
-
+        
+        SubscribeLocalEvent<EntityTableContainerSelectionComponent, ContainerSelectionMessage>(OnContainerSelectionMessage);
         SubscribeLocalEvent<EntityTableContainerSelectionComponent, DestructionEventArgs>(OnDestruction,
             before: [typeof(SharedStorageSystem)]);
     }
 
-    private void OnContainerSelectionMessage(ContainerSelectionMessage message, EntitySessionEventArgs args)
+    private void OnContainerSelectionMessage(Entity<EntityTableContainerSelectionComponent> ent, ref ContainerSelectionMessage message)
     {
-        if (args.SenderSession.AttachedEntity is not { Valid: true } user)
-            return;
-
-        // Is the targeted entity actually one that has an EntityTableContainerSelectionComponent?
-        var targetEnt = GetEntity(message.Target);
-        if (!TryComp<EntityTableContainerSelectionComponent>(targetEnt, out var comp))
-            return;
-
         // Can the user even reach the container anymore?
-        if (!_blockerSystem.CanInteract(user, targetEnt))
+        if (!_blockerSystem.CanInteract(message.Actor, ent))
             return;
 
         // Don't allow invalid selections.
-        if (comp.Selections.Count < message.SelectionIndex)
+        if (ent.Comp.Selections.Count < message.SelectionIndex)
             return;
 
-        var selection = comp.Selections[message.SelectionIndex];
-        OnSelectionMade((targetEnt, comp), selection);
+        var selection = ent.Comp.Selections[message.SelectionIndex];
+        OnSelectionMade(ent, selection);
     }
 
     private void OnDestruction(Entity<EntityTableContainerSelectionComponent> ent,

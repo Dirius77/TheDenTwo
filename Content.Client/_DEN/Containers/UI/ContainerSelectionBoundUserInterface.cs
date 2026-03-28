@@ -1,5 +1,6 @@
 using Content.Client._DEN.Containers.EntitySystems;
 using Content.Shared._DEN.Containers.Components;
+using Content.Shared._DEN.Containers.Events;
 using Content.Shared.EntityTable;
 using JetBrains.Annotations;
 using Robust.Client.Graphics;
@@ -54,9 +55,7 @@ public sealed class ContainerSelectionBoundUserInterface : BoundUserInterface
 
     private void MakeSelection(int index)
     {
-        var containerSelection = EntMan.System<ContainerSelectionSystem>();
-
-        containerSelection.SendSelectionEvent(Owner, index);
+        SendMessage(new ContainerSelectionMessage(index));
         _window?.Close();
     }
 }
