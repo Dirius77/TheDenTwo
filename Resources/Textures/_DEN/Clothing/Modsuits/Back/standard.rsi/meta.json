@@ -11,7 +11,7 @@
       "name": "control"
     },
     {
-      "name": "sealed-control",
+      "name": "control-sealed",
 	  "delays": [[ 0.1, 0.1, 0.1, 0.1 ]]
     },
     {
@@ -19,7 +19,7 @@
       "directions": 4
     },
     {
-      "name": "sealed-equipped-BACKPACK",
+      "name": "equipped-BACKPACK-sealed",
       "directions": 4
 	}
   ]

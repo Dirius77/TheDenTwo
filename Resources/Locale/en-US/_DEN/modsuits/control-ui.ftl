@@ -1,0 +1,1 @@
+wires-board-name-modsuit-control = MODsuit Control

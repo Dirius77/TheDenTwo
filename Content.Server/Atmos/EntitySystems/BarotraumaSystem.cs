@@ -3,6 +3,7 @@ using Content.Server.Administration.Logs;
 using Content.Server.Atmos.Components;
 using Content.Shared.Alert;
 using Content.Shared.Atmos;
+using Content.Shared.Clothing.Components;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Database;
@@ -60,6 +61,19 @@ namespace Content.Server.Atmos.EntitySystems
             {
                 UpdateCachedResistances(uid, barotrauma);
             }
+            // DEN: Handle clothing component lifestage
+            else if (TryComp<ClothingComponent>(uid, out var clothing) 
+                     && clothing.InSlotFlag is {} slotFlag
+                     && clothing.Slots.HasFlag(slotFlag))
+            {
+                // If we're clothing, update our wearer instead.
+                var wearer = Transform(uid).ParentUid;
+                if (TryComp(wearer, out barotrauma))
+                {
+                    UpdateCachedResistances(wearer, barotrauma);
+                }
+            }
+            // DEN: End
         }
 
         private void OnPressureProtectionEquipped(EntityUid uid, PressureProtectionComponent pressureProtection, GotEquippedEvent args)

@@ -6,7 +6,12 @@
   components:
     - type: Sprite
       sprite: _DEN/Clothing/Modsuits/Back/standard.rsi
-      state: control
+      layers:
+        - state: control
+        - state: control-sealed
+          visible: false
+          shader: unshaded
+          map: [ "sealedLayer" ]
     - type: Item
       size: Huge
     - type: Clothing
@@ -24,6 +29,32 @@
         gloves: ClothingModsuitGauntletsStandard
         outerClothing: ClothingModsuitChestplateStandard
         shoes: ClothingModsuitBootsStandard
+    - type: SealableClothing
+      clothingVisuals:
+        back:
+          - state: equipped-BACKPACK-sealed
+            shader: unshaded
+    - type: SealableController
+      controlledSlots: [ back, gloves, head, outerClothing, shoes ]
+    - type: Appearance
+    - type: GenericVisualizer
+      visuals:
+        enum.SealableClothingVisuals.State:
+          sealedLayer:
+            True: { visible: true }
+            False: { visible: false }
+    - type: WiresPanel
+    - type: Wires
+      boardName: wires-board-name-modsuit-control
+      layoutId: ModControl
+    - type: UserInterface
+      interfaces:
+        enum.WiresUiKey.Key:
+          type: WiresBoundUserInterface
+        enum.ModsuitModuleUiKey.Key:
+          type: ModsuitModulesBoundUserInterface
+    - type: ModsuitControl
+      maxBusWidth: 15
 
 - type: entity
   parent: ClothingHandsBase
@@ -34,9 +65,29 @@
     - type: FingerprintMask
     - type: Sprite
       sprite: _DEN/Clothing/Modsuits/Hands/standard.rsi
-      state: gauntlets
+      layers:
+        - state: gauntlets
+        - state: gauntlets-sealed
+          visible: false
+          shader: unshaded
+          map: [ "sealedLayer" ]
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/Hands/standard.rsi
+    - type: SealableClothing
+      clothingVisuals:
+        gloves:
+          - state: equipped-HAND-sealed
+            shader: unshaded
+    - type: Appearance
+    - type: GenericVisualizer
+      visuals:
+        enum.SealableClothingVisuals.State:
+          sealedLayer:
+            True: { visible: true }
+            False: { visible: false }
+    - type: Tag
+      tags:
+        - WhitelistChameleon
 
 - type: entity
   parent: ClothingHeadBase
@@ -46,21 +97,78 @@
   components:
     - type: Sprite
       sprite: _DEN/Clothing/Modsuits/Head/standard.rsi
-      state: helmet
+      layers:
+        - state: helmet
+        - state: helmet-sealed
+          visible: false
+          shader: unshaded
+          map: [ "sealedLayer" ]
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/Head/standard.rsi
+    - type: SealableClothing
+      clothingVisuals:
+        head:
+          - state: equipped-HEAD-sealed
+            shader: unshaded
+      sealedAddComponents:
+        - type: BreathMask
+        - type: IngestionBlocker
+        - type: IdentityBlocker
+        - type: PressureProtection
+          highPressureMultiplier: 0.3
+          lowPressureMultiplier: 1000
+        - type: TemperatureProtection
+          heatingCoefficient: 0.1
+          coolingCoefficient: 0.1
+    - type: Appearance
+    - type: GenericVisualizer
+      visuals:
+        enum.SealableClothingVisuals.State:
+          sealedLayer:
+            True: { visible: true }
+            False: { visible: false }
+    - type: Tag
+      tags:
+        - WhitelistChameleon
 
 - type: entity
-  parent: ClothingOuterBase
+  parent: [ ClothingOuterBase, AllowSuitStorageClothing ]
   id: ClothingModsuitChestplateStandard
   name: standard modsuit chestplate
   description: A chestplate from a standard MODsuit.
   components:
     - type: Sprite
       sprite: _DEN/Clothing/Modsuits/OuterClothing/standard.rsi
-      state: chestplate
+      layers:
+        - state: chestplate
+        - state: chestplate-sealed
+          visible: false
+          shader: unshaded
+          map: [ "sealedLayer" ]
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/OuterClothing/standard.rsi
+    - type: SealableClothing
+      clothingVisuals:
+        outerClothing:
+          - state: equipped-OUTERCLOTHING-sealed
+            shader: unshaded
+      sealedAddComponents:
+        - type: PressureProtection
+          highPressureMultiplier: 0.3
+          lowPressureMultiplier: 1000
+        - type: TemperatureProtection
+          heatingCoefficient: 0.1
+          coolingCoefficient: 0.1
+    - type: Appearance
+    - type: GenericVisualizer
+      visuals:
+        enum.SealableClothingVisuals.State:
+          sealedLayer:
+            True: { visible: true }
+            False: { visible: false }
+    - type: Tag
+      tags:
+        - WhitelistChameleon
 
 - type: entity
   parent: ClothingShoesBase
@@ -70,6 +178,26 @@
   components:
     - type: Sprite
       sprite: _DEN/Clothing/Modsuits/Shoes/standard.rsi
-      state: boots
+      layers:
+        - state: boots
+        - state: boots-sealed
+          visible: false
+          shader: unshaded
+          map: [ "sealedLayer" ]
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/Shoes/standard.rsi
+    - type: SealableClothing
+      clothingVisuals:
+        shoes:
+          - state: equipped-FEET-sealed
+            shader: unshaded
+    - type: Appearance
+    - type: GenericVisualizer
+      visuals:
+        enum.SealableClothingVisuals.State:
+          sealedLayer:
+            True: { visible: true }
+            False: { visible: false }
+    - type: Tag
+      tags:
+        - WhitelistChameleon

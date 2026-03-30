@@ -361,6 +361,15 @@ public sealed partial class ToggleableClothingSystem : EntitySystem
 
         var parent = Transform(target).ParentUid;
         var slot = component.ClothingUids[targetClothing];
+
+        // DEN: Check if clothing can be toggled for MODsuits.
+        if (!CanToggleClothing(targetClothing, out var reason))
+        {
+            if (reason is not null)
+                _popupSystem.PopupClient(Loc.GetString(reason), user, user);
+            return;
+        }
+
         if (!component.Container.Contains(targetClothing))
         {
             _inventorySystem.TryUnequip(user, parent, slot, force: true);

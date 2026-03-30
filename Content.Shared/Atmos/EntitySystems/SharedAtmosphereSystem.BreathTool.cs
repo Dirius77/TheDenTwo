@@ -10,6 +10,9 @@ public abstract partial class SharedAtmosphereSystem
     {
         SubscribeLocalEvent<BreathToolComponent, ComponentShutdown>(OnBreathToolShutdown);
         SubscribeLocalEvent<BreathToolComponent, ItemMaskToggledEvent>(OnMaskToggled);
+        
+        // DEN: Modsuits need ComponentInit...
+        InitializeModsuits();
     }
 
     private void OnBreathToolShutdown(Entity<BreathToolComponent> entity, ref ComponentShutdown args)

@@ -11,14 +11,14 @@
       "name": "helmet"
     },
 		{
-		  "name": "sealed-helmet"
+		  "name": "helmet-sealed"
 		},
 		{
 			"name": "equipped-HEAD",
 			"directions": 4
 		},
 		{
-			"name": "sealed-equipped-HEAD",
+			"name": "equipped-HEAD-sealed",
 			"directions": 4
 		}
   ]

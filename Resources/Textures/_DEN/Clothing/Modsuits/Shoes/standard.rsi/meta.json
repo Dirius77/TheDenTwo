@@ -11,14 +11,14 @@
       "name": "boots"
     },
 		{
-		  "name": "sealed-boots"
+		  "name": "boots-sealed"
 		},
 		{
 			"name": "equipped-FEET",
 			"directions": 4
 		},
 		{
-			"name": "sealed-equipped-FEET",
+			"name": "equipped-FEET-sealed",
 			"directions": 4
 		}
   ]

@@ -186,7 +186,7 @@ public sealed partial class ClientClothingSystem : ClothingSystem
 
         if (!TryComp(item, out ClothingComponent? clothing) || clothing.InSlot == null)
             return;
-
+        
         RenderEquipment(uid, item, clothing.InSlot, component, null, clothing);
     }
 

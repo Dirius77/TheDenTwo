@@ -1,0 +1,11 @@
+- type: entity
+  parent: BaseAction
+  id: ActionToggleClothingSeals
+  name: Toggle Clothing Seals
+  description: Toggle the seals on your suit, or stop in-progress sealing.
+  components:
+  - type: Action
+    itemIconStyle: BigItem
+    useDelay: 1
+  - type: InstantAction
+    event: !type:ToggleSealableControllerEvent

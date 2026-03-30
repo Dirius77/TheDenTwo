@@ -11,14 +11,14 @@
       "name": "gauntlets"
     },
     {
-      "name": "sealed-gauntlets"
+      "name": "gauntlets-sealed"
     },
     {
       "name": "equipped-HAND",
       "directions": 4
     },
     {
-      "name": "sealed-equipped-HAND",
+      "name": "equipped-HAND-sealed",
       "directions": 4
     }
   ]

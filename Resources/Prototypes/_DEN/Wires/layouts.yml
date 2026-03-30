@@ -1,0 +1,5 @@
+- type: wireLayout
+  id: ModControl
+  dummyWires: 2
+  wires:
+  - !type:PowerWireAction
