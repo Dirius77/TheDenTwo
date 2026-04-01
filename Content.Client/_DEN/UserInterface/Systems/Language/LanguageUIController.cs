@@ -289,7 +289,6 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
 
         CheckLanguageEnabled(_languageSystem.LanguagesEnabled);
 
-
         NeedsFullRebuild();
     }
 
