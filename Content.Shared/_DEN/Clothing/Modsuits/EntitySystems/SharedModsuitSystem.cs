@@ -18,7 +18,6 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     private void OnActivateInWorld(Entity<ModsuitControlComponent> entity, ref ActivateInWorldEvent args)
     {
-        Log.Debug("Ough~");
         if (args.Handled || !args.Complex)
             return;
 
