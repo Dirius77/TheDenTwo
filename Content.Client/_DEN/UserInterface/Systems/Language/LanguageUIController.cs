@@ -300,6 +300,9 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
             _window.Close();
             _window = null;
         }
+
+
+        CommandBinds.Unregister<LanguageUIController>();
     }
 
     public void OnSystemLoaded(LanguageSystem system)
@@ -316,5 +319,7 @@ public sealed class LanguageUIController : UIController, IOnStateChanged<Gamepla
         system.OnLanguageCommunicatorUpdate -= OnLanguageCommunicatorUpdated;
         system.OnLanguagesEnabledUpdate -= CheckLanguageEnabled;
         _playerManager.LocalPlayerAttached -= OnPlayerAttached;
+
+        CommandBinds.Unregister<LanguageUIController>();
     }
 }

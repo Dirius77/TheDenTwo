@@ -34,7 +34,7 @@ public sealed partial class LanguagePrototype : IPrototype, IInheritingPrototype
     public string LocalizedDescription => Loc.GetString(Description);
 
     [DataField]
-    public SpriteSpecifier Icon;
+    public SpriteSpecifier? Icon;
 
     [ViewVariables]
     [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<LanguagePrototype>))]
