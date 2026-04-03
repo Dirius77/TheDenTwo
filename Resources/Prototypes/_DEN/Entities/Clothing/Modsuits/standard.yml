@@ -201,3 +201,31 @@
     - type: Tag
       tags:
         - WhitelistChameleon
+
+- type: entity
+  parent: BaseItem
+  id: ModsuitModuleDebug
+  name: debug modsuit module
+  description: A modsuit module for testing functionality.
+  components:
+    - type: Sprite
+      sprite: Objects/Misc/module.rsi
+      layers:
+        - state: cpuboard_adv
+    - type: ModsuitModule
+      busWidth: 3
+      texture: "/Textures/_DEN/Interface/Modsuits/module-width-3.png"
+      
+- type: entity
+  parent: BaseItem
+  id: ModsuitModuleDebugSmall
+  name: debug modsuit module small
+  description: A modsuit module for testing functionality.
+  components:
+    - type: Sprite
+      sprite: Objects/Misc/module.rsi
+      layers:
+        - state: cpuboard
+    - type: ModsuitModule
+      busWidth: 1
+      texture: "/Textures/_DEN/Interface/Modsuits/module-width-1.png"

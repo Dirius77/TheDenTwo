@@ -1,17 +1,14 @@
 using Content.Client._DEN.Clothing.Modsuits.UI.Controls;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
+using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 
 namespace Content.Client._DEN.Clothing.Modsuits.UI;
 
-public sealed class ModsuitModulesBoundUserInterface : BoundUserInterface
+[UsedImplicitly]
+public sealed class ModsuitModulesBoundUserInterface(EntityUid owner, Enum uiKey) : BoundUserInterface(owner, uiKey)
 {
     [ViewVariables] private ModsuitModuleWindow? _window;
-    
-    public ModsuitModulesBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
-    {
-        IoCManager.InjectDependencies(this);
-    }
 
     protected override void Open()
     {
@@ -19,15 +16,21 @@ public sealed class ModsuitModulesBoundUserInterface : BoundUserInterface
         
         _window = this.CreateWindow<ModsuitModuleWindow>();
         if (EntMan.TryGetComponent(Owner, out ModsuitControlComponent? modControl))
-            _window.BuildBackground(modControl.MaxBusWidth);
-        Reload();
+            _window.Initialize((Owner, modControl));
+        _window.OnSlotClicked += ModuleInsertAttempt;
+        Update();
     }
 
-    public void Reload()
+    public override void Update()
     {
         if (_window == null || !EntMan.TryGetComponent(Owner, out ModsuitControlComponent? modControl))
             return;
         
-        _window.Populate((Owner, modControl));
+        _window.Update();
+    }
+
+    private void ModuleInsertAttempt(int slot)
+    {
+        SendPredictedMessage(new ModuleSlotActionMessage(slot));
     }
 }

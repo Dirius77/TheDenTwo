@@ -1,3 +1,4 @@
+using System.Numerics;
 using Content.Client.Resources;
 using Content.Client.UserInterface;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
@@ -13,9 +14,11 @@ public sealed class ModuleGridPiece : Control, IEntityControl
 {
     private readonly IEntityManager _entityManager;
 
-    public readonly EntityUid Entity;
+    private readonly Entity<ModsuitModuleComponent> _entity;
 
-    public event Action<EntityUid>? ModuleClicked;
+    private TextureRect? _texture;
+    
+    public event Action<EntityUid>? OnModuleClicked;
 
     public ModuleGridPiece(Entity<ModsuitModuleComponent> entity, IEntityManager entityManager, IResourceCache resourceCache)
     {
@@ -23,26 +26,28 @@ public sealed class ModuleGridPiece : Control, IEntityControl
         
         _entityManager = entityManager;
 
-        Entity = entity.Owner;
+        _entity = entity;
         
         Visible = true;
         MouseFilter = MouseFilterMode.Stop;
         
         TooltipSupplier = SupplyTooltip;
 
-        var texture = new TextureRect
+        _texture = new TextureRect
         {
             Texture = resourceCache.GetTexture(entity.Comp.UITexture),
+            TextureScale = new Vector2(2, 2),
+            CanShrink = true,
         };
         
-        AddChild(texture);
+        AddChild(_texture);
     }
 
     private Control? SupplyTooltip(Control sender)
     {
         return new Tooltip
         {
-            Text = _entityManager.GetComponent<MetaDataComponent>(Entity).EntityName
+            Text = _entityManager.GetComponent<MetaDataComponent>(_entity).EntityName
         };
     }
 
@@ -55,8 +60,19 @@ public sealed class ModuleGridPiece : Control, IEntityControl
             return;
         }
         
-        ModuleClicked?.Invoke(Entity);
+        OnModuleClicked?.Invoke(_entity);
+    }
+
+    protected override bool HasPoint(Vector2 point)
+    {
+        if (_texture != null)
+        {
+            var size = _texture.Texture!.Size * 2 * UIScale;
+            return point.X >= 0 && point.X <= size.X && point.Y >= 0 && point.Y <= size.Y;
+        }
+
+        return false;
     }
     
-    public EntityUid? UiEntity => Entity;
+    public EntityUid? UiEntity => _entity;
 }
