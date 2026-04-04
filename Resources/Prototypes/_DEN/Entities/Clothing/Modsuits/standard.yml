@@ -21,6 +21,7 @@
     - type: ContainerContainer
       containers:
         toggleable-clothing: !type:Container {}
+        modules: !type:Container {}
     - type: ToggleableClothing
       requiredSlot:
         - back
@@ -30,6 +31,8 @@
         outerClothing: ClothingModsuitChestplateStandard
         shoes: ClothingModsuitBootsStandard
     - type: SealableClothing
+      requiredSlot:
+        - back
       clothingVisuals:
         back:
           - state: equipped-BACKPACK-sealed
@@ -51,10 +54,15 @@
       interfaces:
         enum.WiresUiKey.Key:
           type: WiresBoundUserInterface
-        enum.ModsuitModuleUiKey.Key:
-          type: ModsuitModulesBoundUserInterface
-    - type: ModsuitControl
+        enum.ModuleUiKey.Key:
+          type: ModuleBoundUserInterface
+    - type: ModuleStorageNeedsPanel
+    - type: ModuleStorageBlockWorn
+    - type: ModuleStorage
       maxBusWidth: 15
+      whitelist:
+        components:
+          - ModsuitModule
 
 - type: entity
   parent: ClothingHandsBase
@@ -74,6 +82,8 @@
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/Hands/standard.rsi
     - type: SealableClothing
+      requiredSlot:
+        - gloves
       clothingVisuals:
         gloves:
           - state: equipped-HAND-sealed
@@ -106,6 +116,8 @@
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/Head/standard.rsi
     - type: SealableClothing
+      requiredSlot:
+        - head
       clothingVisuals:
         head:
           - state: equipped-HEAD-sealed
@@ -148,6 +160,8 @@
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/OuterClothing/standard.rsi
     - type: SealableClothing
+      requiredSlot:
+        - outerClothing
       clothingVisuals:
         outerClothing:
           - state: equipped-OUTERCLOTHING-sealed
@@ -187,6 +201,8 @@
     - type: Clothing
       sprite: _DEN/Clothing/Modsuits/Shoes/standard.rsi
     - type: SealableClothing
+      requiredSlot:
+        - feet
       clothingVisuals:
         shoes:
           - state: equipped-FEET-sealed
@@ -204,28 +220,57 @@
 
 - type: entity
   parent: BaseItem
-  id: ModsuitModuleDebug
-  name: debug modsuit module
-  description: A modsuit module for testing functionality.
+  id: ModuleDebug
+  name: debug module
+  description: A module for testing functionality.
   components:
     - type: Sprite
       sprite: Objects/Misc/module.rsi
       layers:
         - state: cpuboard_adv
-    - type: ModsuitModule
+    - type: Module
       busWidth: 3
-      texture: "/Textures/_DEN/Interface/Modsuits/module-width-3.png"
+      texture: "/Textures/_DEN/Interface/Modules/module-width-3.png"
+    - type: ModsuitModule
       
 - type: entity
   parent: BaseItem
-  id: ModsuitModuleDebugSmall
-  name: debug modsuit module small
-  description: A modsuit module for testing functionality.
+  id: ModuleDebugSmall
+  name: debug module small
+  description: A module for testing functionality.
   components:
     - type: Sprite
       sprite: Objects/Misc/module.rsi
       layers:
         - state: cpuboard
-    - type: ModsuitModule
+    - type: Module
       busWidth: 1
-      texture: "/Textures/_DEN/Interface/Modsuits/module-width-1.png"
+      texture: "/Textures/_DEN/Interface/Modules/module-width-1.png"
+    - type: ModsuitModule
+      
+- type: entity
+  parent: BaseItem
+  id: ModsuitStorageModuleDebug
+  name: modsuit debug storage module
+  description: A debug storage module for a modsuit.
+  components:
+    - type: Sprite
+      sprite: Objects/Misc/module.rsi
+      layers:
+        - state: abductor_mod
+    - type: Module
+      busWidth: 4
+      texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
+      siblingBlacklist:
+        tags:
+          - StorageModule
+    - type: Tag
+      tags:
+        - StorageModule
+    - type: ModsuitModule
+    - type: ModsuitStorageModule
+      storageComponent:
+      - type: Storage
+        grid:
+          - 0,0,6,3
+        maxItemSize: Huge

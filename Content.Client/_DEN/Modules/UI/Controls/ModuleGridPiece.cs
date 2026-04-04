@@ -1,26 +1,26 @@
 using System.Numerics;
 using Content.Client.Resources;
 using Content.Client.UserInterface;
-using Content.Shared._DEN.Clothing.Modsuits.Components;
+using Content.Shared._DEN.Modules.Components;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.CustomControls;
 using Robust.Shared.Input;
 
-namespace Content.Client._DEN.UserInterface.Systems.Modsuits.Controls;
+namespace Content.Client._DEN.Modules.UI.Controls;
 
 public sealed class ModuleGridPiece : Control, IEntityControl
 {
     private readonly IEntityManager _entityManager;
 
-    private readonly Entity<ModsuitModuleComponent> _entity;
+    private readonly Entity<ModuleComponent> _entity;
 
     private TextureRect? _texture;
     
     public event Action<EntityUid>? OnModuleClicked;
 
-    public ModuleGridPiece(Entity<ModsuitModuleComponent> entity, IEntityManager entityManager, IResourceCache resourceCache)
+    public ModuleGridPiece(Entity<ModuleComponent> entity, IEntityManager entityManager, IResourceCache resourceCache)
     {
         IoCManager.InjectDependencies(this);
         

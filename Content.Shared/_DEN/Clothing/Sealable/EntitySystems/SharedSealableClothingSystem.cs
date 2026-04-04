@@ -3,6 +3,7 @@ using System.Linq;
 using Content.Shared._DEN.Clothing.Sealable.Components;
 using Content.Shared.Clothing.EntitySystems;
 using Content.Shared.DoAfter;
+using Content.Shared.Inventory;
 using Content.Shared.Inventory.Events;
 using Content.Shared.Item;
 using Content.Shared.Popups;
@@ -21,6 +22,7 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
     [Dependency] private readonly SharedItemSystem _item = default!;
     [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly InventorySystem _inventorySystem = default!;
 
     private readonly LocId _cantToggleReason = "sealable-clothing-cant-toggle-sealed";
     
@@ -33,6 +35,7 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         SubscribeLocalEvent<SealableClothingComponent, ToggleSealDoAfterEvent>(OnToggleSealDoAfter);
         SubscribeLocalEvent<SealableClothingComponent, GetVerbsEvent<EquipmentVerb>>(OnGetVerbs);
         SubscribeLocalEvent<SealableClothingComponent, ToggleClothingAttemptEvent>(OnToggleClothingAttempt);
+        SubscribeLocalEvent<SealableClothingComponent, DoAfterAttemptEvent<ToggleSealDoAfterEvent>>(OnToggleSealDoAfterAttempt);
     }
 
     private void OnToggleClothingAttempt(Entity<SealableClothingComponent> entity, ref ToggleClothingAttemptEvent evt)
@@ -48,6 +51,12 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
     {
         if (entity.Comp.IsSealed)
             evt.Cancel();
+    }
+
+    private void OnToggleSealDoAfterAttempt(Entity<SealableClothingComponent> entity, ref DoAfterAttemptEvent<ToggleSealDoAfterEvent> args)
+    {
+        if (!_inventorySystem.InSlotWithFlags(entity.Owner, entity.Comp.RequiredFlags))
+            args.Cancel();
     }
 
     private void OnSealableUnequipped(Entity<SealableClothingComponent> entity, ref GotUnequippedEvent args)
@@ -69,6 +78,9 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
     private void OnGetVerbs(Entity<SealableClothingComponent> entity, ref GetVerbsEvent<EquipmentVerb> args)
     {
         if (!args.CanAccess || !args.CanInteract || args.Hands == null)
+            return;
+
+        if (!_inventorySystem.InSlotWithFlags(entity.Owner, entity.Comp.RequiredFlags))
             return;
         
         var user = args.User;
@@ -94,6 +106,9 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         
         if (!Resolve(entity, ref entity.Comp))
             return;
+
+        if (!_inventorySystem.InSlotWithFlags(entity.Owner, entity.Comp.RequiredFlags))
+            return;
         
         var evt = new ChangeSealStateAttemptEvent(!entity.Comp.IsSealed);
         RaiseLocalEvent(entity, evt);
@@ -106,6 +121,7 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
             BreakOnDamage = false,
             BreakOnMove = false,
             CancelDuplicate = true,
+            AttemptFrequency = AttemptFrequency.EveryTick,
             DuplicateCondition = DuplicateConditions.SameEvent,
         };
 

@@ -1,3 +1,4 @@
+using Content.Shared.Inventory;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
 
@@ -11,6 +12,8 @@ public sealed partial class SealableClothingComponent : Component
     [DataField] public List<string> SealedSpriteLayers = [];
     
     [DataField] public TimeSpan SealDoAfterTime = TimeSpan.FromSeconds(1.5);
+
+    [DataField("requiredSlot", true)] public SlotFlags RequiredFlags;
     
     [DataField] public Dictionary<string, List<PrototypeLayerData>> ClothingVisuals = new();
 
