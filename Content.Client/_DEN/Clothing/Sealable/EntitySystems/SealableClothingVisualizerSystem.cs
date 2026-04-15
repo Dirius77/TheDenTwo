@@ -1,25 +1,27 @@
 using System.Linq;
-using Content.Client.Clothing;
-using Content.Shared._DEN.Clothing.Sealable.Components;
+using Content.Client._DEN.Clothing.Sealable.Components;
 using Content.Shared._DEN.Clothing.Sealable.EntitySystems;
 using Content.Shared.Clothing;
+using Content.Shared.Clothing.EntitySystems;
 using Content.Shared.Inventory;
 
 namespace Content.Client._DEN.Clothing.Sealable.EntitySystems;
 
-public sealed partial class SealableClothingSystem : SharedSealableClothingSystem
+public sealed partial class SealableClothingVisualizerSystem : EntitySystem
 {
+    [Dependency] private readonly SharedAppearanceSystem _appearanceSystem = default!;
+    
     public override void Initialize()
     {
         base.Initialize();
 
-        SubscribeLocalEvent<SealableClothingComponent, GetEquipmentVisualsEvent>(OnGetEquipmentVisuals,
-            after: [typeof(ClientClothingSystem)]);
+        SubscribeLocalEvent<SealableClothingVisualsComponent, GetEquipmentVisualsEvent>(OnGetEquipmentVisuals,
+            after: [typeof(ClothingSystem)]);
     }
 
-    private void OnGetEquipmentVisuals(Entity<SealableClothingComponent> entity, ref GetEquipmentVisualsEvent args)
+    private void OnGetEquipmentVisuals(Entity<SealableClothingVisualsComponent> entity, ref GetEquipmentVisualsEvent args)
     {
-        if (!entity.Comp.IsSealed)
+        if (!_appearanceSystem.TryGetData<bool>(entity, SealableClothingVisuals.State, out var state) || !state)
             return;
         
         if (!TryComp(args.Equipee, out InventoryComponent? inventory))

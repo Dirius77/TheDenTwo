@@ -38,6 +38,10 @@ public sealed partial class ModsuitStorageModuleSystem : EntitySystem
 
     private void OnModuleRemoved(Entity<ModsuitStorageModuleComponent> entity, ref ModuleRemovedEvent args)
     {
+        // If our parent is being deleted, just let everything be deleted.
+        if (TerminatingOrDeleted(args.Storage))
+            return;
+        
         var coordinates = Transform(args.Storage).Coordinates;
         var target = args.Storage;
 

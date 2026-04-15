@@ -1,0 +1,185 @@
+- type: entity
+  abstract: true
+  parent: [Clothing, ContentsExplosionResistanceBase]
+  id: ClothingModsuitBase
+  components:
+  - type: Item
+    size: Ginormous
+  - type: Clothing
+    quickEquip: false
+    slots:
+      - back
+  - type: ContainerContainer
+    containers:
+      toggleable-clothing: !type:Container {}
+      modules: !type:Container {}
+      cell_slot: !type:ContainerSlot {}
+  - type: ToggleableClothing
+    requiredSlot:
+      - back
+  - type: SealableClothing
+    requiredSlot:
+      - back
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      back:
+        - state: equipped-BACKPACK-sealed
+          shader: unshaded
+  - type: SealableController
+    controlledSlots: [ back, head, outerClothing, shoes, gloves ]
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.SealableClothingVisuals.State:
+        sealedLayer:
+          True: { visible: true }
+          False: { visible: false }
+  - type: WiresPanel
+  - type: Wires
+    boardName: wires-board-name-modsuit-control
+    layoutId: ModControl
+  - type: UserInterface
+    interfaces:
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+      enum.ModuleUiKey.Key:
+        type: ModuleBoundUserInterface
+      enum.ModsuitControllerUiKey.Key:
+        type: ModsuitControllerBoundUserInterface
+  - type: PowerCellSlot
+    cellSlotId: cell_slot
+  - type: ItemSlots
+    slots:
+      cell_slot:
+        name: power-cell-slot-component-slot-name-default
+  - type: PanelLocksItemSlot
+    lockedSlots:
+      - cell_slot
+  - type: ModuleStorage
+    maxBusWidth: 10
+  - type: ModulePowerProvider
+  - type: ModuleStorageBlockWorn
+  - type: ModuleStorageNeedsPanel
+  - type: ModsuitController
+  - type: ModsuitPart
+
+- type: entity
+  abstract: true
+  parent: ClothingHandsBase
+  id: ClothingModsuitGauntletsBase
+  components:
+  - type: SealableClothing
+    requiredSlot:
+      - gloves
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      gloves:
+        - state: equipped-HAND-sealed
+          shader: unshaded
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.SealableClothingVisuals.State:
+        sealedLayer:
+          True: { visible: true }
+          False: { visible: false }
+  - type: ModsuitPart
+
+- type: entity
+  abstract: true
+  parent: ClothingHeadBase
+  id: ClothingModsuitHelmetBase
+  components:
+  - type: SealableClothing
+    requiredSlot:
+      - head
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      head:
+        - state: equipped-HEAD-sealed
+          shader: unshaded
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.SealableClothingVisuals.State:
+        sealedLayer:
+          True: { visible: true }
+          False: { visible: false }
+  - type: ModsuitPart
+
+- type: entity
+  abstract: true
+  parent: ClothingModsuitHelmetBase
+  id: ClothingModsuitHelmetBaseExo
+  components:
+  - type: SealableClothing
+    sealedAddComponents:
+      - type: BreathMask
+      - type: IngestionBlocker
+      - type: IdentityBlocker
+      - type: PressureProtection
+        highPressureMultiplier: 0.3
+        lowPressureMultiplier: 1000
+      - type: TemperatureProtection
+        heatingCoefficient: 0.1
+        coolingCoefficient: 0.1
+  - type: ModsuitPart
+
+- type: entity
+  abstract: true
+  parent: [ ClothingOuterBase, AllowSuitStorageClothing ]
+  id: ClothingModsuitChestplateBase
+  components:
+  - type: SealableClothing
+    requiredSlot:
+      - outerClothing
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      outerClothing:
+        - state: equipped-OUTERCLOTHING-sealed
+          shader: unshaded
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.SealableClothingVisuals.State:
+        sealedLayer:
+          True: { visible: true }
+          False: { visible: false }
+  - type: ModsuitPart
+          
+- type: entity
+  abstract: true
+  parent: ClothingModsuitChestplateBase
+  id: ClothingModsuitChestplateBaseExo
+  components:
+  - type: SealableClothing
+    sealedAddComponents:
+      - type: PressureProtection
+        highPressureMultiplier: 0.3
+        lowPressureMultiplier: 1000
+      - type: TemperatureProtection
+        heatingCoefficient: 0.1
+        coolingCoefficient: 0.1
+  - type: ModsuitPart
+
+- type: entity
+  abstract: true
+  parent: ClothingShoesBase
+  id: ClothingModsuitBootsBase
+  components:
+  - type: SealableClothing
+    requiredSlot:
+      - feet
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      shoes:
+        - state: equipped-FEET-sealed
+          shader: unshaded
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.SealableClothingVisuals.State:
+        sealedLayer:
+          True: { visible: true }
+          False: { visible: false }
+  - type: ModsuitPart

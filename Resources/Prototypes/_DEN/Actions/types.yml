@@ -9,3 +9,25 @@
     useDelay: 1
   - type: InstantAction
     event: !type:ToggleSealableControllerEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionOpenModsuitUI
+  name: Open MODsuit Controller UI
+  description: Opens the MODsuit Controller UI.
+  components:
+  - type: Action
+    itemIconStyle: BigItem
+  - type: InstantAction
+    event: !type:ModsuitControllerOpenUiEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionToggleModsuitMagnet
+  name: Toggle Modsuit Magboots
+  description: Toggles the modsuit's magboot module.
+  components:
+    - type: Action
+      itemIconStyle: BigItem
+    - type: InstantAction
+      event: !type:ToggleActionEvent

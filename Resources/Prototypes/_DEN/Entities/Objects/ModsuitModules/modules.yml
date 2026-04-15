@@ -1,0 +1,124 @@
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: ModsuitModuleBase
+  components:
+  - type: Module
+    busWidth: 1
+    texture: "/Textures/_DEN/Interface/Modules/module-width-1.png"
+  - type: ModsuitModule
+
+- type: entity
+  parent: ModsuitModuleBase
+  id: ModsuitModuleEatingApparatus
+  name: eating apparatus module
+  description: A module which projects a barrier in front of the mouth, allowing for eating while retaining pressure and atmosphere protection.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: apparatus
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModsuitPassiveComponentModule
+    blockOnSeal:
+    - type: IngestionBlocker
+
+- type: entity
+  parent: ModsuitModuleBase
+  id: ModsuitModuleRadiationShielding
+  name: radiation shielding module
+  description: A module which allows the modsuit to block radiation from reaching the wearer. Requires a deployed chestplate.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: radshield_module
+  - type: Module
+    busWidth: 2
+    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
+  - type: ModuleTogglePowerDraw
+  - type: ItemToggle
+    onUse: false
+    onActivate: false
+  - type: ModsuitPartAttachedModule
+    slots:
+    - outerClothing
+  - type: ModulePowerDraw
+    enabled: false
+    drawRate: 0.1
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: Armor
+      modifiers:
+        coefficients:
+          Blunt: 1.0
+          Slash: 1.0
+          Piercing: 1.0
+          Heat: 1.0
+          Radiation: 0.0
+          Caustic: 1.0
+
+- type: entity
+  parent: ModsuitModuleBase
+  id: ModsuitModuleMagneticStabilizer
+  name: magnetic stabilizer module
+  description: A module containing powerful electromagnets which integrate with the modsuit's boots.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: magnet_module
+  - type: Module
+    busWidth: 2
+    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
+  - type: ModulePowerDraw
+    enabled: false
+    drawRate: 2.5
+  - type: ModuleTogglePowerDraw
+  - type: ModsuitModuleActionGrant
+    slot: shoes
+    action: ActionToggleModsuitMagnet
+  - type: ItemToggle
+    onUse: false
+    onActivate: false
+  - type: ModsuitModuleTogglePart
+  - type: ModsuitPartAttachedModule
+    slots:
+    - shoes
+  - type: ModsuitPassiveComponentModule
+    addOnSeal:
+    - type: ItemToggle
+      onUse: false
+      onActivate: false
+    - type: Magboots
+    - type: ClothingSpeedModifier
+      walkModifier: 0.8
+      sprintModifier: 0.8
+
+- type: entity
+  parent: ModsuitModuleBase
+  id: ModsuitStorageModuleDebug
+  name: debug storage module
+  description: A debug storage module for a modsuit.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: bluespace_storage
+  - type: Module
+    busWidth: 4
+    texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
+    siblingBlacklist:
+      tags:
+      - StorageModule
+  - type: Tag
+    tags:
+    - StorageModule
+  - type: ModsuitStorageModule
+    storageComponent:
+    - type: Storage
+      grid:
+        - 0,0,19,9
+    maxItemSize: Huge

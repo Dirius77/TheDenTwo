@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Linq;
 using Content.Shared._DEN.Clothing.Sealable.Components;
 using Content.Shared.Clothing.EntitySystems;
 using Content.Shared.DoAfter;
@@ -11,17 +9,15 @@ using Content.Shared.Verbs;
 using JetBrains.Annotations;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
-using Robust.Shared.Timing;
 
 namespace Content.Shared._DEN.Clothing.Sealable.EntitySystems;
 
-public abstract partial class SharedSealableClothingSystem : EntitySystem
+public sealed partial class SealableClothingSystem : EntitySystem
 {
-    [Dependency] private readonly SharedAppearanceSystem _appearance = default!;
+    [Dependency] private readonly SharedAppearanceSystem _appearanceSystem = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedItemSystem _item = default!;
     [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly InventorySystem _inventorySystem = default!;
 
     private readonly LocId _cantToggleReason = "sealable-clothing-cant-toggle-sealed";
@@ -40,6 +36,7 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
 
     private void OnToggleClothingAttempt(Entity<SealableClothingComponent> entity, ref ToggleClothingAttemptEvent evt)
     {
+        // Clothing toggles use force unequip so we need a different way to cancel it and inform.
         if (entity.Comp.IsSealed)
         {
             evt.Reason = _cantToggleReason;
@@ -49,12 +46,14 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
 
     private void OnBeingUnequipped(Entity<SealableClothingComponent> entity, ref BeingUnequippedAttemptEvent evt)
     {
+        // Stop a sealed piece being taken off until it's unsealed.
         if (entity.Comp.IsSealed)
             evt.Cancel();
     }
 
     private void OnToggleSealDoAfterAttempt(Entity<SealableClothingComponent> entity, ref DoAfterAttemptEvent<ToggleSealDoAfterEvent> args)
     {
+        // If someone takes of a piece of gear before it finishes sealing, stop sealing it.
         if (!_inventorySystem.InSlotWithFlags(entity.Owner, entity.Comp.RequiredFlags))
             args.Cancel();
     }
@@ -64,7 +63,7 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         // Sealed clothing is only intended to be so while worn. This makes sure that if the entity somehow gets
         // force unequipped it doesn't stay stuck in a sealed state.
         if (entity.Comp.IsSealed)
-            ModifyClothingSeal(entity.AsNullable(), false);
+            SetSealed(entity.AsNullable(), false);
     }
 
     private void OnToggleSealDoAfter(Entity<SealableClothingComponent> entity, ref ToggleSealDoAfterEvent args)
@@ -72,7 +71,7 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         if (args.Cancelled)
             return;
         
-        ModifyClothingSeal(entity.AsNullable(), !entity.Comp.IsSealed);
+        SetSealed(entity.AsNullable(), !entity.Comp.IsSealed);
     }
 
     private void OnGetVerbs(Entity<SealableClothingComponent> entity, ref GetVerbsEvent<EquipmentVerb> args)
@@ -88,7 +87,7 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         var verb = new EquipmentVerb()
         {
             Text = Loc.GetString("sealable-clothing-verb-text"),
-            Act = () => TryToggleSeal(user, entity.AsNullable(), out _),
+            Act = () => TryToggleSeal(user, entity.AsNullable()),
         };
         args.Verbs.Add(verb);
     }
@@ -98,25 +97,25 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
     /// </summary>
     /// <param name="user">The user who is trying to seal the clothing.</param>
     /// <param name="entity">The piece of clothing being sealed.</param>
-    /// <param name="doAfterId">The DoAfterId of the created DoAfter.</param>
+    /// <param name="timeMultiplier">Multiplies the doafter duration by this value.</param>
+    /// <param name="customSealMsg">Sealing message is replaced with this.</param>
+    /// <param name="customUnsealMsg">Unsealing message is replaced with this.</param>
     [PublicAPI]
-    public void TryToggleSeal(EntityUid user, Entity<SealableClothingComponent?> entity, out DoAfterId? doAfterId)
+    public void TryToggleSeal(EntityUid user, Entity<SealableClothingComponent?> entity, float timeMultiplier = 1.0f, LocId? customSealMsg = null, LocId? customUnsealMsg = null)
     {
-        doAfterId = null;
-        
         if (!Resolve(entity, ref entity.Comp))
             return;
 
         if (!_inventorySystem.InSlotWithFlags(entity.Owner, entity.Comp.RequiredFlags))
             return;
         
-        var evt = new ChangeSealStateAttemptEvent(!entity.Comp.IsSealed);
+        var evt = new ChangeSealStateAttemptEvent(user, !entity.Comp.IsSealed);
         RaiseLocalEvent(entity, evt);
         if (evt.Cancelled)
             return;
         
         // The sealing can continue while doing anything else, however, only one piece can seal or unseal at a time.
-        var args = new DoAfterArgs(EntityManager, user, entity.Comp.SealDoAfterTime, new ToggleSealDoAfterEvent(), entity, user, entity)
+        var args = new DoAfterArgs(EntityManager, user, entity.Comp.SealDoAfterTime * timeMultiplier, new ToggleSealDoAfterEvent(), entity, user, entity)
         {
             BreakOnDamage = false,
             BreakOnMove = false,
@@ -125,12 +124,12 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
             DuplicateCondition = DuplicateConditions.SameEvent,
         };
 
-        if (!_doAfter.TryStartDoAfter(args, out doAfterId))
+        if (!_doAfter.TryStartDoAfter(args))
             return;
         
         var popup = entity.Comp.IsSealed 
-            ? Loc.GetString(entity.Comp.UnsealMessage, ("entity", Name(entity))) 
-            : Loc.GetString(entity.Comp.SealMessage, ("entity", Name(entity)));
+            ? Loc.GetString(customUnsealMsg ?? entity.Comp.UnsealMessage, ("entity", entity)) 
+            : Loc.GetString(customSealMsg ?? entity.Comp.SealMessage, ("entity", entity));
         
         _popupSystem.PopupPredicted(popup, user, user, PopupType.Medium);
     }
@@ -149,11 +148,8 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         return entity.Comp.IsSealed;
     }
     
-    private void ModifyClothingSeal(Entity<SealableClothingComponent?> entity, bool state)
+    private void SetSealed(Entity<SealableClothingComponent?> entity, bool state)
     {
-        if (!_timing.IsFirstTimePredicted)
-            return;
-        
         if (!Resolve(entity, ref entity.Comp))
             return;
         
@@ -162,6 +158,8 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         // Don't do work if the new state isn't different.
         if (!hasChange)
             return;
+        
+        UpdateVisuals(entity.AsNullable());
 
         ComponentRegistry addingComps = new();
         ComponentRegistry removingComps = new();
@@ -204,21 +202,37 @@ public abstract partial class SharedSealableClothingSystem : EntitySystem
         }
 
         // Create the right event type for the state change.
-        ClothingSealStateChangedEvent evt;
-        if (state)
-            evt = new ClothingSealedEvent(addingComps, removingComps);
-        else
-            evt = new ClothingUnsealedEvent(addingComps, removingComps);
+        ComponentRegistry? evtAddComps;
+        ComponentRegistry? evtRemoveComps;
         
-        RaiseLocalEvent(entity, evt);
+        if (state)
+        {
+            var evt = new ClothingSealedEvent(addingComps, removingComps);
+            RaiseLocalEvent(entity, evt);
+            evtAddComps = evt.AddingComponents;
+            evtRemoveComps = evt.RemovingComponents;
+        }
+        else
+        {
+            var evt = new ClothingUnsealedEvent(addingComps, removingComps);
+            RaiseLocalEvent(entity, evt);
+            evtAddComps = evt.AddingComponents;
+            evtRemoveComps = evt.RemovingComponents;
+        }
         
         // Apply all the changes handled in the event.
-        EntityManager.AddComponents(entity, evt.AddingComponents);
-        EntityManager.RemoveComponents(entity, evt.RemovingComponents);
-        _appearance.SetData(entity, SealableClothingVisuals.State, state);
-        _item.VisualsChanged(entity);
+        EntityManager.AddComponents(entity, evtAddComps);
+        EntityManager.RemoveComponents(entity, evtRemoveComps);
+        Dirty(entity);
+    }
+
+    private void UpdateVisuals(Entity<SealableClothingComponent?, AppearanceComponent?> entity)
+    {
+        if (!Resolve(entity, ref entity.Comp1, ref entity.Comp2))
+            return;
         
-        DirtyEntity(entity);
+        _appearanceSystem.SetData(entity, SealableClothingVisuals.State, entity.Comp1.IsSealed, entity.Comp2);
+        _item.VisualsChanged(entity);
     }
 }
 
@@ -244,9 +258,9 @@ public sealed class ClothingUnsealedEvent(ComponentRegistry addingComponents, Co
 /// Raised BEFORE the doAfter to change the state of a piece of Sealable Clothing is created. Cancel to prevent it.
 /// </summary>
 /// <param name="goalState">If the clothing is being sealed or unsealed</param>
-[Serializable, NetSerializable]
-public sealed class ChangeSealStateAttemptEvent(bool goalState) : CancellableEntityEventArgs
+public sealed class ChangeSealStateAttemptEvent(EntityUid user, bool goalState) : CancellableEntityEventArgs
 {
+    public readonly EntityUid User = user;
     public readonly bool GoalState = goalState;
 }
 

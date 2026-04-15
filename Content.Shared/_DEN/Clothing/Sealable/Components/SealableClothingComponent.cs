@@ -4,7 +4,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._DEN.Clothing.Sealable.Components;
 
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true)]
 public sealed partial class SealableClothingComponent : Component
 {
     [DataField, AutoNetworkedField] public bool IsSealed = false;
@@ -13,9 +13,8 @@ public sealed partial class SealableClothingComponent : Component
     
     [DataField] public TimeSpan SealDoAfterTime = TimeSpan.FromSeconds(1.5);
 
-    [DataField("requiredSlot", true)] public SlotFlags RequiredFlags;
-    
-    [DataField] public Dictionary<string, List<PrototypeLayerData>> ClothingVisuals = new();
+    [DataField("requiredSlot", required: true)] 
+    public SlotFlags RequiredFlags;
 
     [DataField] public LocId SealMessage = "sealable-clothing-started-sealing";
 

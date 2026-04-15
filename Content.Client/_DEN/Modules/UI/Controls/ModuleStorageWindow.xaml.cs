@@ -23,7 +23,7 @@ public sealed partial class ModuleStorageWindow : FancyWindow
     [Dependency] private readonly IResourceCache _resourceCache = default!;
     [Dependency] private readonly IEntityManager _entity = default!;
 
-    public Entity<ModuleStorageComponent>? ModControlEntity;
+    private Entity<ModuleStorageComponent>? _modControlEntity;
 
     public event Action<int>? OnSlotClicked;
     
@@ -51,7 +51,7 @@ public sealed partial class ModuleStorageWindow : FancyWindow
 
     public void Initialize(Entity<ModuleStorageComponent> entity)
     {
-        ModControlEntity = entity;
+        _modControlEntity = entity;
         _busSize = entity.Comp.MaxBusWidth;
         BuildBackground(_busSize);
     }
@@ -93,7 +93,7 @@ public sealed partial class ModuleStorageWindow : FancyWindow
             child.ModulateSelfOverride = null;
         }
         
-        if (UserInterfaceManager.CurrentlyHovered != this || ModControlEntity == null)
+        if (UserInterfaceManager.CurrentlyHovered != this || _modControlEntity == null)
             return;
         
         if (handsSystem.GetActiveHandEntity() is { } handsEntity)
@@ -102,7 +102,7 @@ public sealed partial class ModuleStorageWindow : FancyWindow
                 return;
 
             var location = GetMouseModuleLocation();
-            var isValid = modsuitSystem.ModuleFitsInStorage(ModControlEntity.Value, handsEntity, location.X);
+            var isValid = modsuitSystem.ModuleFitsInStorage(_modControlEntity.Value, handsEntity, location.X);
             var color = isValid ? Color.Aqua : Color.Red;
             for (var x = 0; x < _busSize; x++)
             {
@@ -137,7 +137,7 @@ public sealed partial class ModuleStorageWindow : FancyWindow
     {
         base.KeyBindDown(args);
 
-        if (args.Function != EngineKeyFunctions.UIClick || ModControlEntity == null)
+        if (args.Function != EngineKeyFunctions.UIClick || _modControlEntity == null)
             return;
         
         var handsSystem = _entity.System<HandsSystem>();
@@ -151,7 +151,7 @@ public sealed partial class ModuleStorageWindow : FancyWindow
             return;
         
         var slot = location.X;
-        if (modsuitSystem.ModuleFitsInStorage(ModControlEntity.Value, handEntity, slot))
+        if (modsuitSystem.ModuleFitsInStorage(_modControlEntity.Value, handEntity, slot))
         {
             OnSlotClicked?.Invoke(slot);
             args.Handle();
@@ -165,12 +165,12 @@ public sealed partial class ModuleStorageWindow : FancyWindow
 
     public void Update()
     {
-        if (ModControlEntity == null)
+        if (_modControlEntity == null)
             return;
         
         var size = _middleTexture!.Size * 2;
         
-        ModuleGrid.Columns = ModControlEntity.Value.Comp.MaxBusWidth;
+        ModuleGrid.Columns = _modControlEntity.Value.Comp.MaxBusWidth;
         ModuleGrid.RemoveAllChildren();
         _controlGrid.Clear();
         for (var i = 0; i < _busSize; i++)
@@ -184,7 +184,7 @@ public sealed partial class ModuleStorageWindow : FancyWindow
             ModuleGrid.AddChild(control);
         }
 
-        var moduleSlots = ModControlEntity.Value.Comp.ModuleSlots;
+        var moduleSlots = _modControlEntity.Value.Comp.ModuleSlots;
         
         List<EntityUid> toRemove = new();
         foreach (var (ent, data) in _modules)

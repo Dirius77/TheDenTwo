@@ -23,6 +23,11 @@ public sealed partial class ModuleComponent : Component
     /// These should be symmetrical between modules because only the one being installed is ever checked.
     /// </summary>
     [DataField] public EntityWhitelist? SiblingBlacklist;
+
+    /// <summary>
+    /// The module storage that this module is currently inside.
+    /// </summary>
+    [DataField] public EntityUid? StoredIn;
 }
 
 /// <summary>

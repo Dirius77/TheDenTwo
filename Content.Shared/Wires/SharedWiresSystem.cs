@@ -32,6 +32,8 @@ public abstract partial class SharedWiresSystem : EntitySystem
 
         SubscribeLocalEvent<ActivatableUIRequiresPanelComponent, ActivatableUIOpenAttemptEvent>(OnAttemptOpenActivatableUI);
         SubscribeLocalEvent<ActivatableUIRequiresPanelComponent, PanelChangedEvent>(OnActivatableUIPanelChanged);
+
+        InitializeLock(); // DEN: Panel locking item slots.
     }
 
     private void OnStartup(Entity<WiresPanelComponent> ent, ref ComponentStartup args)

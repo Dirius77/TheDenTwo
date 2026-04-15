@@ -12,7 +12,7 @@ public sealed partial class SealableControllerSystem : EntitySystem
     [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;
     [Dependency] private readonly ActionContainerSystem _actionContainer = default!;
     [Dependency] private readonly InventorySystem _inventory = default!;
-    [Dependency] private readonly SharedSealableClothingSystem _sealableClothing = default!;
+    [Dependency] private readonly SealableClothingSystem _sealableClothing = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     
     public override void Initialize()
@@ -23,7 +23,7 @@ public sealed partial class SealableControllerSystem : EntitySystem
         SubscribeLocalEvent<SealableControllerComponent, ToggleSealableControllerEvent>(OnToggleSealable);
         SubscribeLocalEvent<SealableControllerComponent, BeingUnequippedAttemptEvent>(OnControllerUnequipAttempt);
         
-        SubscribeLocalEvent<SealedByControllerComponent, ToggleSealDoAfterEvent>(OnSealFinished, after: [typeof(SharedSealableClothingSystem)]);
+        SubscribeLocalEvent<SealedByControllerComponent, ToggleSealDoAfterEvent>(OnSealFinished, after: [typeof(SealableClothingSystem)]);
     }
 
     private void OnControllerUnequipAttempt(Entity<SealableControllerComponent> entity,
@@ -86,7 +86,8 @@ public sealed partial class SealableControllerSystem : EntitySystem
                 }
 
                 // We have a piece of clothing that is in the wrong state at this point.
-                _sealableClothing.TryToggleSeal(user, target.Value.AsNullable(), out _);
+                // This is delayed entirely for the aesthetics of letting the previous doafter bar despawn before starting the next one.
+                Timer.Spawn(TimeSpan.FromMilliseconds(200), () => _sealableClothing.TryToggleSeal(user, target.Value.AsNullable()));
                 entity.Comp.CurrentSlot++;
                 return true;
             }

@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Retrieved from github.com/tgstation/tgstation",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "advancedcloak"
+    },
+    {
+      "name": "antigravmod"
+    },
+    {
+      "name": "apparatus"
+    },
+    {
+      "name": "armorbooster"
+    },
+    {
+      "name": "atrocinator"
+    },
+    {
+      "name": "battlemageshield"
+    },
+    {
+      "name": "bloon"
+    },
+    {
+      "name": "bluespace_storage",
+      "delays": [
+        [
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+        ]
+      ]
+    },
+    {
+      "name": "burgdispenser"
+    },
+    {
+      "name": "clampmodule"
+    },
+    {
+      "name": "cloak_module"
+    },
+    {
+      "name": "constructor_module"
+    },
+    {
+      "name": "diaghud_visor"
+    },
+    {
+      "name": "dna_lock_module"
+    },
+    {
+      "name": "drill_module"
+    },
+    {
+      "name": "empshield_module"
+    },
+    {
+      "name": "energyshield"
+    },
+    {
+      "name": "flashlight_module"
+    },
+    {
+      "name": "gps_module"
+    },
+    {
+      "name": "health_module"
+    },
+    {
+      "name": "holster_module"
+    },
+    {
+      "name": "honk_module"
+    },
+    {
+      "name": "injector_module"
+    },
+    {
+      "name": "insigniamodule",
+      "delays": [
+        [
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+        ]
+      ]
+    },
+    {
+      "name": "jetpack"
+    },
+    {
+      "name": "kinesismodule"
+    },
+    {
+      "name": "large_storage"
+    },
+    {
+      "name": "longfall"
+    },
+    {
+      "name": "magicnullifier"
+    },
+    {
+      "name": "magnet_module"
+    },
+    {
+      "name": "medhud_visor"
+    },
+    {
+      "name": "meson_visor"
+    },
+    {
+      "name": "microwavebeam"
+    },
+    {
+      "name": "mod_storage"
+    },
+    {
+      "name": "night_visor"
+    },
+    {
+      "name": "noslip"
+    },
+    {
+      "name": "orebag_module"
+    },
+    {
+      "name": "organthrower"
+    },
+    {
+      "name": "pathfinder_module"
+    },
+    {
+      "name": "plasmastabilizer"
+    },
+    {
+      "name": "quickcarry"
+    },
+    {
+      "name": "radshield_module"
+    },
+    {
+      "name": "ravevisor",
+      "delays": [
+        [
+            0.2,
+            0.2,
+            0.2
+        ]
+      ]
+    },
+    {
+      "name": "regulator_module"
+    },
+    {
+      "name": "scanner_module"
+    },
+    {
+      "name": "sechud_visor"
+    },
+    {
+      "name": "springlock"
+    },
+    {
+      "name": "syndie_storage"
+    },
+    {
+      "name": "tanning"
+    },
+    {
+      "name": "teleportmod"
+    },
+    {
+      "name": "tether_module"
+    },
+    {
+      "name": "thermal_visor"
+    },
+    {
+      "name": "traymodule"
+    },
+    {
+      "name": "waddleboots"
+    },
+    {
+      "name": "weldingprot"
+    }
+  ]
+}

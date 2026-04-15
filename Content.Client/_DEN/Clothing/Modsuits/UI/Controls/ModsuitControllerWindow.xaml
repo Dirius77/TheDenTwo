@@ -1,0 +1,14 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      MinSize="240 240">
+    <BoxContainer Orientation="Horizontal" Margin="0 5 10 10">
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+            <Control>
+                <PanelContainer Margin="100 0 0 0" StyleClasses="BackgroundPanelDark">
+                </PanelContainer>
+                <GridContainer Margin="10 10 10 10" Columns="2" Name="ToggleGrid">
+                </GridContainer>
+            </Control>
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>

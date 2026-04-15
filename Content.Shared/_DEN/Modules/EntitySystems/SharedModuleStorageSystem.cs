@@ -148,6 +148,15 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         RaiseLocalEvent(storage, storageInsertAttempt);
         return !storageInsertAttempt.Cancelled;
     }
+    
+    public IReadOnlyList<EntityUid> GetContainedModules(Entity<ModuleStorageComponent?> storage)
+    {
+        // I'm expecting this to get passed invalid entities during shutdown, it's fine.
+        if (!Resolve(storage, ref storage.Comp, false))
+            return [];
+        
+        return storage.Comp.ModuleContainer.ContainedEntities;
+    }
 
     private bool PassesAllWhitelists(Entity<ModuleStorageComponent> storage, Entity<ModuleComponent> module)
     {
@@ -323,6 +332,8 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
             }
             AssignModuleToSlot(entity, module, slot.Value);
         }
+
+        module.Comp.StoredIn = entity.Owner;
         
         var controlEvt = new ModuleInsertedIntoStorageEvent(module);
         RaiseLocalEvent(entity, controlEvt);
@@ -344,6 +355,8 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
 
     private void OnModuleRemoved(Entity<ModuleStorageComponent> entity, Entity<ModuleComponent> module)
     {
+        module.Comp.StoredIn = null;
+        
         var controlEvt = new ModuleRemovedFromStorageEvent(module);
         RaiseLocalEvent(entity, controlEvt);
 
