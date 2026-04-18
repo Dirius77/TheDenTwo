@@ -6,8 +6,10 @@ using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Inventory;
 using Content.Shared.Popups;
+using Content.Shared.Storage.EntitySystems;
 using Content.Shared.Tools.Components;
 using Content.Shared.Tools.Systems;
+using Content.Shared.Verbs;
 using Content.Shared.Whitelist;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
@@ -35,12 +37,13 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
 
         _moduleQuery = GetEntityQuery<ModuleComponent>();
         
-        SubscribeLocalEvent<ModuleStorageComponent, ComponentInit>(OnControlInit);
-        SubscribeLocalEvent<ModuleStorageComponent, ActivateInWorldEvent>(OnActivateInWorld);
+        SubscribeLocalEvent<ModuleStorageComponent, ComponentInit>(OnModultStorageInit);
+        SubscribeLocalEvent<ModuleStorageComponent, ActivateInWorldEvent>(OnActivateInWorld, before: [typeof(SharedStorageSystem)]);
         SubscribeLocalEvent<ModuleStorageComponent, ModuleSlotActionMessage>(OnModuleSlotAction);
         SubscribeLocalEvent<ModuleStorageComponent, EntRemovedFromContainerMessage>(OnStorageEntityRemoved);
         SubscribeLocalEvent<ModuleStorageComponent, EntInsertedIntoContainerMessage>(OnStorageEntityInserted);
         SubscribeLocalEvent<ModuleStorageComponent, ContainerIsInsertingAttemptEvent>(OnIsInsertingAttempt);
+        SubscribeLocalEvent<ModuleStorageComponent, GetVerbsEvent<ActivationVerb>>(AddUiVerb);
         
         InitializeUILimits();
     }
@@ -76,14 +79,11 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         }
     }
 
-    private void OnControlInit(Entity<ModuleStorageComponent> entity, ref ComponentInit args)
+    private void OnModultStorageInit(Entity<ModuleStorageComponent> entity, ref ComponentInit args)
     {
         entity.Comp.ModuleContainer = _containerSystem.EnsureContainer<Container>(entity, entity.Comp.ContainerId);
-        entity.Comp.ModuleSlots = new Dictionary<int, EntityUid?>();
-        for (var i = 0; i < entity.Comp.MaxBusWidth; i++)
-        {
-            entity.Comp.ModuleSlots[i] = null;
-        }
+        // Point Light my behated...
+        entity.Comp.ModuleContainer.OccludesLight = false;
     }
 
     private void OnActivateInWorld(Entity<ModuleStorageComponent> entity, ref ActivateInWorldEvent args)
@@ -112,7 +112,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         
         for (var i = slot; i < (slot + module.Comp.BusWidth); i++)
         {
-            if (storage.Comp.ModuleSlots[i] != null)
+            if (storage.Comp.ModuleSlots.GetValueOrDefault(i) != null)
                 return false;
         }
 
@@ -128,7 +128,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
     /// <returns>Whether the module fits in the slot.</returns>
     public bool ModuleFitsInStorage(Entity<ModuleStorageComponent> storage, Entity<ModuleComponent?> module, int slot)
     {
-        if (!Resolve(module, ref module.Comp))
+        if (!Resolve(module, ref module.Comp, false))
             return false;
 
         if (!ModuleFitsInSlot(storage, module, slot))
@@ -234,7 +234,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         int slot)
     {
         // There's nothing in this slot, so nothing to do.
-        if (entity.Comp.ModuleSlots[slot] is not {} module)
+        if (entity.Comp.ModuleSlots.GetValueOrDefault(slot) is not {} module)
             return;
 
         if (entity.Comp.RemovalQuality is {} quality 
@@ -310,6 +310,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         {
             entity.Comp.ModuleSlots[i] = module.Owner;
         }
+        Dirty(entity);
     }
 
     private void OnStorageEntityInserted(Entity<ModuleStorageComponent> entity,
@@ -341,6 +342,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         var moduleEvt = new ModuleInsertedEvent(entity);
         RaiseLocalEvent(module, moduleEvt);
         
+        Dirty(module);
         UpdateUi(entity);
     }
 
@@ -364,6 +366,43 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         RaiseLocalEvent(module, moduleEvt);
         
         UpdateUi(entity);
+    }
+
+    private void AddUiVerb(Entity<ModuleStorageComponent> entity, ref GetVerbsEvent<ActivationVerb> evt)
+    {
+        var args = evt;
+        
+        var attemptOpenEvt = new ModuleStorageUIOpenAttemptEvent(args.User);
+        RaiseLocalEvent(entity, attemptOpenEvt);
+        if (attemptOpenEvt.Cancelled)
+            return;
+        
+        var uiOpen = _uiSystem.IsUiOpen(entity.Owner, ModuleUiKey.Key, args.User);
+
+        ActivationVerb verb = new()
+        {
+            Act = () =>
+            {
+                if (uiOpen)
+                {
+                    _uiSystem.CloseUi(entity.Owner, ModuleUiKey.Key, args.User);
+                }
+                else
+                {
+                    _uiSystem.OpenUi(entity.Owner, ModuleUiKey.Key, args.User);
+                }
+            }
+        };
+
+        if (uiOpen)
+        {
+            verb.Text = Loc.GetString("module-storage-verb-close-storage");
+        }
+        else
+        {
+            verb.Text = Loc.GetString("module-storage-verb-open-storage");
+        }
+        args.Verbs.Add(verb);
     }
 
     protected virtual void UpdateUi(Entity<ModuleStorageComponent> entity)

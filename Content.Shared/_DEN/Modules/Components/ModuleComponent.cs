@@ -1,14 +1,15 @@
 using Content.Shared.Whitelist;
+using Robust.Shared.GameStates;
 
 namespace Content.Shared._DEN.Modules.Components;
 
-[RegisterComponent]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class ModuleComponent : Component
 {
     /// <summary>
     /// How much 'bus space' this module consumes when installed.
     /// </summary>
-    [DataField(required: true)] public int BusWidth;
+    [DataField(required: true), AutoNetworkedField] public int BusWidth;
 
     [DataField("texture", required: true)] public string UITexture;
 
@@ -27,7 +28,7 @@ public sealed partial class ModuleComponent : Component
     /// <summary>
     /// The module storage that this module is currently inside.
     /// </summary>
-    [DataField] public EntityUid? StoredIn;
+    [DataField, AutoNetworkedField] public EntityUid? StoredIn;
 }
 
 /// <summary>

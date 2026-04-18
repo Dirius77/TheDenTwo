@@ -1,0 +1,1 @@
+armor-module-examine = The {$entity} is providing the following protection:

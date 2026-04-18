@@ -20,6 +20,8 @@
   - type: SealableClothing
     requiredSlot:
       - back
+  - type: ExplosionResistance
+    damageCoefficient: 0.9
   - type: SealableClothingVisuals
     clothingVisuals:
       back:
@@ -55,6 +57,7 @@
   - type: PanelLocksItemSlot
     lockedSlots:
       - cell_slot
+  - type: EmpBreaksWires
   - type: ModuleStorage
     maxBusWidth: 10
   - type: ModulePowerProvider
@@ -84,6 +87,11 @@
           True: { visible: true }
           False: { visible: false }
   - type: ModsuitPart
+  - type: Tag
+    tags:
+    - WhitelistChameleon
+  - type: Armor
+    modifiers: {}
 
 - type: entity
   abstract: true
@@ -105,7 +113,12 @@
         sealedLayer:
           True: { visible: true }
           False: { visible: false }
+  - type: Tag
+    tags:
+    - WhitelistChameleon
   - type: ModsuitPart
+  - type: Armor
+    modifiers: {}
 
 - type: entity
   abstract: true
@@ -124,6 +137,8 @@
         heatingCoefficient: 0.1
         coolingCoefficient: 0.1
   - type: ModsuitPart
+  - type: Armor
+    modifiers: {}
 
 - type: entity
   abstract: true
@@ -145,7 +160,12 @@
         sealedLayer:
           True: { visible: true }
           False: { visible: false }
+  - type: Tag
+    tags:
+    - WhitelistChameleon
   - type: ModsuitPart
+  - type: Armor
+    modifiers: {}
           
 - type: entity
   abstract: true
@@ -161,6 +181,8 @@
         heatingCoefficient: 0.1
         coolingCoefficient: 0.1
   - type: ModsuitPart
+  - type: Armor
+    modifiers: {}
 
 - type: entity
   abstract: true
@@ -182,4 +204,9 @@
         sealedLayer:
           True: { visible: true }
           False: { visible: false }
+  - type: Tag
+    tags:
+    - WhitelistChameleon
   - type: ModsuitPart
+  - type: Armor
+    modifiers: {}

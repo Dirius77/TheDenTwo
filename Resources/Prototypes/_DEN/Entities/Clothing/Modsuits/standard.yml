@@ -24,8 +24,25 @@
     maxBusWidth: 15
 
 - type: entity
+  parent: ClothingModsuitStandard
+  id: ClothingModsuitStandardDebug
+  suffix: DEBUG; Filled
+  components:
+  - type: EntityTableContainerFill
+    containers: 
+      modules: !type:AllSelector
+        children:
+        - id: ModsuitStorageModuleBluespace
+        - id: ModsuitModuleCloak
+        - id: ModsuitModuleMagneticStabilizer
+        - id: ModsuitModuleFlashlight
+      cell_slot: 
+        id: PowerCellSmall
+
+- type: entity
   parent: ClothingModsuitGauntletsBase
   id: ClothingModsuitGauntletsStandard
+  categories: [ HideSpawnMenu ]
   name: standard modsuit gauntlets
   description: A pair of gauntlets from a standard MODsuit.
   components:
@@ -44,6 +61,7 @@
 - type: entity
   parent: ClothingModsuitHelmetBaseExo
   id: ClothingModsuitHelmetStandard
+  categories: [ HideSpawnMenu ]
   name: standard modsuit helmet
   description: A helmet from a standard MODsuit.
   components:
@@ -61,6 +79,7 @@
 - type: entity
   parent: ClothingModsuitChestplateBaseExo
   id: ClothingModsuitChestplateStandard
+  categories: [ HideSpawnMenu ]
   name: standard modsuit chestplate
   description: A chestplate from a standard MODsuit.
   components:
@@ -78,6 +97,7 @@
 - type: entity
   parent: ClothingModsuitBootsBase
   id: ClothingModsuitBootsStandard
+  categories: [ HideSpawnMenu ]
   name: standard modsuit boots
   description: A pair of boots from a standard MODsuit.
   components:

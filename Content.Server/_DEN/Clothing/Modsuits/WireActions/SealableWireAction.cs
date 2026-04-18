@@ -27,21 +27,21 @@ public sealed partial class SealableWireAction : ComponentWireAction<ModsuitCont
     public override StatusLightState? GetLightState(Wire wire, ModsuitControllerComponent component)
         => component.PartsSpringlocked ? StatusLightState.BlinkingFast : StatusLightState.On;
 
-    public override bool Cut(EntityUid user, Wire wire, ModsuitControllerComponent component)
+    public override bool Cut(EntityUid? user, Wire wire, ModsuitControllerComponent component)
     {
         _popupSystem.PopupEntity(Loc.GetString("springlock-wire-cut", ("name", wire.Owner)), wire.Owner, PopupType.LargeCaution);
         _modsuitSystem.TrySetSpringlocked((wire.Owner, component), true);
         return true;
     }
 
-    public override bool Mend(EntityUid user, Wire wire, ModsuitControllerComponent component)
+    public override bool Mend(EntityUid? user, Wire wire, ModsuitControllerComponent component)
     {
         _popupSystem.PopupEntity(Loc.GetString("springlock-wire-repaired", ("name", wire.Owner)), wire.Owner);
         _modsuitSystem.TrySetSpringlocked((wire.Owner, component), false);
         return true;
     }
 
-    public override void Pulse(EntityUid user, Wire wire, ModsuitControllerComponent component)
+    public override void Pulse(EntityUid? user, Wire wire, ModsuitControllerComponent component)
     {
         _popupSystem.PopupEntity(Loc.GetString("springlock-wire-pulsed", ("name", wire.Owner)), wire.Owner);
     }

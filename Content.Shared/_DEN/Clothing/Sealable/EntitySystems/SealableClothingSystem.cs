@@ -143,7 +143,10 @@ public sealed partial class SealableClothingSystem : EntitySystem
     public bool IsSealed(Entity<SealableClothingComponent?> entity)
     {
         if (!Resolve(entity, ref entity.Comp))
+        {
+            Log.Debug("Uhh... " + Name(entity));
             return false;
+        }
         
         return entity.Comp.IsSealed;
     }

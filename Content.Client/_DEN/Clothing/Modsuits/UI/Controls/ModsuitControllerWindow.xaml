@@ -1,9 +1,28 @@
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
-                      MinSize="240 240">
-    <BoxContainer Orientation="Horizontal" Margin="0 5 10 10">
+                      MinSize="320 167"
+                      Resizable="false"
+                      Title="{Loc 'modsuit-controller-ui-title'}">
+    <BoxContainer Orientation="Horizontal">
         <BoxContainer Orientation="Vertical" HorizontalExpand="True">
-            <Control>
+            <BoxContainer Orientation="Horizontal" Margin="0 5 0 5">
+                <SpriteView OverrideDirection="South" Scale="2 2" Name="SpriteView" SetSize="64 64" />
+                <BoxContainer Margin="5 0 0 0" Orientation="Vertical" VerticalAlignment="Top">
+                    <RichTextLabel Name="ControlName"/>
+                    <Label Name="NoCellLabel" Text="{Loc 'modsuit-controller-ui-no-cell'}" Visible="False" StyleClasses="LabelSubText"/>
+                    <ProgressBar Name="ChargeBar"
+                                 MinValue="0"
+                                 MaxValue="1"
+                                 SetHeight="25"
+                                 Page="0"
+                                 Margin="0 5 0 0"
+                                 Value="0.5">
+                        <Label Name="ChargePercentage" Margin="4 0" Text="0 %" />
+                    </ProgressBar>
+                </BoxContainer>
+            </BoxContainer>
+            <PanelContainer StyleClasses="LowDivider" />
+            <Control MinSize="240 120" VerticalExpand="True" Margin="5 5 5 5">
                 <PanelContainer Margin="100 0 0 0" StyleClasses="BackgroundPanelDark">
                 </PanelContainer>
                 <GridContainer Margin="10 10 10 10" Columns="2" Name="ToggleGrid">

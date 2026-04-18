@@ -1,6 +1,7 @@
 using Content.Server.Wires;
 using Content.Shared._DEN.Wires.Components;
 using Content.Shared.Emp;
+using Content.Shared.Wires;
 using Robust.Shared.Random;
 
 namespace Content.Server._DEN.Wires.EntitySystems;
@@ -26,6 +27,7 @@ public sealed class EmpWireFrySystem : EntitySystem
         {
             if (_random.Prob(entity.Comp.Chance))
             {
+                _wiresSystem.TryForceWireAction(entity, wire, WiresAction.Cut, wires);
             }
         }
     }

@@ -23,9 +23,9 @@
 
 - type: entity
   parent: BaseAction
-  id: ActionToggleModsuitMagnet
-  name: Toggle Modsuit Magboots
-  description: Toggles the modsuit's magboot module.
+  id: ActionToggleModsuitModule
+  name: Toggle Modsuit Module
+  description: Toggles the modsuit module.
   components:
     - type: Action
       itemIconStyle: BigItem

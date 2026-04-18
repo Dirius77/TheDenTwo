@@ -1,8 +1,10 @@
+using System.Linq;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
 using Content.Shared._DEN.Clothing.Sealable.EntitySystems;
 using Content.Shared.Item.ItemToggle;
 using Content.Shared.Item.ItemToggle.Components;
 using Content.Shared.Toggleable;
+using Robust.Shared.Prototypes;
 
 namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 
@@ -13,15 +15,35 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
     
     public override void Initialize()
     {
-        SubscribeLocalEvent<ModsuitPartAttachedModuleComponent, ItemToggleActivateAttemptEvent>(OnModsuitModulePartToggleAttempt);
+        SubscribeLocalEvent<ModsuitModuleComponent, ItemToggleActivateAttemptEvent>(OnModsuitModuleToggleAttempt);
+        SubscribeLocalEvent<ModsuitModuleComponent, ToggleActionEvent>(OnModsuitModuleToggleAction);
+        SubscribeLocalEvent<ModsuitModuleComponent, ItemToggledEvent>(OnModsuitModuleToggled);
+        
         SubscribeLocalEvent<ModsuitModuleTogglePartComponent, ItemToggledEvent>(OnModsuitModulePartToggle);
-        SubscribeLocalEvent<ModsuitModuleTogglePartComponent, ToggleActionEvent>(OnModsuitModuleToggleAction);
+        
         SubscribeLocalEvent<ItemToggleComponent, ModsuitRelayedEvent<ClothingUnsealedEvent>>(
             OnClothingUnsealed);
         
-        SubscribeLocalEvent<ModsuitModuleTogglePartComponentsComponent, ItemToggledEvent>(OnModsuitModuleToggleComponents);
+        SubscribeLocalEvent<ModsuitModuleTogglePartComponentsComponent, ItemToggledEvent>(OnModsuitModuleTogglePartComponents);
         SubscribeLocalEvent<ModsuitModuleTogglePartComponentsComponent, ModsuitRelayedEvent<ClothingUnsealedEvent>>(OnAttachedPartUnsealed);
         SubscribeLocalEvent<ModsuitModuleTogglePartComponentsComponent, ModsuitRelayedEvent<ClothingSealedEvent>>(OnAttachedPartSealed);
+        
+        SubscribeLocalEvent<ModsuitModuleToggleParentComponentsComponent, ItemToggledEvent>(OnModsuitModuleToggleParentComponents);
+    }
+
+    private void OnModsuitModuleToggleAttempt(Entity<ModsuitModuleComponent> entity,
+        ref ItemToggleActivateAttemptEvent args)
+    {
+        if (args.Cancelled)
+            return;
+        
+        if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
+            args.Cancelled = true;
+    }
+
+    private void OnModsuitModuleToggled(Entity<ModsuitModuleComponent> entity, ref ItemToggledEvent args)
+    {
+        _modsuitSystem.ModuleUpdateUI(entity.AsNullable());
     }
 
     private void OnAttachedPartUnsealed(Entity<ModsuitModuleTogglePartComponentsComponent> entity,
@@ -31,15 +53,11 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
             || !TryComp<ModsuitPartAttachedModuleComponent>(entity, out var attachedComp))
             return;
      
-        if (!attachedComp.AttachedParts.ContainsValue(args.Owner)) 
+        if (!_modsuitSystem.PartMatchesModule(entity.Owner, args.Owner))
             return;
         
         var target = args.Owner;
-        if (entity.Comp.AddOnToggle is {} addOnToggle)
-            EntityManager.RemoveComponents(target, addOnToggle);
-            
-        if (entity.Comp.RemoveOnToggle is {} removeOnToggle) 
-            EntityManager.AddComponents(target, removeOnToggle);
+        ToggleComponentsOnTarget(target, entity.Comp.AddOnToggle, entity.Comp.RemoveOnToggle, false);
     }
     
     // This exists to catch when the module doesn't have `NeedsAll`, in which case it might be activated while one
@@ -53,48 +71,39 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
         if (!TryComp<ModsuitPartAttachedModuleComponent>(entity, out var attachedComp))
             return;
         
-        if (!attachedComp.AttachedParts.ContainsValue(args.Owner)) 
+        if (!_modsuitSystem.PartMatchesModule(entity.Owner, args.Owner))
             return;
         
         var target = args.Owner;
-        if (entity.Comp.AddOnToggle is {} addOnToggle)
-            EntityManager.RemoveComponents(target, addOnToggle);
-            
-        if (entity.Comp.RemoveOnToggle is {} removeOnToggle) 
-            EntityManager.AddComponents(target, removeOnToggle);
+        ToggleComponentsOnTarget(target, entity.Comp.AddOnToggle, entity.Comp.RemoveOnToggle, true);
     }
 
-    private void OnModsuitModuleToggleComponents(Entity<ModsuitModuleTogglePartComponentsComponent> entity,
+    private void OnModsuitModuleTogglePartComponents(Entity<ModsuitModuleTogglePartComponentsComponent> entity,
         ref ItemToggledEvent args)
     {
         if (!TryComp<ModsuitPartAttachedModuleComponent>(entity, out var attachedComp))
             return;
 
-        foreach (var part in attachedComp.AttachedParts)
+        foreach (var target in _modsuitSystem.GetModuleAttachedParts((entity.Owner, attachedComp)))
         {
-            var target = part.Value;
-            if (!_modsuitSystem.CanPartBeActivated(target))
+            if (!_modsuitSystem.CanPartBeActivated(target.Item2))
                 continue;
             
-            if (args.Activated)
-            {
-                if (entity.Comp.AddOnToggle is {} addOnToggle)
-                    EntityManager.AddComponents(target, addOnToggle);
-            
-                if (entity.Comp.RemoveOnToggle is {} removeOnToggle)
-                    EntityManager.RemoveComponents(target, removeOnToggle);
-            }
-            else
-            {
-                if (entity.Comp.AddOnToggle is {} addOnToggle)
-                    EntityManager.RemoveComponents(target, addOnToggle);
-            
-                if (entity.Comp.RemoveOnToggle is {} removeOnToggle)
-                    EntityManager.AddComponents(target, removeOnToggle);
-            }
+            ToggleComponentsOnTarget(target.Item2, entity.Comp.AddOnToggle, entity.Comp.RemoveOnToggle, args.Activated);
         }
     }
+    
+    private void OnModsuitModuleToggleParentComponents(Entity<ModsuitModuleToggleParentComponentsComponent> entity,
+        ref ItemToggledEvent args)
+    {
+        if (!_modsuitSystem.ModuleHasActiveController(entity.Owner, out var controller))
+            return;
 
+        var wearer = Transform(controller.Value).ParentUid;
+        
+        ToggleComponentsOnTarget(wearer, entity.Comp.AddOnToggle, entity.Comp.RemoveOnToggle, args.Activated);
+    }
+    
     private void OnClothingUnsealed(Entity<ItemToggleComponent> entity,
         ref ModsuitRelayedEvent<ClothingUnsealedEvent> args)
     {
@@ -104,19 +113,10 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
         }
     }
 
-    private void OnModsuitModuleToggleAction(Entity<ModsuitModuleTogglePartComponent> entity,
+    private void OnModsuitModuleToggleAction(Entity<ModsuitModuleComponent> entity,
         ref ToggleActionEvent args)
     {
         args.Handled = _toggleSystem.Toggle(entity.Owner, args.Performer);
-    }
-
-    private void OnModsuitModulePartToggleAttempt(Entity<ModsuitPartAttachedModuleComponent> entity,
-        ref ItemToggleActivateAttemptEvent args)
-    {
-        if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
-        {
-            args.Cancelled = true;
-        }
     }
 
     private void OnModsuitModulePartToggle(Entity<ModsuitModuleTogglePartComponent> entity, ref ItemToggledEvent args)
@@ -125,13 +125,12 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
         if (!TryComp<ModsuitPartAttachedModuleComponent>(entity, out var attachedComp))
             return;
         
-        // Skip the "Are things sealed" checks if we remember what part we have and we're turning it off.
-        // This way if the part somehow gets unequipped before we can turn it off we can still find it to turn it off.
+        // Skip checking slots if we're turning off, just in case something got unequipped before we did this.
         if (!args.Activated)
         {
-            foreach (var parts in attachedComp.AttachedParts)
+            foreach (var part in _modsuitSystem.GetModuleAttachedParts((entity.Owner, attachedComp)))
             {
-                _toggleSystem.TryDeactivate(parts.Value);
+                _toggleSystem.TryDeactivate(part.Item2);
             }
             return;
         }
@@ -140,10 +139,31 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
             return;
 
         // Try to turn on all the relevant parts.
-        foreach (var part in attachedComp.AttachedParts)
+        foreach (var part in _modsuitSystem.GetModuleAttachedParts((entity.Owner, attachedComp)))
         {
-            if (_modsuitSystem.CanPartBeActivated(part.Value))
-                _toggleSystem.TrySetActive(part.Value, args.Activated, args.User);
+            if (_modsuitSystem.CanPartBeActivated(part.Item2))
+                _toggleSystem.TrySetActive(part.Item2, args.Activated, args.User);
+        }
+    }
+    
+    private void ToggleComponentsOnTarget(EntityUid target, ComponentRegistry? addOnToggle,
+        ComponentRegistry? removeOnToggle, bool activated)
+    {
+        if (activated)
+        {
+            if (addOnToggle is not null)
+                EntityManager.AddComponents(target, addOnToggle);
+            
+            if (removeOnToggle is not null)
+                EntityManager.RemoveComponents(target, removeOnToggle);
+        }
+        else
+        {
+            if (addOnToggle is not null)
+                EntityManager.RemoveComponents(target, addOnToggle);
+            
+            if (removeOnToggle is not null)
+                EntityManager.AddComponents(target, removeOnToggle);
         }
     }
 }

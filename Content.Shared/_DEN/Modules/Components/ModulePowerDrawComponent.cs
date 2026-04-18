@@ -12,7 +12,7 @@ public sealed partial class ModulePowerDrawComponent : Component
     /// Whether this module's power draw is enabled.
     /// </summary>
     [DataField, AutoNetworkedField, ViewVariables]
-    public bool Enabled = true;
+    public bool Enabled;
 
     /// <summary>
     /// How much power the module draws while active. This value is subtracted, so negative values would be charging.

@@ -10,7 +10,6 @@ public sealed partial class ModsuitModuleActionSystem : EntitySystem
     [Dependency] private readonly SharedActionsSystem _actions = default!;
     [Dependency] private readonly ItemToggleSystem _toggle = default!;
     [Dependency] private readonly SharedModsuitSystem _modsuitSystem = default!;
-    [Dependency] private readonly SealableClothingSystem _sealableSystem = default!;
     
     public override void Initialize()
     {
@@ -34,24 +33,17 @@ public sealed partial class ModsuitModuleActionSystem : EntitySystem
     private void OnClothingSealed(Entity<ModsuitModuleActionGrantComponent> entity,
         ref ModsuitRelayedEvent<ClothingSealedEvent> evt)
     {
-        // Check that we both have a controller, and have the correct part. This is done irrespective of the event
-        // because we don't know what order the two might be sealed in.
-        if (!_modsuitSystem.ModuleHasActiveController(entity.Owner, out var controller)
-            || !_modsuitSystem.TryGetPartFromController(controller.Value, entity.Comp.Slot, out var part)
-            || !_sealableSystem.IsSealed(part.Value.Owner))
+        if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
             return;
         
-        var wearer = Transform(controller.Value).ParentUid;
+        var wearer = Transform(evt.Owner).ParentUid;
         _actions.GrantContainedActions(wearer, entity.Owner);
     }
     
     private void OnClothingUnsealed(Entity<ModsuitModuleActionGrantComponent> entity,
         ref ModsuitRelayedEvent<ClothingUnsealedEvent> evt)
     {
-        // If either our controller or our part is now unsealed, remove the action.
-        if (!_modsuitSystem.ModuleHasActiveController(entity.Owner, out var controller)
-            || !_modsuitSystem.TryGetPartFromController(controller.Value, entity.Comp.Slot, out var part)
-            || !_sealableSystem.IsSealed(part.Value.Owner))
+        if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
         {
             var wearer = Transform(evt.Owner).ParentUid;
             _actions.RemoveProvidedActions(wearer, entity.Owner);

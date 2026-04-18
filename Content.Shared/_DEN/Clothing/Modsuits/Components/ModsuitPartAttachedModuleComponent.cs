@@ -20,6 +20,4 @@ public sealed partial class ModsuitPartAttachedModuleComponent : Component
     /// If all the listed slots must be present and sealed, or just one.
     /// </summary>
     [DataField, AutoNetworkedField] public bool NeedsAll = true;
-
-    [DataField, AutoNetworkedField] public Dictionary<string, EntityUid> AttachedParts = new();
 }

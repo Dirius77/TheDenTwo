@@ -9,6 +9,16 @@
   - type: ModsuitModule
 
 - type: entity
+  abstract: true
+  parent: ModsuitModuleBase
+  id: ModsuitModuleToggleBase
+  components:
+  - type: ModuleTogglePowerDraw
+  - type: ItemToggle
+    onUse: false
+    onActivate: false
+
+- type: entity
   parent: ModsuitModuleBase
   id: ModsuitModuleEatingApparatus
   name: eating apparatus module
@@ -27,6 +37,45 @@
 
 - type: entity
   parent: ModsuitModuleBase
+  id: ModsuitModuleElectricalInsulation
+  name: electrical insulation module
+  description: A module which allows the modsuit gloves to be insulated against electrical shocks while sealed.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: quickcarry
+  - type: ModsuitPartAttachedModule
+    slots:
+    - hands
+  - type: ModsuitPassiveComponentModule
+    addOnSeal:
+    - type: Insulated
+
+- type: entity
+  parent: ModsuitModuleBase
+  id: ModsuitModuleNoSlip
+  name: no slip module
+  description: A module which allows the modsuit boots incredible grip, preventing slipping.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: noslip
+  - type: Module
+    busWidth: 2
+    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
+  - type: ModulePowerDraw
+    drawRate: 0.2
+  - type: ModsuitPartAttachedModule
+    slots:
+    - shoes
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: NoSlip
+
+- type: entity
+  parent: ModsuitModuleToggleBase
   id: ModsuitModuleRadiationShielding
   name: radiation shielding module
   description: A module which allows the modsuit to block radiation from reaching the wearer. Requires a deployed chestplate.
@@ -38,30 +87,43 @@
   - type: Module
     busWidth: 2
     texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
-  - type: ModuleTogglePowerDraw
-  - type: ItemToggle
-    onUse: false
-    onActivate: false
   - type: ModsuitPartAttachedModule
     slots:
     - outerClothing
   - type: ModulePowerDraw
-    enabled: false
     drawRate: 0.1
-  - type: ModsuitModuleTogglePartComponents
-    addOnToggle:
-    - type: Armor
-      modifiers:
-        coefficients:
-          Blunt: 1.0
-          Slash: 1.0
-          Piercing: 1.0
-          Heat: 1.0
-          Radiation: 0.0
-          Caustic: 1.0
+  - type: ModsuitArmorModule
+    modifiers:
+      coefficients:
+        Radiation: 0.0
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleThermalRegulator
+  name: thermal regulator module
+  description: A module which allows the modsuit to insulate the user from extreme temperatures and fire.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+      - state: regulator_module
+  - type: ModsuitPartAttachedModule
+    needsAll: false
+    slots:
+    - outerClothing
+    - head
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: TemperatureProtection
+      heatingCoefficient: 0.01
+      coolingCoefficient: 0.01
+    - type: FireProtection
+      reduction: 0.8
+
+- type: entity
+  parent: ModsuitModuleToggleBase
   id: ModsuitModuleMagneticStabilizer
   name: magnetic stabilizer module
   description: A module containing powerful electromagnets which integrate with the modsuit's boots.
@@ -74,15 +136,9 @@
     busWidth: 2
     texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
   - type: ModulePowerDraw
-    enabled: false
-    drawRate: 2.5
-  - type: ModuleTogglePowerDraw
+    drawRate: 0.5
   - type: ModsuitModuleActionGrant
-    slot: shoes
-    action: ActionToggleModsuitMagnet
-  - type: ItemToggle
-    onUse: false
-    onActivate: false
+    action: ActionToggleModsuitModule
   - type: ModsuitModuleTogglePart
   - type: ModsuitPartAttachedModule
     slots:
@@ -98,27 +154,210 @@
       sprintModifier: 0.8
 
 - type: entity
-  parent: ModsuitModuleBase
-  id: ModsuitStorageModuleDebug
-  name: debug storage module
-  description: A debug storage module for a modsuit.
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleFlashlight
+  name: flashlight module
+  description: A module that installs a powerful flashlight on the modsuit helmet.
   components:
   - type: Sprite
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
-    - state: bluespace_storage
+    - state: flashlight_module
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleActionGrant
+    action: ActionToggleModsuitModule
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ItemTogglePointLight
+  - type: PointLight
+    enabled: false
+    radius: 5
+    energy: 3
+    mask: /Textures/Effects/LightMasks/cone.png
+    autoRot: true
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleCloak
+  name: cloaking module
+  description: An advanced module which allows the user to become invisible.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: advancedcloak
   - type: Module
     busWidth: 4
     texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
-    siblingBlacklist:
-      tags:
-      - StorageModule
-  - type: Tag
-    tags:
-    - StorageModule
-  - type: ModsuitStorageModule
-    storageComponent:
-    - type: Storage
-      grid:
-        - 0,0,19,9
-    maxItemSize: Huge
+  - type: ModsuitPartAttachedModule
+    slots:
+    - outerClothing
+    - head
+  - type: ModulePowerDraw
+    drawRate: 2.0
+  - type: ModsuitModuleToggleParentComponents
+    addOnToggle:
+    - type: Stealth
+      minVisibility: 0.1
+      lastVisibility: 0.1
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleGPS
+  name: gps module
+  description: A module which adds a built-in gps to the modsuit controller.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: gps_module
+  - type: ModsuitPartAttachedModule
+    slots:
+    - back
+  - type: ModulePowerDraw
+    drawRate: 0.2
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: HandheldGPS
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleMedicalVisor
+  name: medical visor module
+  description: A module which provides a built in medical hud to the modsuit helmet.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: medhud_visor
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: ShowHealthBars
+    - type: ShowHealthIcons
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleDiagnosticVisor
+  name: diagnostic visor module
+  description: A module which provides a built in diagnostic hud to the modsuit helmet.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: diaghud_visor
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: ShowHealthBars
+      damageContainers:
+      - Inorganic
+      - Silicon
+    - type: ShowAccessReaderSettings
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleSecurityVisor
+  name: security visor module
+  description: A module which provides a built in security hud to the modsuit helmet.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: sechud_visor
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: ShowJobIcons
+    - type: ShowMindShieldIcons
+    - type: ShowCriminalRecordIcons
+    - type: ShowContrabandDetails
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleOreScanner
+  name: ore scanner visor module
+  description: A module which provides a built in ore scanner hud to the modsuit helmet.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: meson_visor
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: MiningScanner
+      range: 10
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleThermal
+  name: thermal visor module
+  description: A module which provides a built in thermal hud to the modsuit helmet.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: thermal_visor
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: ThermalSight
+
+- type: entity
+  parent: ModsuitModuleToggleBase
+  id: ModsuitModuleReagentScanner
+  name: reagent scanner visor module
+  description: A module which provides a built in thermal hud to the modsuit helmet.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: scanner_module
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: SolutionScanner
+
+- type: entity
+  parent: ModsuitModuleBase
+  id: ModsuitModuleWeldingProtection
+  name: welding protection visor module
+  description: A module which provides a tinted shielding layer protecting from welder arcs.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: weldingprot
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModsuitPassiveComponentModule
+    addOnSeal:
+    - type: EyeProtection

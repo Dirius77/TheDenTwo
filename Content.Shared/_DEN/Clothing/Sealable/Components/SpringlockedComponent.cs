@@ -14,7 +14,9 @@ public sealed partial class SpringlockedComponent : Component
 
     [DataField, AutoNetworkedField] public bool HasBeenForced = false;
     
-    [DataField] public LocId FailedMessage = "springlock-could-not-open";
+    [DataField] public LocId FailedUnsealMessage = "springlock-could-not-open";
+    
+    [DataField] public LocId FailedSealMessage = "springlock-could-not-close";
     
     [DataField, AutoNetworkedField] 
     public SoundSpecifier? SoundForceOpen = new SoundPathSpecifier("/Audio/Machines/airlock_creaking.ogg")

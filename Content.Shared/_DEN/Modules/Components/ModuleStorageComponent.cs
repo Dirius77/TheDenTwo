@@ -35,7 +35,8 @@ public sealed partial class ModuleStorageComponent : Component
     /// Maps bus 'slots' to modules in the ModuleContainer, used to make the UI show a consistent order.
     /// Multiple slots may be mapped to the same module based on its complexity.
     /// </summary>
-    [AutoNetworkedField] public Dictionary<int, EntityUid?> ModuleSlots = new();
+    [DataField, AutoNetworkedField, ViewVariables(VVAccess.ReadOnly)] 
+    public Dictionary<int, EntityUid?> ModuleSlots = new();
 
     /// <summary>
     /// The sound that is played when a module is inserted into this storage.

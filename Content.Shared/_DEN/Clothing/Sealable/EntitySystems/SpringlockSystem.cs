@@ -1,4 +1,5 @@
 using Content.Shared._DEN.Clothing.Sealable.Components;
+using Content.Shared.Examine;
 using Content.Shared.Interaction;
 using Content.Shared.Popups;
 using Content.Shared.Tools.Components;
@@ -20,13 +21,21 @@ public sealed partial class SpringlockSystem : EntitySystem
 
         SubscribeLocalEvent<SpringlockedComponent, ChangeSealStateAttemptEvent>(OnSealStateAttempt);
         SubscribeLocalEvent<SpringlockedComponent, InteractUsingEvent>(OnSpringlockInteract);
+        SubscribeLocalEvent<SpringlockedComponent, ExaminedEvent>(OnSpringlockedExamined);
+    }
+
+    private void OnSpringlockedExamined(Entity<SpringlockedComponent> entity, ref ExaminedEvent args)
+    {
+        if (_sealableSystem.IsSealed(entity.Owner))
+            args.PushMarkup(Loc.GetString("springlock-examine"));
     }
 
     private void OnSealStateAttempt(Entity<SpringlockedComponent> entity, ref ChangeSealStateAttemptEvent args)
     {
         if (!entity.Comp.HasBeenForced)
         {
-            _popupSystem.PopupPredicted(Loc.GetString(entity.Comp.FailedMessage, ("name", entity)), args.User, args.User, PopupType.MediumCaution);
+            var isSealed = _sealableSystem.IsSealed(entity.Owner);
+            _popupSystem.PopupPredicted(Loc.GetString(isSealed ? entity.Comp.FailedUnsealMessage : entity.Comp.FailedSealMessage, ("name", entity)), args.User, args.User, PopupType.MediumCaution);
             args.Cancel();
         }
         
