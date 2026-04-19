@@ -60,6 +60,9 @@ public sealed partial class SealableClothingSystem : EntitySystem
 
     private void OnSealableUnequipped(Entity<SealableClothingComponent> entity, ref GotUnequippedEvent args)
     {
+        if (TerminatingOrDeleted(entity))
+            return;
+        
         // Sealed clothing is only intended to be so while worn. This makes sure that if the entity somehow gets
         // force unequipped it doesn't stay stuck in a sealed state.
         if (entity.Comp.IsSealed)

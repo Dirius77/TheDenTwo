@@ -1,5 +1,5 @@
 - type: entity
-  parent: ModsuitModuleBase
+  parent: ModsuitModuleWidth4
   id: ModsuitStorageModuleBluespace
   name: bluespace storage module
   description: A storage module utilizing bluespace technology.
@@ -9,8 +9,6 @@
       layers:
         - state: bluespace_storage
     - type: Module
-      busWidth: 4
-      texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
       siblingBlacklist:
         tags:
           - StorageModule
@@ -25,7 +23,7 @@
       maxItemSize: Huge
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: ModsuitModuleWidth4
   id: ModsuitStorageModule
   name: storage module
   description: A storage module for a modsuit.
@@ -35,8 +33,6 @@
       layers:
         - state: mod_storage
     - type: Module
-      busWidth: 4
-      texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
       siblingBlacklist:
         tags:
           - StorageModule
@@ -53,7 +49,7 @@
       maxItemSize: Huge
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: ModsuitModuleWidth4
   id: ModsuitStorageModuleLarge
   name: large storage module
   description: An expanded storage module for a modsuit.
@@ -63,8 +59,6 @@
     layers:
       - state: large_storage
   - type: Module
-    busWidth: 4
-    texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
     siblingBlacklist:
       tags:
         - StorageModule
@@ -80,7 +74,7 @@
     maxItemSize: Huge
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: ModsuitModuleWidth4
   id: ModsuitStorageModuleSyndicate
   name: syndicate storage module
   description: An expanded storage module for a modsuit.
@@ -90,8 +84,6 @@
     layers:
     - state: syndie_storage
   - type: Module
-    busWidth: 4
-    texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
     siblingBlacklist:
       tags:
       - StorageModule

@@ -4,16 +4,18 @@ using Content.Shared._DEN.Clothing.Modsuits.Components;
 using Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 using Content.Shared.Popups;
 using Content.Shared.Wires;
+using JetBrains.Annotations;
 
 namespace Content.Server._DEN.Clothing.Modsuits.WireActions;
 
+[UsedImplicitly]
 public sealed partial class SealableWireAction : ComponentWireAction<ModsuitControllerComponent>
 {
     private SharedModsuitSystem _modsuitSystem = default!;
     private PopupSystem _popupSystem = default!;
     
     public override string Name { get; set; } = "wire-name-seals";
-    public override Color Color { get; set; } = Color.Blue;
+    public override Color Color { get; set; } = Color.Red;
     public override object? StatusKey { get; } = SealableWireActionKey.StatusKey;
 
     public override void Initialize()

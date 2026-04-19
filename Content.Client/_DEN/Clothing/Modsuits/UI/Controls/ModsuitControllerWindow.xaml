@@ -1,6 +1,6 @@
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
-                      MinSize="320 167"
+                      MinSize="340 167"
                       Resizable="false"
                       Title="{Loc 'modsuit-controller-ui-title'}">
     <BoxContainer Orientation="Horizontal">
@@ -20,6 +20,10 @@
                         <Label Name="ChargePercentage" Margin="4 0" Text="0 %" />
                     </ProgressBar>
                 </BoxContainer>
+                <RichTextLabel Margin="30 0 10 0" HorizontalExpand="True" HorizontalAlignment="Right" VerticalExpand="True"
+                       VerticalAlignment="Center" Name="UIErrorLabel"
+                       Text="{Loc 'modsuit-controller-ui-malfunction'}"
+                       Visible="False"/>
             </BoxContainer>
             <PanelContainer StyleClasses="LowDivider" />
             <Control MinSize="240 120" VerticalExpand="True" Margin="5 5 5 5">

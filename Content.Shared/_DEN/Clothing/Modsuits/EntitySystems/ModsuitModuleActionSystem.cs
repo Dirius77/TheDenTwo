@@ -13,21 +13,10 @@ public sealed partial class ModsuitModuleActionSystem : EntitySystem
     
     public override void Initialize()
     {
-        SubscribeLocalEvent<ModsuitModuleActionGrantComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<ModsuitModuleActionGrantComponent, ModsuitRelayedEvent<ClothingSealedEvent>>(
             OnClothingSealed);
         SubscribeLocalEvent<ModsuitModuleActionGrantComponent, ModsuitRelayedEvent<ClothingUnsealedEvent>>(
             OnClothingUnsealed);
-    }
-
-    private void OnMapInit(Entity<ModsuitModuleActionGrantComponent> entity, ref MapInitEvent evt)
-    {
-        if (string.IsNullOrEmpty(entity.Comp.Action))
-            return;
-        
-        _actions.AddAction(entity, ref entity.Comp.ActionEntity, entity.Comp.Action);
-        _actions.SetToggled(entity.Comp.ActionEntity, _toggle.IsActivated(entity.Owner));
-        Dirty(entity);
     }
 
     private void OnClothingSealed(Entity<ModsuitModuleActionGrantComponent> entity,
@@ -37,6 +26,7 @@ public sealed partial class ModsuitModuleActionSystem : EntitySystem
             return;
         
         var wearer = Transform(evt.Owner).ParentUid;
+        _actions.AddAction(entity.Owner, ref entity.Comp.ActionEntity, entity.Comp.Action);
         _actions.GrantContainedActions(wearer, entity.Owner);
     }
     
@@ -46,7 +36,8 @@ public sealed partial class ModsuitModuleActionSystem : EntitySystem
         if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
         {
             var wearer = Transform(evt.Owner).ParentUid;
-            _actions.RemoveProvidedActions(wearer, entity.Owner);
+            _actions.RemoveAction(wearer, entity.Comp.ActionEntity);
+            PredictedQueueDel(entity.Comp.ActionEntity);
         }
     }
 }

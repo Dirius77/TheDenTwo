@@ -3,3 +3,5 @@
   dummyWires: 2
   wires:
   - !type:SealableWireAction
+  - !type:InterfaceWireAction
+    

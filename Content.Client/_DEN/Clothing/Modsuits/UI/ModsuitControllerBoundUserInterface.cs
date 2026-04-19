@@ -1,4 +1,5 @@
 using Content.Client._DEN.Clothing.Modsuits.UI.Controls;
+using Content.Shared._DEN.Clothing.Modsuits.Components;
 using Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 using Content.Shared._DEN.Modules.Components;
 using JetBrains.Annotations;
@@ -16,15 +17,17 @@ public sealed class ModsuitControllerBoundUserInterface(EntityUid owner, Enum ui
         base.Open();
 
         _window = this.CreateWindow<ModsuitControllerWindow>();
-        if (EntMan.TryGetComponent(Owner, out ModuleStorageComponent? modStorage))
-            _window.Initialize((Owner, modStorage));
+        if (EntMan.TryGetComponent(Owner, out ModuleStorageComponent? modStorage) 
+            && EntMan.TryGetComponent(Owner, out ModsuitControllerComponent? modControllerComp))
+            _window.Initialize((Owner, modControllerComp, modStorage));
         _window.OnModuleToggled += OnModuleToggled;
         Update();
     }
 
     public override void Update()
     {
-        if (_window == null || !EntMan.TryGetComponent(Owner, out ModuleStorageComponent? modControl))
+        if (_window == null || !EntMan.HasComponent<ModsuitControllerComponent>(Owner) 
+                            || !EntMan.HasComponent<ModsuitControllerComponent>(Owner))
             return;
         
         _window.Update();

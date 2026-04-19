@@ -27,7 +27,29 @@
   name: Toggle Modsuit Module
   description: Toggles the modsuit module.
   components:
-    - type: Action
-      itemIconStyle: BigItem
-    - type: InstantAction
-      event: !type:ToggleActionEvent
+  - type: Action
+    itemIconStyle: BigItem
+  - type: InstantAction
+    event: !type:ToggleActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionRetractableItemModsuitDrill
+  name: Modsuit Drill
+  description: Deploy the contained drill from your MODsuit
+  components:
+  - type: Action
+    useDelay: 2
+    raiseOnAction: true
+    itemIconStyle: BigAction
+    icon:
+      sprite: Objects/Tools/handdrill.rsi
+      state: handdrill
+  - type: InstantAction
+    event: !type:OnRetractableItemActionEvent
+  - type: RetractableItemAction
+    spawnedPrototype: ModsuitMiningDrill
+    summonSounds:
+      collection: Drill
+    retractSounds:
+      collection: Drill

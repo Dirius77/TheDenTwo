@@ -1,7 +1,7 @@
 - type: entity
   abstract: true
   parent: BaseItem
-  id: ModsuitModuleBase
+  id: ModsuitModuleWidth1
   components:
   - type: Module
     busWidth: 1
@@ -10,8 +10,37 @@
 
 - type: entity
   abstract: true
-  parent: ModsuitModuleBase
-  id: ModsuitModuleToggleBase
+  parent: BaseItem
+  id: ModsuitModuleWidth2
+  components:
+    - type: Module
+      busWidth: 2
+      texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
+    - type: ModsuitModule
+
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: ModsuitModuleWidth3
+  components:
+    - type: Module
+      busWidth: 3
+      texture: "/Textures/_DEN/Interface/Modules/module-width-3.png"
+    - type: ModsuitModule
+      
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: ModsuitModuleWidth4
+  components:
+    - type: Module
+      busWidth: 4
+      texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
+    - type: ModsuitModule
+
+- type: entity
+  abstract: true
+  id: ModsuitModuleToggle
   components:
   - type: ModuleTogglePowerDraw
   - type: ItemToggle
@@ -19,7 +48,7 @@
     onActivate: false
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: ModsuitModuleWidth1
   id: ModsuitModuleEatingApparatus
   name: eating apparatus module
   description: A module which projects a barrier in front of the mouth, allowing for eating while retaining pressure and atmosphere protection.
@@ -36,7 +65,7 @@
     - type: IngestionBlocker
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: ModsuitModuleWidth1
   id: ModsuitModuleElectricalInsulation
   name: electrical insulation module
   description: A module which allows the modsuit gloves to be insulated against electrical shocks while sealed.
@@ -47,13 +76,13 @@
     - state: quickcarry
   - type: ModsuitPartAttachedModule
     slots:
-    - hands
+    - gloves
   - type: ModsuitPassiveComponentModule
     addOnSeal:
     - type: Insulated
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: [ ModsuitModuleWidth2, ModsuitModuleToggle ]
   id: ModsuitModuleNoSlip
   name: no slip module
   description: A module which allows the modsuit boots incredible grip, preventing slipping.
@@ -62,9 +91,6 @@
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
     - state: noslip
-  - type: Module
-    busWidth: 2
-    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
   - type: ModulePowerDraw
     drawRate: 0.2
   - type: ModsuitPartAttachedModule
@@ -75,7 +101,7 @@
     - type: NoSlip
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth2, ModsuitModuleToggle]
   id: ModsuitModuleRadiationShielding
   name: radiation shielding module
   description: A module which allows the modsuit to block radiation from reaching the wearer. Requires a deployed chestplate.
@@ -84,9 +110,6 @@
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
     - state: radshield_module
-  - type: Module
-    busWidth: 2
-    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
   - type: ModsuitPartAttachedModule
     slots:
     - outerClothing
@@ -98,7 +121,7 @@
         Radiation: 0.0
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleThermalRegulator
   name: thermal regulator module
   description: A module which allows the modsuit to insulate the user from extreme temperatures and fire.
@@ -123,7 +146,7 @@
       reduction: 0.8
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth2, ModsuitModuleToggle]
   id: ModsuitModuleMagneticStabilizer
   name: magnetic stabilizer module
   description: A module containing powerful electromagnets which integrate with the modsuit's boots.
@@ -132,9 +155,6 @@
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
     - state: magnet_module
-  - type: Module
-    busWidth: 2
-    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
   - type: ModulePowerDraw
     drawRate: 0.5
   - type: ModsuitModuleActionGrant
@@ -154,7 +174,7 @@
       sprintModifier: 0.8
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleFlashlight
   name: flashlight module
   description: A module that installs a powerful flashlight on the modsuit helmet.
@@ -179,7 +199,36 @@
     autoRot: true
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: MiningDrill
+  id: ModsuitMiningDrill
+  name: modsuit mining drill
+  description: The collapsable drill from a MODsuit module, consumes power on use.
+  categories: [HideSpawnMenu]
+  components:
+  - type: ConsumeModsuitPowerOnMelee
+    drainOnMelee: 1.0
+
+- type: entity
+  parent: [ModsuitModuleWidth2]
+  id: ModsuitModuleMiningDrill
+  name: drill module
+  description: A module that incorporates a collapsible drill into the MODsuit for mining.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: drill_module
+  - type: Module
+    busWidth: 2
+    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
+  - type: ModsuitModuleActionGrant
+    action: ActionRetractableItemModsuitDrill
+  - type: ModsuitPartAttachedModule
+    slots:
+    - gloves
+
+- type: entity
+  parent: [ModsuitModuleWidth4, ModsuitModuleToggle]
   id: ModsuitModuleCloak
   name: cloaking module
   description: An advanced module which allows the user to become invisible.
@@ -188,9 +237,6 @@
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
     - state: advancedcloak
-  - type: Module
-    busWidth: 4
-    texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
   - type: ModsuitPartAttachedModule
     slots:
     - outerClothing
@@ -204,7 +250,7 @@
       lastVisibility: 0.1
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleGPS
   name: gps module
   description: A module which adds a built-in gps to the modsuit controller.
@@ -223,7 +269,7 @@
     - type: HandheldGPS
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleMedicalVisor
   name: medical visor module
   description: A module which provides a built in medical hud to the modsuit helmet.
@@ -243,7 +289,7 @@
     - type: ShowHealthIcons
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleDiagnosticVisor
   name: diagnostic visor module
   description: A module which provides a built in diagnostic hud to the modsuit helmet.
@@ -266,7 +312,7 @@
     - type: ShowAccessReaderSettings
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleSecurityVisor
   name: security visor module
   description: A module which provides a built in security hud to the modsuit helmet.
@@ -288,7 +334,7 @@
     - type: ShowContrabandDetails
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleOreScanner
   name: ore scanner visor module
   description: A module which provides a built in ore scanner hud to the modsuit helmet.
@@ -308,7 +354,7 @@
       range: 10
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleThermal
   name: thermal visor module
   description: A module which provides a built in thermal hud to the modsuit helmet.
@@ -327,7 +373,7 @@
     - type: ThermalSight
 
 - type: entity
-  parent: ModsuitModuleToggleBase
+  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
   id: ModsuitModuleReagentScanner
   name: reagent scanner visor module
   description: A module which provides a built in thermal hud to the modsuit helmet.
@@ -346,7 +392,7 @@
     - type: SolutionScanner
 
 - type: entity
-  parent: ModsuitModuleBase
+  parent: [ModsuitModuleWidth1]
   id: ModsuitModuleWeldingProtection
   name: welding protection visor module
   description: A module which provides a tinted shielding layer protecting from welder arcs.

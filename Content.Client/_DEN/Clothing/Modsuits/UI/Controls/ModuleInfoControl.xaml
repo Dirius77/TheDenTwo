@@ -3,8 +3,8 @@
     HorizontalExpand="True"
     Orientation="Horizontal">
     <Control Margin="0 0 5 0">
-        <SpriteView Name="SpriteView" SetSize="32 32" Visible="False"/>
-        <AnimatedTextureRect Name="BrokenIcon" SetSize="32 32" Visible="True"/>
+        <SpriteView Name="SpriteView" SetSize="32 32" Visible="True"/>
+        <AnimatedTextureRect Name="BrokenIcon" SetSize="32 32" Visible="False"/>
     </Control>
     <Label Name="ModuleName" HorizontalExpand="True"/>
 </BoxContainer>

@@ -849,7 +849,7 @@ public abstract partial class SharedActionsSystem : EntitySystem
         ActionRemoved((performer, performer.Comp), ent);
 
         if (ent.Comp.Temporary)
-            QueueDel(ent);
+            PredictedQueueDel(ent); // DEN: Make predicted.
     }
 
     /// <summary>

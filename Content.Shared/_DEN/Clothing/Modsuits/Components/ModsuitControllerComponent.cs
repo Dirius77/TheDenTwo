@@ -4,7 +4,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._DEN.Clothing.Modsuits.Components;
 
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState, Access(typeof(SharedModsuitSystem))]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true), Access(typeof(SharedModsuitSystem))]
 public sealed partial class ModsuitControllerComponent : Component
 {
     [DataField] public EntProtoId ActionId = "ActionOpenModsuitUI";

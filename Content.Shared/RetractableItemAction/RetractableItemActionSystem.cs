@@ -27,6 +27,7 @@ public sealed partial class RetractableItemActionSystem : EntitySystem
 
         SubscribeLocalEvent<RetractableItemActionComponent, MapInitEvent>(OnActionInit);
         SubscribeLocalEvent<RetractableItemActionComponent, OnRetractableItemActionEvent>(OnRetractableItemAction);
+        SubscribeLocalEvent<RetractableItemActionComponent, ComponentShutdown>(OnRetractableItemActionShutdown); // DEN: Handle shutdown.
 
         SubscribeLocalEvent<ActionRetractableItemComponent, ComponentShutdown>(OnActionSummonedShutdown);
         Subs.SubscribeWithRelay<ActionRetractableItemComponent, HeldRelayedEvent<TargetHandcuffedEvent>>(OnItemHandcuffed, inventory: false);

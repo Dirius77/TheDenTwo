@@ -1,0 +1,4 @@
+- type: soundCollection
+  id: Drill
+  files:
+  - "/Audio/Items/drill_hit.ogg"

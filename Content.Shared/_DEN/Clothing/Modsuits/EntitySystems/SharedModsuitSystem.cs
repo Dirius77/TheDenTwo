@@ -41,6 +41,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         SubscribeLocalEvent<ModsuitControllerComponent, ModsuitControllerOpenUiEvent>(OnControllerOpenUi);
         SubscribeLocalEvent<ModsuitControllerComponent, ModsuitToggleModuleMessage>(OnModsuitModuleToggle);
         SubscribeLocalEvent<ModsuitControllerComponent, GotUnequippedEvent>(OnModsuitUnequipped);
+        SubscribeLocalEvent<ModsuitControllerComponent, AfterAutoHandleStateEvent>(OnModsuitHandleState);
         
         SubscribeLocalEvent<ModsuitPassiveComponentModuleComponent, ModsuitRelayedEvent<ClothingSealedEvent>>(OnPassiveComponentSealed);
         SubscribeLocalEvent<ModsuitPassiveComponentModuleComponent, ModsuitRelayedEvent<ClothingUnsealedEvent>>(OnPassiveComponentUnsealed);
@@ -322,6 +323,12 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         Dirty(entity);
     }
 
+    public void SetUIFunctionality(Entity<ModsuitControllerComponent> entity, bool functional)
+    {
+        entity.Comp.UIFunctional = functional;
+        Dirty(entity);
+    }
+
     public void ModuleUpdateUI(Entity<ModsuitModuleComponent?> entity)
     {
         if (!Resolve(entity, ref entity.Comp))
@@ -339,6 +346,11 @@ public abstract partial class SharedModsuitSystem : EntitySystem
     private void OnModsuitUnequipped(Entity<ModsuitControllerComponent> entity, ref GotUnequippedEvent args)
     {
         _uiSystem.CloseUi(entity.Owner, ModsuitControllerUiKey.Key);
+    }
+
+    private void OnModsuitHandleState(Entity<ModsuitControllerComponent> entity, ref AfterAutoHandleStateEvent args)
+    {
+        UpdateUI(entity);
     }
 
     protected virtual void UpdateUI(Entity<ModsuitControllerComponent> entity)
@@ -382,6 +394,12 @@ public sealed partial class ModsuitControllerOpenUiEvent : InstantActionEvent;
 
 [Serializable, NetSerializable]
 public enum SealableWireActionKey : byte
+{
+    StatusKey
+}
+
+[Serializable, NetSerializable]
+public enum InterfaceWireActionKey : byte
 {
     StatusKey
 }
