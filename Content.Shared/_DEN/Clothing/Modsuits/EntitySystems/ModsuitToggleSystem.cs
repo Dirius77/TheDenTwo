@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
 using Content.Shared._DEN.Clothing.Sealable.EntitySystems;
+using Content.Shared._DEN.Modules.Components;
 using Content.Shared.Item.ItemToggle;
 using Content.Shared.Item.ItemToggle.Components;
 using Content.Shared.Toggleable;
@@ -18,6 +19,7 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
         SubscribeLocalEvent<ModsuitModuleComponent, ItemToggleActivateAttemptEvent>(OnModsuitModuleToggleAttempt);
         SubscribeLocalEvent<ModsuitModuleComponent, ToggleActionEvent>(OnModsuitModuleToggleAction);
         SubscribeLocalEvent<ModsuitModuleComponent, ItemToggledEvent>(OnModsuitModuleToggled);
+        SubscribeLocalEvent<ModsuitModuleComponent, ModuleRemovedEvent>(OnModsuitModuleRemoved);
         
         SubscribeLocalEvent<ModsuitModuleTogglePartComponent, ItemToggledEvent>(OnModsuitModulePartToggle);
         
@@ -34,9 +36,11 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
     private void OnModsuitModuleToggleAttempt(Entity<ModsuitModuleComponent> entity,
         ref ItemToggleActivateAttemptEvent args)
     {
+        Log.Debug("Who up toggling their: " + Name(entity));
         if (args.Cancelled)
             return;
         
+        Log.Debug("Not me apparently.");
         if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
             args.Cancelled = true;
     }
@@ -44,6 +48,11 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
     private void OnModsuitModuleToggled(Entity<ModsuitModuleComponent> entity, ref ItemToggledEvent args)
     {
         _modsuitSystem.ModuleUpdateUI(entity.AsNullable());
+    }
+
+    private void OnModsuitModuleRemoved(Entity<ModsuitModuleComponent> entity, ref ModuleRemovedEvent args)
+    {
+        _toggleSystem.TryDeactivate(entity.Owner);
     }
 
     private void OnAttachedPartUnsealed(Entity<ModsuitModuleTogglePartComponentsComponent> entity,

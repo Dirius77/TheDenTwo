@@ -32,18 +32,18 @@ public sealed partial class ModuleComponent : Component
 }
 
 /// <summary>
-/// Raised on the module when it is inserted into a ModuleStorage
+/// Raised on the module when it is removed from a ModuleStorage
 /// </summary>
-/// <param name="storage">The storage it was inserted into.</param>
+/// <param name="storage">The storage it was removed from.</param>
 public sealed class ModuleRemovedEvent(Entity<ModuleStorageComponent> storage) : EntityEventArgs
 {
     public Entity<ModuleStorageComponent> Storage = storage;
 }
 
 /// <summary>
-/// Raised on the module when it is removed from a ModuleStorage
+/// Raised on the module when it is inserted into a ModuleStorage
 /// </summary>
-/// <param name="storage">The storage it was removed from.</param>
+/// <param name="storage">The storage it was interted into.</param>
 public sealed class ModuleInsertedEvent(Entity<ModuleStorageComponent> storage) : EntityEventArgs
 {
     public Entity<ModuleStorageComponent> Storage = storage;

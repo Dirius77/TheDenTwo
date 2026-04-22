@@ -1023,7 +1023,7 @@ public abstract partial class SharedSolutionContainerSystem : EntitySystem
         args.Verbs.Add(verb);
     }
 
-    private FormattedMessage GetSolutionExamine(Solution solution)
+    public FormattedMessage GetSolutionExamine(Solution solution) // DEN: Make Public
     {
         var msg = new FormattedMessage();
 

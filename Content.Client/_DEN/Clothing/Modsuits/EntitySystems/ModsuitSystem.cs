@@ -1,4 +1,5 @@
 using Content.Client._DEN.Clothing.Modsuits.UI;
+using Content.Client.Items;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
 using Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 

@@ -7,6 +7,8 @@ using Content.Shared._DEN.Modules.EntitySystems;
 using Content.Shared.Actions;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Clothing.EntitySystems;
+using Content.Shared.Examine;
+using Content.Shared.Interaction;
 using Content.Shared.Inventory;
 using Content.Shared.Inventory.Events;
 using Content.Shared.Item.ItemToggle;
@@ -35,6 +37,8 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         
         SubscribeLocalEvent<ModsuitModuleComponent, ModuleInsertedEvent>(OnModsuitModuleInserted);
         SubscribeLocalEvent<ModsuitModuleComponent, ModuleRemovedEvent>(OnModsuitModuleRemoved);
+        SubscribeLocalEvent<ModsuitModuleComponent, AccessibleOverrideEvent>(OnAccessibleOverride);
+        SubscribeLocalEvent<ModsuitModuleComponent, InRangeOverrideEvent>(OnInRangeOverride);
 
         SubscribeLocalEvent<ModsuitControllerComponent, GetItemActionsEvent>(OnControllerItemActions);
         SubscribeLocalEvent<ModsuitControllerComponent, MapInitEvent>(OnControllerInit, after: [typeof(ToggleableClothingSystem)]);
@@ -45,6 +49,34 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         
         SubscribeLocalEvent<ModsuitPassiveComponentModuleComponent, ModsuitRelayedEvent<ClothingSealedEvent>>(OnPassiveComponentSealed);
         SubscribeLocalEvent<ModsuitPassiveComponentModuleComponent, ModsuitRelayedEvent<ClothingUnsealedEvent>>(OnPassiveComponentUnsealed);
+    }
+    
+    private void OnAccessibleOverride(Entity<ModsuitModuleComponent> ent, ref AccessibleOverrideEvent args)
+    {
+        // We're not in a controller so behave like a normal item.
+        if (ent.Comp.ModController is not { } controller)
+            return;
+
+        // If the controller is parented to the user, then we're accessible as a module installed in it.
+        if (Transform(controller).ParentUid != args.User) 
+            return;
+        
+        args.Accessible = true;
+        args.Handled = true;
+    }
+
+    private void OnInRangeOverride(Entity<ModsuitModuleComponent> ent, ref InRangeOverrideEvent args)
+    {
+        // We're not in a controller so behave like a normal item.
+        if (ent.Comp.ModController is not { } controller)
+            return;
+
+        // If the controller is parented to the user, then we're accessible as a module installed in it.
+        if (Transform(controller).ParentUid != args.User) 
+            return;
+        
+        args.InRange = true;
+        args.Handled = true;
     }
 
     private void OnModsuitModuleToggle(Entity<ModsuitControllerComponent> entity, ref ModsuitToggleModuleMessage msg)
@@ -71,17 +103,17 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     private void OnControllerOpenUi(Entity<ModsuitControllerComponent> entity, ref ModsuitControllerOpenUiEvent evt)
     {
-        if (_uiSystem.HasUi(entity, ModsuitControllerUiKey.Key))
+        if (!_uiSystem.HasUi(entity, ModsuitControllerUiKey.Key)) 
+            return;
+        
+        if (_uiSystem.IsUiOpen(entity.Owner, ModsuitControllerUiKey.Key, evt.Performer))
         {
-            if (_uiSystem.IsUiOpen(entity.Owner, ModsuitControllerUiKey.Key, evt.Performer))
-            {
-                _uiSystem.CloseUi(entity.Owner, ModsuitControllerUiKey.Key, evt.Performer);
-                evt.Handled = true;
-            }
-            else
-            {
-                evt.Handled = _uiSystem.TryOpenUi(entity.Owner, ModsuitControllerUiKey.Key, evt.Performer);
-            }
+            _uiSystem.CloseUi(entity.Owner, ModsuitControllerUiKey.Key, evt.Performer);
+            evt.Handled = true;
+        }
+        else
+        {
+            evt.Handled = _uiSystem.TryOpenUi(entity.Owner, ModsuitControllerUiKey.Key, evt.Performer);
         }
     }
 
@@ -127,10 +159,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     private bool IsActiveController(Entity<ModsuitControllerComponent> controller)
     {
-        if (!IsWorn(controller))
-            return false;
-
-        return _sealableSystem.IsSealed(controller.Owner);
+        return IsWorn(controller) && _sealableSystem.IsSealed(controller.Owner);
     }
 
     public bool CanPartBeActivated(Entity<ModsuitPartComponent?> part)
@@ -138,37 +167,31 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         if (!Resolve(part, ref part.Comp))
             return false;
 
-        if (!IsWorn(part))
-            return false;
-        
-        if (!_sealableSystem.IsSealed(part.Owner))
-            return false;
-        
-        return true;
+        return IsWorn(part) && _sealableSystem.IsSealed(part.Owner);
     }
 
     public bool CanModuleBeEnabled(Entity<ModsuitModuleComponent?> entity)
     {
-        if (!ModuleHasActiveController(entity, out var controller))
+        if (!ModuleHasActiveController(entity, out _))
             return false;
 
         // This defaults to true because if it doesn't have the comp, then all it needs is the controller.
         var seenOne = true;
-        if (TryComp<ModsuitPartAttachedModuleComponent>(entity, out var attachedPartComp))
+        if (!TryComp<ModsuitPartAttachedModuleComponent>(entity, out var attachedPartComp)) 
+            return seenOne;
+        
+        // Ok we have the comp, we have to find at least one part.
+        seenOne = false;
+        foreach (var part in GetModuleAttachedParts((entity, attachedPartComp)))
         {
-            // Ok we have the comp, we have to find at least one part.
-            seenOne = false;
-            foreach (var part in GetModuleAttachedParts((entity, attachedPartComp)))
+            if (!_sealableSystem.IsSealed(part.Item2))
             {
-                if (!_sealableSystem.IsSealed(part.Item2))
-                {
-                    if (attachedPartComp.NeedsAll)
-                        return false;
-                }
-                else
-                {
-                    seenOne = true;
-                }
+                if (attachedPartComp.NeedsAll)
+                    return false;
+            }
+            else
+            {
+                seenOne = true;
             }
         }
 
@@ -200,12 +223,10 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     public IReadOnlyList<(string, EntityUid)> GetModuleAttachedParts(Entity<ModsuitPartAttachedModuleComponent?> module)
     {
-        if (!TryGetModuleController(module.Owner, out var controller))
+        if (!TryGetModuleController(module.Owner, out var controller) 
+            || !Resolve(module, ref module.Comp))
             return [];
 
-        if (!Resolve(module, ref module.Comp))
-            return [];
-        
         var result = new List<(string, EntityUid)>();
         foreach (var slot in module.Comp.Slots)
         {
@@ -219,7 +240,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
     {
         if (!TryComp<ToggleableClothingComponent>(entity, out var clothing))
         {
-            Log.Warning($"{ToPrettyString(entity)} is a modsuit that is not also ToggleableClothing!");
+            Log.Warning($"{ToPrettyString(entity):entity} is a modsuit that is not also ToggleableClothing!");
             return;
         }
 
@@ -282,11 +303,11 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     private void OnModsuitModuleInserted(Entity<ModsuitModuleComponent> entity, ref ModuleInsertedEvent args)
     {
-        if (HasComp<ModsuitControllerComponent>(args.Storage))
-        {
-            entity.Comp.ModController = args.Storage;
-            Dirty(entity);
-        }
+        if (!HasComp<ModsuitControllerComponent>(args.Storage)) 
+            return;
+        
+        entity.Comp.ModController = args.Storage;
+        Dirty(entity);
     }
 
     private void OnModsuitModuleRemoved(Entity<ModsuitModuleComponent> entity, ref ModuleRemovedEvent args)
@@ -297,22 +318,18 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     public void TrySetSpringlocked(Entity<ModsuitControllerComponent> entity, bool locked)
     {
-        // Relying on this feels kind of weird, but so does replicating its functionality everywhere.
-        if (!TryComp<ToggleableClothingComponent>(entity, out var toggleable))
-            return;
-        
-        foreach (var part in toggleable.ClothingUids)
+        foreach (var part in entity.Comp.PartToSlot)
         {
             var target = part.Key;
             // Doesn't make sense to seal it if it's not this, also if this somehow happened something has gone really
             // really wrong.
-            if (HasComp<ModsuitPartComponent>(target) && HasComp<SealableClothingComponent>(target))
-            {
-                if (locked)
-                    EnsureComp<SpringlockedComponent>(target);
-                else
-                    RemComp<SpringlockedComponent>(target);
-            }
+            if (!HasComp<ModsuitPartComponent>(target) || !HasComp<SealableClothingComponent>(target)) 
+                continue;
+            
+            if (locked)
+                EnsureComp<SpringlockedComponent>(target);
+            else
+                RemComp<SpringlockedComponent>(target);
         }
         if (locked)
             EnsureComp<SpringlockedComponent>(entity);
@@ -365,7 +382,7 @@ public enum ModsuitControllerUiKey
 }
 
 [Serializable, NetSerializable]
-public sealed partial class ModsuitToggleModuleMessage : BoundUserInterfaceMessage
+public sealed class ModsuitToggleModuleMessage : BoundUserInterfaceMessage
 {
     public NetEntity Target;
     public bool State;

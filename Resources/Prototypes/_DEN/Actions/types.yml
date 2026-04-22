@@ -22,15 +22,13 @@
     event: !type:ModsuitControllerOpenUiEvent
 
 - type: entity
-  parent: BaseAction
+  parent: BaseToggleAction
   id: ActionToggleModsuitModule
-  name: Toggle Modsuit Module
+  name: Toggle Modsuit Modules
   description: Toggles the modsuit module.
   components:
   - type: Action
     itemIconStyle: BigItem
-  - type: InstantAction
-    event: !type:ToggleActionEvent
 
 - type: entity
   parent: BaseAction
@@ -53,3 +51,67 @@
       collection: Drill
     retractSounds:
       collection: Drill
+
+- type: entity
+  parent: BaseAction
+  id: ActionHealthAnalyzerScan
+  name: Modsuit Health Analyzer Scan
+  description: Use the scanner built into your modsuit gauntlets to read something's vitals.
+  components:
+  - type: Action
+    useDelay: 1
+    icon: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: health_module }
+    iconOn: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: health_module }
+    itemIconStyle: BigAction
+  - type: TargetAction
+  - type: EntityTargetAction
+    whitelist:
+      components:
+      - MobState
+    event: !type:InteractUsingActionEvent
+  - type: ModsuitPowerDrainAction
+    drainOnAction: 2.5
+
+- type: entity
+  parent: BaseAction
+  id: ActionInjectorUse
+  name: Modsuit Injector
+  description: Use the injector build into your modsuit gauntlets to draw or inject from a target.
+  components:
+  - type: Action
+    useDelay: 0.25
+    icon: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: injector_module }
+    iconOn: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: injector_module }
+    itemIconStyle: BigAction
+  - type: TargetAction
+  - type: EntityTargetAction
+    whitelist:
+      components:
+      - Bloodstream
+      - DrawableSolution
+    event: !type:InteractUsingActionEvent
+  - type: ModsuitPowerDrainAction
+    drainOnAction: 1.5
+  - type: ContainerExamineRelay
+
+- type: entity
+  parent: BaseAction
+  id: ActionDefibrillatorUse
+  name: Modsuit Defibrillator
+  description: Use the defibrillator paddles integrated into your MODsuit gauntlets to shock the target.
+  components:
+  - type: Action
+    useDelay: 3.0
+    icon: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: defibrillator }
+    iconOn: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: defibrillator }
+    itemIconStyle: BigAction
+  - type: TargetAction
+  - type: EntityTargetAction
+    whitelist:
+      components:
+        - Bloodstream
+        - DrawableSolution
+    event: !type:InteractUsingActionEvent
+  - type: ModsuitPowerDrainAction
+    drainOnAction: 100
+  - type: ContainerExamineRelay

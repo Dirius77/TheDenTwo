@@ -61,6 +61,10 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         
         var module = (args.EntityUid, moduleComp);
 
+        // The module is already in our storage list, likely from being assigned a slot as part of UI based insertion.
+        if (entity.Comp.ModuleSlots.ContainsValue(args.EntityUid))
+            return;
+        
         // If the module is bigger than the BusWidth it will never fit.
         if (moduleComp.BusWidth > entity.Comp.MaxBusWidth)
         {

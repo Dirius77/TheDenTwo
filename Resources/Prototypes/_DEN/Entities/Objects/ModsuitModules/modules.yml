@@ -1,51 +1,64 @@
 - type: entity
   abstract: true
   parent: BaseItem
-  id: ModsuitModuleWidth1
+  id: BaseModsuitModule
   components:
   - type: Module
-    busWidth: 1
-    texture: "/Textures/_DEN/Interface/Modules/module-width-1.png"
   - type: ModsuitModule
 
 - type: entity
   abstract: true
-  parent: BaseItem
-  id: ModsuitModuleWidth2
+  parent: BaseModsuitModule
+  id: ModsuitModuleWidth1
   components:
-    - type: Module
-      busWidth: 2
-      texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
-    - type: ModsuitModule
+  - type: Item
+    size: Small
+  - type: Module
+    busWidth: 1
+    texture: "/Textures/_DEN/Interface/Modules/module-width-1.png"
 
 - type: entity
   abstract: true
-  parent: BaseItem
+  parent: BaseModsuitModule
+  id: ModsuitModuleWidth2
+  components:
+  - type: Item
+    size: Normal
+  - type: Module
+    busWidth: 2
+    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
+
+- type: entity
+  abstract: true
+  parent: BaseModsuitModule
   id: ModsuitModuleWidth3
   components:
-    - type: Module
-      busWidth: 3
-      texture: "/Textures/_DEN/Interface/Modules/module-width-3.png"
-    - type: ModsuitModule
+  - type: Item
+    size: Large
+  - type: Module
+    busWidth: 3
+    texture: "/Textures/_DEN/Interface/Modules/module-width-3.png"
       
 - type: entity
   abstract: true
-  parent: BaseItem
+  parent: BaseModsuitModule
   id: ModsuitModuleWidth4
   components:
-    - type: Module
-      busWidth: 4
-      texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
-    - type: ModsuitModule
+  - type: Item
+    size: Huge
+  - type: Module
+    busWidth: 4
+    texture: "/Textures/_DEN/Interface/Modules/module-width-4.png"
 
 - type: entity
   abstract: true
-  id: ModsuitModuleToggle
+  id: ModsuitModuleTogglePower
   components:
   - type: ModuleTogglePowerDraw
   - type: ItemToggle
     onUse: false
     onActivate: false
+  - type: ModulePowerDraw
 
 - type: entity
   parent: ModsuitModuleWidth1
@@ -82,7 +95,7 @@
     - type: Insulated
 
 - type: entity
-  parent: [ ModsuitModuleWidth2, ModsuitModuleToggle ]
+  parent: [ ModsuitModuleWidth2, ModsuitModuleTogglePower ]
   id: ModsuitModuleNoSlip
   name: no slip module
   description: A module which allows the modsuit boots incredible grip, preventing slipping.
@@ -101,7 +114,7 @@
     - type: NoSlip
 
 - type: entity
-  parent: [ModsuitModuleWidth2, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth2, ModsuitModuleTogglePower]
   id: ModsuitModuleRadiationShielding
   name: radiation shielding module
   description: A module which allows the modsuit to block radiation from reaching the wearer. Requires a deployed chestplate.
@@ -121,7 +134,7 @@
         Radiation: 0.0
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleThermalRegulator
   name: thermal regulator module
   description: A module which allows the modsuit to insulate the user from extreme temperatures and fire.
@@ -146,7 +159,7 @@
       reduction: 0.8
 
 - type: entity
-  parent: [ModsuitModuleWidth2, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth2, ModsuitModuleTogglePower]
   id: ModsuitModuleMagneticStabilizer
   name: magnetic stabilizer module
   description: A module containing powerful electromagnets which integrate with the modsuit's boots.
@@ -174,7 +187,7 @@
       sprintModifier: 0.8
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleFlashlight
   name: flashlight module
   description: A module that installs a powerful flashlight on the modsuit helmet.
@@ -199,6 +212,93 @@
     autoRot: true
 
 - type: entity
+  parent: [ModsuitModuleWidth2]
+  id: ModsuitModuleHealthAnalyzer
+  name: health analyzer module
+  description: A module that provides a built in health analyzer in the modsuits gauntlets for reading the vitals of patients.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: health_module
+  - type: ModsuitPartAttachedModule
+    slots:
+    - gloves
+  - type: InteractUsingAction
+  - type: ModsuitModuleActionGrant
+    action: ActionHealthAnalyzerScan
+  - type: HealthAnalyzer
+  - type: UserInterface
+    interfaces:
+      enum.HealthAnalyzerUiKey.Key:
+        type: HealthAnalyzerBoundUserInterface
+
+- type: entity
+  parent: [ModsuitModuleWidth1]
+  id: ModsuitModuleInjector
+  name: injector module
+  description: A module that provides a jet injector built into the wrist of the MODsuit's gauntlets.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: injector_module
+  - type: ModsuitPartAttachedModule
+    slots:
+    - gloves
+  - type: ModsuitRelayVerbs
+  - type: ModsuitModuleActionGrant
+    action: ActionInjectorUse
+  - type: InteractUsingAction
+  - type: UseDelay
+    delay: 1.5
+  - type: SolutionContainerManager
+    solutions:
+      hypospray:
+        maxVol: 15
+  - type: RelayedSolutionExamine
+    solution: hypospray
+  - type: ExaminableSolution
+    solution: hypospray
+    exactVolume: true
+  - type: Spillable
+    solution: hypospray
+  - type: Injector
+    solutionName: hypospray
+    ignoreClosed: false
+    currentTransferAmount: null
+    activeModeProtoId: ModsuitInjectorDynamicMode
+    allowedModes:
+    - ModsuitInjectorDynamicMode
+    - ModsuitInjectorInjectMode
+
+- type: entity
+  parent: [ ModsuitModuleWidth2 ]
+  id: ModsuitModuleDefibrillator
+  name: defibrillator module
+  description: A module that integrates defibrillator paddles into the hands of the MODsuit gauntlets.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: defibrillator
+  - type: ModsuitPartAttachedModule
+    slots:
+    - gloves
+  - type: InteractUsingAction
+  - type: ModsuitModuleActionGrant
+    action: ActionDefibrillatorUse
+  - type: UseDelay
+    delay: 3.0
+  - type: ItemToggle
+    onUse: false
+    onActivate: false
+  - type: Defibrillator
+    zapHeal:
+      types:
+        Asphyxiation: -40
+
+- type: entity
   parent: MiningDrill
   id: ModsuitMiningDrill
   name: modsuit mining drill
@@ -218,9 +318,6 @@
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
     - state: drill_module
-  - type: Module
-    busWidth: 2
-    texture: "/Textures/_DEN/Interface/Modules/module-width-2.png"
   - type: ModsuitModuleActionGrant
     action: ActionRetractableItemModsuitDrill
   - type: ModsuitPartAttachedModule
@@ -228,7 +325,7 @@
     - gloves
 
 - type: entity
-  parent: [ModsuitModuleWidth4, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth4, ModsuitModuleTogglePower]
   id: ModsuitModuleCloak
   name: cloaking module
   description: An advanced module which allows the user to become invisible.
@@ -250,7 +347,7 @@
       lastVisibility: 0.1
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleGPS
   name: gps module
   description: A module which adds a built-in gps to the modsuit controller.
@@ -269,7 +366,7 @@
     - type: HandheldGPS
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleMedicalVisor
   name: medical visor module
   description: A module which provides a built in medical hud to the modsuit helmet.
@@ -289,7 +386,7 @@
     - type: ShowHealthIcons
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleDiagnosticVisor
   name: diagnostic visor module
   description: A module which provides a built in diagnostic hud to the modsuit helmet.
@@ -312,7 +409,7 @@
     - type: ShowAccessReaderSettings
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleSecurityVisor
   name: security visor module
   description: A module which provides a built in security hud to the modsuit helmet.
@@ -334,7 +431,7 @@
     - type: ShowContrabandDetails
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleOreScanner
   name: ore scanner visor module
   description: A module which provides a built in ore scanner hud to the modsuit helmet.
@@ -354,7 +451,7 @@
       range: 10
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleThermal
   name: thermal visor module
   description: A module which provides a built in thermal hud to the modsuit helmet.
@@ -373,7 +470,7 @@
     - type: ThermalSight
 
 - type: entity
-  parent: [ModsuitModuleWidth1, ModsuitModuleToggle]
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
   id: ModsuitModuleReagentScanner
   name: reagent scanner visor module
   description: A module which provides a built in thermal hud to the modsuit helmet.

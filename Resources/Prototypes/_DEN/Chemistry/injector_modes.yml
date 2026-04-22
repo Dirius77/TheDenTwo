@@ -1,0 +1,14 @@
+- type: injectorMode
+  abstract: true
+  parent: BaseJetInjectorMode
+  id: BaseModsuitInjectorMode
+  popupUserAttempt: modsuit-injector-component-spray-injecting-user
+  popupTargetAttempt: modsuit-injector-component-spray-injecting-target
+
+- type: injectorMode
+  parent: [ BaseModsuitInjectorMode, BaseInjectMode ]
+  id: ModsuitInjectorInjectMode
+  
+- type: injectorMode
+  parent: [ BaseModsuitInjectorMode, BaseDynamicMode ]
+  id: ModsuitInjectorDynamicMode
