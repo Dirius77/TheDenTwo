@@ -52,6 +52,7 @@ public abstract partial class SharedTetherGunSystem : EntitySystem
         SubscribeLocalEvent<TetheredComponent, EntGotInsertedIntoContainerMessage>(OnTetheredContainerInserted);
 
         InitializeForce();
+        InitializeToggle(); // DEN: ItemToggle behavior.
     }
 
     private void OnTetheredContainerInserted(EntityUid uid, TetheredComponent component, EntGotInsertedIntoContainerMessage args)

@@ -111,4 +111,71 @@ public sealed partial class ModulePowerSystem : EntitySystem
             || !_cell.HasCharge(storage, powerDraw.UseCharge, user: evt.User, predicted: true))
             evt.Cancelled = true;
     }
+
+    /// <summary>
+    /// Attempts to use charge on the module, this involves finding the controller that is responsible for the module
+    /// and applying its DrainMultiplier to the provided value.
+    /// </summary>
+    /// <param name="entity">The module or module power provider being operated on.</param>
+    /// <param name="draw">The amount of power to drain.</param>
+    /// <param name="user">Optional user trying to perform this action (passed to PowerCellSystem).</param>
+    /// <param name="predicted">If the no power popup is predicted (passed to PowerCellSystem).</param>
+    /// <returns>If using the charge succeeded.</returns>
+    public bool TryUseCharge(EntityUid entity, float draw, EntityUid? user = null, bool predicted = false)
+    {
+        Entity<ModulePowerProviderComponent>? provider = null;
+        
+        if (TryComp<ModuleComponent>(entity, out var module))
+        {
+            if (module.StoredIn is null)
+                return false;
+
+            if (!TryComp<ModulePowerProviderComponent>(module.StoredIn, out var providerComp))
+                return false;
+            
+            provider = (module.StoredIn.Value, providerComp);
+        } 
+        else if (TryComp<ModulePowerProviderComponent>(entity, out var providerComp))
+        {
+            provider = (entity, providerComp);
+        }
+
+        if (provider is null)
+            return false;
+
+        return _cell.TryUseCharge(provider.Value.Owner, draw * provider.Value.Comp.DrainMultiplier, user, predicted);
+    }
+    
+    /// <summary>
+    /// Checks if the entity has access to enough charge through ModulePowerSystem.
+    /// </summary>
+    /// <param name="entity">The module or module power provider being operated on.</param>
+    /// <param name="draw">The amount of power being drained.</param>
+    /// <param name="user">Optional user trying to perform this action (passed to PowerCellSystem).</param>
+    /// <param name="predicted">If the no power popup is predicted (passed to PowerCellSystem).</param>
+    /// <returns>If the charge is available.</returns>
+    public bool HasCharge(EntityUid entity, float draw, EntityUid? user, bool predicted = false)
+    {
+        Entity<ModulePowerProviderComponent>? provider = null;
+        
+        if (TryComp<ModuleComponent>(entity, out var module))
+        {
+            if (module.StoredIn is null)
+                return false;
+
+            if (!TryComp<ModulePowerProviderComponent>(module.StoredIn, out var providerComp))
+                return false;
+            
+            provider = (module.StoredIn.Value, providerComp);
+        } 
+        else if (TryComp<ModulePowerProviderComponent>(entity, out var providerComp))
+        {
+            provider = (entity, providerComp);
+        }
+
+        if (provider is null)
+            return false;
+
+        return _cell.HasCharge(provider.Value.Owner, draw * provider.Value.Comp.DrainMultiplier, user, predicted);
+    }
 }

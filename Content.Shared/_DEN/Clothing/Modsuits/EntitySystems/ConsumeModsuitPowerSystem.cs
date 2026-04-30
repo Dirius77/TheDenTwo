@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
+using Content.Shared._DEN.Modules.EntitySystems;
 using Content.Shared.Actions;
 using Content.Shared.Actions.Events;
 using Content.Shared.Inventory;
-using Content.Shared.PowerCell;
 using Content.Shared.Weapons.Melee.Events;
 
 namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
@@ -11,7 +11,7 @@ namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 public sealed class ConsumeModsuitPowerSystem : EntitySystem
 {
     [Dependency] private readonly InventorySystem _inventory = default!;
-    [Dependency] private readonly PowerCellSystem _powerCell = default!;
+    [Dependency] private readonly ModulePowerSystem _powerSystem = default!;
 
     public override void Initialize()
     {
@@ -38,7 +38,7 @@ public sealed class ConsumeModsuitPowerSystem : EntitySystem
         if (!TryGetModsuit(args.User, ent.Comp.ExpectedModsuitSlot, out var modsuit))
             return;
 
-        if (!_powerCell.TryUseCharge(modsuit.Value.Owner, ent.Comp.DrainOnMelee, args.User, true))
+        if (!_powerSystem.TryUseCharge(modsuit.Value.Owner, ent.Comp.DrainOnMelee, args.User, true))
         {
             args.Handled = true;
         }
@@ -53,7 +53,7 @@ public sealed class ConsumeModsuitPowerSystem : EntitySystem
             return;
         }
         
-        if (!_powerCell.HasCharge(modsuit.Value.Owner, ent.Comp.DrainOnAction, args.User, true))
+        if (!_powerSystem.HasCharge(modsuit.Value.Owner, ent.Comp.DrainOnAction, args.User, true))
         {
             args.Invalid = true;
         }
@@ -65,6 +65,6 @@ public sealed class ConsumeModsuitPowerSystem : EntitySystem
         if (!TryGetModsuit(args.Performer, ent.Comp.ExpectedModsuitSlot, out var modsuit))
             return;
 
-        _powerCell.TryUseCharge(modsuit.Value.Owner, ent.Comp.DrainOnAction, args.Performer, true);
+        _powerSystem.TryUseCharge(modsuit.Value.Owner, ent.Comp.DrainOnAction, args.Performer, true);
     }
 }

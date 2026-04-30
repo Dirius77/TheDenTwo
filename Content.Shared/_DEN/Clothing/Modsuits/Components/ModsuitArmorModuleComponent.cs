@@ -9,16 +9,16 @@ namespace Content.Shared._DEN.Clothing.Modsuits.Components;
 /// ModsuitPartAttachedModuleComponent and ItemToggleComponent to handle being turned on and off and requiring specific
 /// parts to be enabled. 
 /// </summary>
-[RegisterComponent, NetworkedComponent, Access(typeof(ModsuitArmorSystem))]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState, Access(typeof(ModsuitArmorSystem))]
 public sealed partial class ModsuitArmorModuleComponent : Component
 {
     /// <summary>
     /// Default damage modifier set. Applied to every part if there are multiple.
     /// </summary>
-    [DataField] public DamageModifierSet? Modifiers;
+    [DataField, AutoNetworkedField] public DamageModifierSet? Modifiers;
 
     /// <summary>
     /// Per slot modifier sets. Use this if you need multiple parts and want the values to be different per part.s
     /// </summary>
-    [DataField] public Dictionary<string, DamageModifierSet> SlotModifiers = new();
+    [DataField, AutoNetworkedField] public Dictionary<string, DamageModifierSet> SlotModifiers = new();
 }

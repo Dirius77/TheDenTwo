@@ -1,3 +1,4 @@
+using System.Linq;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
 using Content.Shared._DEN.Clothing.Sealable.EntitySystems;
 using Content.Shared.Actions;
@@ -25,7 +26,13 @@ public sealed partial class ModsuitModuleActionSystem : EntitySystem
             return;
         
         var wearer = Transform(evt.Owner).ParentUid;
-        _actions.AddAction(entity.Owner, ref entity.Comp.ActionEntity, entity.Comp.Action);
+        foreach (var action in entity.Comp.Actions)
+        {
+            EntityUid? actionEntity = entity.Comp.ActionEntities.GetValueOrDefault(action);
+            _actions.AddAction(entity.Owner, ref actionEntity, action);
+            if (actionEntity is not null)
+                entity.Comp.ActionEntities[action] = actionEntity.Value;
+        }
         _actions.GrantContainedActions(wearer, entity.Owner);
     }
     
@@ -35,8 +42,16 @@ public sealed partial class ModsuitModuleActionSystem : EntitySystem
         if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
         {
             var wearer = Transform(evt.Owner).ParentUid;
-            _actions.RemoveAction(wearer, entity.Comp.ActionEntity);
-            PredictedQueueDel(entity.Comp.ActionEntity);
+            // Copy so removing mid-iteration doesn't error.
+            var actions = entity.Comp.ActionEntities.Keys.ToList();
+            foreach (var action in actions)
+            {
+                if (!entity.Comp.ActionEntities.Remove(action, out var actionEnt))
+                    continue;
+                
+                _actions.RemoveAction(wearer, actionEnt);
+                PredictedQueueDel(actionEnt);
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ using Content.Shared.Verbs;
 using Content.Shared.Whitelist;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._DEN.Modules.EntitySystems;
@@ -28,6 +29,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
     [Dependency] private readonly SharedToolSystem _toolSystem = default!;
     [Dependency] private readonly InventorySystem _inventorySystem = default!;
     [Dependency] private readonly EntityWhitelistSystem _whitelistSystem = default!;
+    [Dependency] private readonly IPrototypeManager _protoManager = default!;
 
     private EntityQuery<ModuleComponent> _moduleQuery;
     
@@ -116,50 +118,11 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         
         for (var i = slot; i < (slot + module.Comp.BusWidth); i++)
         {
-            if (storage.Comp.ModuleSlots.GetValueOrDefault(i) != null)
+            if (storage.Comp.ModuleSlots.TryGetValue(i, out var result) && result is not null)
                 return false;
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Checks to see if a module fits in a slot within a storage, including raising events and passing whitelists.
-    /// </summary>
-    /// <param name="storage">The storage to check</param>
-    /// <param name="module">The module to check</param>
-    /// <param name="slot">The slot in the storage to check</param>
-    /// <returns>Whether the module fits in the slot.</returns>
-    public bool ModuleFitsInStorage(Entity<ModuleStorageComponent> storage, Entity<ModuleComponent?> module, int slot)
-    {
-        if (!Resolve(module, ref module.Comp, false))
-            return false;
-
-        if (!ModuleFitsInSlot(storage, module, slot))
-            return false;
-
-        if (!PassesAllWhitelists(storage, (module, module.Comp)))
-            return false;
-        
-        // Raised on the module itself to allow it to reject the insertion.
-        var moduleInsertAttempt = new ModuleGettingInsertedAttemptEvent(storage);
-        RaiseLocalEvent(module, moduleInsertAttempt);
-        if (moduleInsertAttempt.Cancelled)
-            return false;
-
-        // Raised on the storage to allow it to reject the insertion.
-        var storageInsertAttempt = new AttemptInsertModuleIntoStorageEvent((module, module.Comp));
-        RaiseLocalEvent(storage, storageInsertAttempt);
-        return !storageInsertAttempt.Cancelled;
-    }
-    
-    public IReadOnlyList<EntityUid> GetContainedModules(Entity<ModuleStorageComponent?> storage)
-    {
-        // I'm expecting this to get passed invalid entities during shutdown, it's fine.
-        if (!Resolve(storage, ref storage.Comp, false))
-            return [];
-        
-        return storage.Comp.ModuleContainer.ContainedEntities;
     }
 
     private bool PassesAllWhitelists(Entity<ModuleStorageComponent> storage, Entity<ModuleComponent> module)
@@ -212,7 +175,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         if (!_handsSystem.TryGetActiveItem((player, handsComponent), out var item))
         {
             if (entity.Comp.RemovalQuality is null)
-                TryRemoveModule(entity, player, null, args.Slot);
+                TryRemoveModule(entity.AsNullable(), player, null, args.Slot, out _);
 
             return;
         }
@@ -223,72 +186,15 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         // Tools remove things from storage.
         if (TryComp<ToolComponent>(item, out var tool))
         {
-            TryRemoveModule(entity, player, (item.Value, tool), args.Slot);
+            TryRemoveModule(entity.AsNullable(), player, (item.Value, tool), args.Slot, out _);
             return;
         }
 
         // Modules get put into storage.
         if (TryComp<ModuleComponent>(item, out var module))
         {
-            TryInsertModule(entity, (item.Value, module), player, args.Slot);
+            TryInsertModule(entity.AsNullable(), (item.Value, module), player, args.Slot);
         }
-    }
-
-    private void TryRemoveModule(Entity<ModuleStorageComponent> entity, EntityUid player, Entity<ToolComponent>? heldTool,
-        int slot)
-    {
-        // There's nothing in this slot, so nothing to do.
-        if (entity.Comp.ModuleSlots.GetValueOrDefault(slot) is not {} module)
-            return;
-
-        if (entity.Comp.RemovalQuality is {} quality 
-            && heldTool is {} tool
-            && !_toolSystem.HasQuality(tool, quality))
-        {
-            _popupSystem.PopupPredicted(Loc.GetString("module-storage-ui-on-receive-message-need-prying"), entity, player);
-            return;
-        }
-
-        if (!entity.Comp.ModuleContainer.Contains(module))
-        {
-            Log.Debug("We have a module that isn't in our container.");
-            return;
-        }
-
-        _containerSystem.Remove(module, entity.Comp.ModuleContainer);
-        _handsSystem.PickupOrDrop(player, module);
-        // Only play the sound if we actually used a tool.
-        if (heldTool is not null && entity.Comp.RemovalQuality is not null)
-            _toolSystem.PlayToolSound(heldTool.Value, heldTool.Value.Comp, player);
-
-        if (_moduleQuery.TryComp(module, out var moduleComp))
-        {
-            for (int i = slot; i < slot + moduleComp.BusWidth; i++)
-            {
-                entity.Comp.ModuleSlots[i] = null;
-            }
-        }
-        
-        Dirty(entity);
-        UpdateUi(entity);
-    }
-
-    private void TryInsertModule(Entity<ModuleStorageComponent> entity,
-        Entity<ModuleComponent> module, EntityUid player, int slot)
-    {
-        if (!ModuleFitsInStorage(entity, module.AsNullable(), slot))
-            return;
-
-        AssignModuleToSlot(entity, module, slot);
-        
-        if (!_containerSystem.Insert(module.Owner, entity.Comp.ModuleContainer))
-            return;
-        
-        if (entity.Comp.InsertSound is { } insertSound)
-            _audioSystem.PlayPredicted(insertSound, entity, player);
-        
-        Dirty(entity);
-        UpdateUi(entity);
     }
 
     private bool TryFindAvailableSlot(Entity<ModuleStorageComponent> entity, Entity<ModuleComponent> module,
@@ -306,6 +212,16 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         }
 
         return false;
+    }
+
+    private void ClearSlot(Entity<ModuleStorageComponent> entity, int slot, int width)
+    {
+        for (int i = slot; i < slot + width; i++)
+        {
+            entity.Comp.ModuleSlots[i] = null;
+        }
+
+        Dirty(entity);
     }
 
     private void AssignModuleToSlot(Entity<ModuleStorageComponent> entity, Entity<ModuleComponent> module, int slot)
@@ -395,23 +311,186 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
                 {
                     _uiSystem.OpenUi(entity.Owner, ModuleUiKey.Key, args.User);
                 }
-            }
+            },
+            Text = Loc.GetString(uiOpen ? "module-storage-verb-close-storage" : "module-storage-verb-open-storage")
         };
 
-        if (uiOpen)
-        {
-            verb.Text = Loc.GetString("module-storage-verb-close-storage");
-        }
-        else
-        {
-            verb.Text = Loc.GetString("module-storage-verb-open-storage");
-        }
         args.Verbs.Add(verb);
     }
 
     protected virtual void UpdateUi(Entity<ModuleStorageComponent> entity)
     {
     }
+    
+    #region PublicAPI
+
+    /// <summary>
+    /// Attempts to remove the specified module from the modsuit, placing it into the user's hands if possible, or
+    /// on the ground otherwise.
+    /// </summary>
+    /// <param name="entity">The module storage to remove from.</param>
+    /// <param name="user">The user attempting to remove the module, if there is one.</param>
+    /// <param name="heldTool">The tool being used to remove the module, if there is one.</param>
+    /// <param name="slot">The slot to try removing from.</param>
+    /// <param name="removedModule">The module that was removed.</param>
+    /// <param name="ignoreTools">Whether to skip tool checks and just remove the module.</param>
+    /// <returns>Whether a module was removed.</returns>
+    public bool TryRemoveModule(Entity<ModuleStorageComponent?> entity, EntityUid? user, Entity<ToolComponent>? heldTool,
+        int slot, [NotNullWhen(true)] out EntityUid? removedModule, bool ignoreTools = false)
+    {
+        removedModule = null;
+        if (!Resolve(entity, ref entity.Comp))
+            return false;
+        
+        // There's nothing in this slot, so nothing to do.
+        if (entity.Comp.ModuleSlots.GetValueOrDefault(slot) is not {} module)
+            return false;
+
+        if (HasComp<UnremoveableModuleComponent>(entity))
+        {
+            _popupSystem.PopupPredicted(Loc.GetString("module-storage-ui-module-unremoveable"), entity, user);
+            return false;
+        }
+
+        if (!ignoreTools)
+        {
+            if (entity.Comp.RemovalQuality is {} quality 
+                && heldTool is {} tool
+                && !_toolSystem.HasQuality(tool, quality))
+            {
+                var resolvedQuality = _protoManager.Index(quality);
+                _popupSystem.PopupPredicted(Loc.GetString("module-storage-ui-on-receive-message-need-tool-quality", ("quality", resolvedQuality.Name)), entity, user);
+                return false;
+            }
+        }
+
+        if (!entity.Comp.ModuleContainer.Contains(module))
+        {
+            Log.Debug("We have a module that isn't in our container.");
+            return false;
+        }
+
+        _containerSystem.Remove(module, entity.Comp.ModuleContainer);
+        _handsSystem.PickupOrDrop(user, module);
+        // Only play the sound if we actually used a tool.
+        if (heldTool is not null && entity.Comp.RemovalQuality is not null)
+            _toolSystem.PlayToolSound(heldTool.Value, heldTool.Value.Comp, user);
+
+        if (_moduleQuery.TryComp(module, out var moduleComp))
+        {
+            ClearSlot((entity, entity.Comp), slot, moduleComp.BusWidth);
+        }
+        
+        removedModule = module;
+        Dirty(entity);
+        UpdateUi((entity, entity.Comp));
+        return true;
+    }
+    
+    /// <summary>
+    /// Attempts to insert the provided module into the provided storage.
+    /// </summary>
+    /// <param name="entity">The storage to insert into</param>
+    /// <param name="module"></param>
+    /// <param name="player"></param>
+    /// <param name="slot"></param>
+    /// <returns>Whether insertion succeeded.</returns>
+    public bool TryInsertModule(Entity<ModuleStorageComponent?> entity,
+        Entity<ModuleComponent?> module, EntityUid? player, int slot)
+    {
+        if (!Resolve(entity, ref entity.Comp) || !Resolve(module, ref module.Comp))
+            return false;
+        
+        if (!ModuleFitsInStorage((entity, entity.Comp), module.AsNullable(), slot))
+            return false;
+
+        AssignModuleToSlot((entity, entity.Comp), (module, module.Comp), slot);
+        
+        if (!_containerSystem.Insert(module.Owner, entity.Comp.ModuleContainer))
+        {
+            
+            return false;
+        }
+        
+        if (entity.Comp.InsertSound is { } insertSound && player is not null)
+            _audioSystem.PlayPredicted(insertSound, entity, player);
+        
+        Dirty(entity);
+        UpdateUi((entity, entity.Comp));
+        return true;
+    }
+    
+    /// <summary>
+    /// Checks to see if a module fits in a slot within a storage, including raising events and passing whitelists.
+    /// </summary>
+    /// <param name="storage">The storage to check</param>
+    /// <param name="module">The module to check</param>
+    /// <param name="slot">The slot in the storage to check</param>
+    /// <returns>Whether the module fits in the slot.</returns>
+    public bool ModuleFitsInStorage(Entity<ModuleStorageComponent> storage, Entity<ModuleComponent?> module, int slot)
+    {
+        if (!Resolve(module, ref module.Comp, false))
+            return false;
+
+        if (!ModuleFitsInSlot(storage, module, slot))
+            return false;
+
+        if (!PassesAllWhitelists(storage, (module, module.Comp)))
+            return false;
+        
+        // Raised on the module itself to allow it to reject the insertion.
+        var moduleInsertAttempt = new ModuleGettingInsertedAttemptEvent(storage);
+        RaiseLocalEvent(module, moduleInsertAttempt);
+        if (moduleInsertAttempt.Cancelled)
+            return false;
+
+        // Raised on the storage to allow it to reject the insertion.
+        var storageInsertAttempt = new AttemptInsertModuleIntoStorageEvent((module, module.Comp));
+        RaiseLocalEvent(storage, storageInsertAttempt);
+        return !storageInsertAttempt.Cancelled;
+    }
+    
+    /// <summary>
+    /// Returns the list of modules contained within the storage.
+    /// </summary>
+    /// <param name="storage">The storage entity</param>
+    /// <returns>The list of contained modules.</returns>
+    public IReadOnlyList<EntityUid> GetContainedModules(Entity<ModuleStorageComponent?> storage)
+    {
+        // I'm expecting this to get passed invalid entities during shutdown, it's fine.
+        if (!Resolve(storage, ref storage.Comp, false))
+            return [];
+        
+        return storage.Comp.ModuleContainer.ContainedEntities;
+    }
+
+    /// <summary>
+    /// Returns (one of) the slots containing the passed module, if it is present in the provided storage.
+    /// </summary>
+    /// <param name="storage">The storage to look in.</param>
+    /// <param name="module">The module to search for.</param>
+    /// <param name="slot">The slot the module is contained in.</param>
+    /// <returns>Whether the module was found in the storage.</returns>
+    public bool TryGetModuleContainingSlot(Entity<ModuleStorageComponent?> storage, Entity<ModuleComponent?> module,
+        [NotNullWhen(true)] out int? slot)
+    {
+        slot = null;
+        if (!Resolve(storage, ref storage.Comp) || !Resolve(module, ref module.Comp))
+            return false;
+
+        foreach (var slotData in storage.Comp.ModuleSlots)
+        {
+            if (slotData.Value == module)
+            {
+                slot = slotData.Key;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    #endregion
 }
 
 [Serializable, NetSerializable]

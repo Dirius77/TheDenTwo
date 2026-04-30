@@ -19,7 +19,6 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
         SubscribeLocalEvent<ModsuitModuleComponent, ItemToggleActivateAttemptEvent>(OnModsuitModuleToggleAttempt);
         SubscribeLocalEvent<ModsuitModuleComponent, ToggleActionEvent>(OnModsuitModuleToggleAction);
         SubscribeLocalEvent<ModsuitModuleComponent, ItemToggledEvent>(OnModsuitModuleToggled);
-        SubscribeLocalEvent<ModsuitModuleComponent, ModuleRemovedEvent>(OnModsuitModuleRemoved);
         
         SubscribeLocalEvent<ModsuitModuleTogglePartComponent, ItemToggledEvent>(OnModsuitModulePartToggle);
         
@@ -36,11 +35,9 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
     private void OnModsuitModuleToggleAttempt(Entity<ModsuitModuleComponent> entity,
         ref ItemToggleActivateAttemptEvent args)
     {
-        Log.Debug("Who up toggling their: " + Name(entity));
         if (args.Cancelled)
             return;
         
-        Log.Debug("Not me apparently.");
         if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner))
             args.Cancelled = true;
     }
@@ -50,16 +47,11 @@ public sealed partial class ModsuitToggleSystem : EntitySystem
         _modsuitSystem.ModuleUpdateUI(entity.AsNullable());
     }
 
-    private void OnModsuitModuleRemoved(Entity<ModsuitModuleComponent> entity, ref ModuleRemovedEvent args)
-    {
-        _toggleSystem.TryDeactivate(entity.Owner);
-    }
-
     private void OnAttachedPartUnsealed(Entity<ModsuitModuleTogglePartComponentsComponent> entity,
         ref ModsuitRelayedEvent<ClothingUnsealedEvent> args)
     {
         if (!_modsuitSystem.CanModuleBeEnabled(entity.Owner) 
-            || !TryComp<ModsuitPartAttachedModuleComponent>(entity, out var attachedComp))
+            || !HasComp<ModsuitPartAttachedModuleComponent>(entity))
             return;
      
         if (!_modsuitSystem.PartMatchesModule(entity.Owner, args.Owner))

@@ -61,6 +61,35 @@
   - type: ModulePowerDraw
 
 - type: entity
+  parent: ModsuitModuleWidth2
+  id: ModsuitModuleBrokenWidth2
+  name: broken module
+  description: This module is cracked clean through and no longer functions...
+  components:
+  - type: Sprite
+    sprite: Objects/Materials/Scrap/generic.rsi
+    layers:
+    - state: glass-1
+  - type: Module
+    texture: "/Textures/_DEN/Interface/Modules/module-width-2-broken.png"
+  - type: Tag
+    tags:
+    - Trash
+
+- type: entity
+  parent: ModsuitModuleWidth2
+  id: ModsuitModuleEmpProtection
+  name: emp protection module
+  description: A module which will absorb the charge from an EMP in order to prevent it causing physical damage to the MODsuit. Only works once.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: empshield_module
+  - type: ModsuitEmpProtectionModule
+    broken: ModsuitModuleBrokenWidth2
+
+- type: entity
   parent: ModsuitModuleWidth1
   id: ModsuitModuleEatingApparatus
   name: eating apparatus module
@@ -76,6 +105,51 @@
   - type: ModsuitPassiveComponentModule
     blockOnSeal:
     - type: IngestionBlocker
+
+- type: entity
+  parent: ModsuitModuleWidth2
+  id: ModsuitModuleArmorBooster
+  name: armor booster module
+  description: A collection of armored plates that greatly increase the defensive capabilities of the modsuit, but prevent it from sealing enough to protect the user from the vacuum of space.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: armorbooster
+  - type: Module
+    siblingBlacklist:
+      tags:
+      - ArmorModule
+  - type: Tag
+    tags:
+    - ArmorModule
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+    - outerClothing
+  - type: ModsuitArmorModule
+    slotModifiers:
+      outerClothing:
+        coefficients:
+          Blunt: 0.6
+          Slash: 0.6
+          Piercing: 0.6
+          Heat: 0.8
+          Caustic: 0.7
+      head:
+        coefficients:
+          Blunt: 0.9
+          Slash: 0.9
+          Piercing: 0.9
+          Heat: 0.9
+  - type: ModsuitExplosionResistanceModule
+    slotCoefficients:
+      outerClothing: 0.6
+      head: 0.9
+  - type: ModsuitPassiveComponentModule
+    blockOnSeal:
+    - type: PressureProtection
+    - type: TemperatureProtection
 
 - type: entity
   parent: ModsuitModuleWidth1
@@ -95,10 +169,28 @@
     - type: Insulated
 
 - type: entity
+  parent: ModsuitModuleWidth4
+  id: ModsuitModuleHolster
+  name: holster module
+  description: A module which allows the modsuit to store items worn in suit storage internally when retracted.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: holster_module
+  - type: ModsuitPartAttachedModule
+    slots:
+    - outerClothing
+  - type: ModsuitHolsterModule
+  - type: ModulePowerDraw
+    drawRate: 0.0
+    useCharge: 5.0
+
+- type: entity
   parent: [ ModsuitModuleWidth2, ModsuitModuleTogglePower ]
   id: ModsuitModuleNoSlip
   name: no slip module
-  description: A module which allows the modsuit boots incredible grip, preventing slipping.
+  description: A module which provides the modsuit boots incredible grip, preventing slipping.
   components:
   - type: Sprite
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
@@ -168,10 +260,18 @@
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
     - state: magnet_module
+  - type: Module
+    siblingBlacklist:
+      tags:
+      - MagbootModule
+  - type: Tag
+    tags:
+    - MagbootModule
   - type: ModulePowerDraw
     drawRate: 0.5
   - type: ModsuitModuleActionGrant
-    action: ActionToggleModsuitModule
+    actions: 
+    - ActionToggleModsuitModule
   - type: ModsuitModuleTogglePart
   - type: ModsuitPartAttachedModule
     slots:
@@ -199,7 +299,8 @@
   - type: ModulePowerDraw
     drawRate: 0.3
   - type: ModsuitModuleActionGrant
-    action: ActionToggleModsuitModule
+    actions: 
+    - ActionToggleModsuitModule
   - type: ModsuitPartAttachedModule
     slots:
     - head
@@ -210,6 +311,37 @@
     energy: 3
     mask: /Textures/Effects/LightMasks/cone.png
     autoRot: true
+
+- type: entity
+  parent: [ModsuitModuleWidth1]
+  id: ModsuitModuleBikeHorn
+  name: bike horn module
+  description: A module that installs a bike horn into your MODsuit controller.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: honk_module
+  - type: ModsuitModuleActionGrant
+    actions: 
+    - ActionModsuitBikeHorn
+  - type: ModsuitPartAttachedModule
+    slots:
+    - back
+  - type: ActivateUsingAction
+  - type: UseDelay
+    delay: 0.5
+  - type: EmitSoundOnUse
+    sound: &SoundBikeHorn
+      collection: BikeHorn
+      params:
+        variation: 0.125
+  - type: EmitSoundOnLand
+    sound: *SoundBikeHorn
+  - type: EmitSoundOnActivate
+    sound: *SoundBikeHorn
+  - type: EmitSoundOnCollide
+    sound: *SoundBikeHorn
 
 - type: entity
   parent: [ModsuitModuleWidth2]
@@ -226,7 +358,8 @@
     - gloves
   - type: InteractUsingAction
   - type: ModsuitModuleActionGrant
-    action: ActionHealthAnalyzerScan
+    actions: 
+    - ActionHealthAnalyzerScan
   - type: HealthAnalyzer
   - type: UserInterface
     interfaces:
@@ -248,7 +381,8 @@
     - gloves
   - type: ModsuitRelayVerbs
   - type: ModsuitModuleActionGrant
-    action: ActionInjectorUse
+    actions: 
+    - ActionInjectorUse
   - type: InteractUsingAction
   - type: UseDelay
     delay: 1.5
@@ -287,7 +421,8 @@
     - gloves
   - type: InteractUsingAction
   - type: ModsuitModuleActionGrant
-    action: ActionDefibrillatorUse
+    actions: 
+    - ActionDefibrillatorUse
   - type: UseDelay
     delay: 3.0
   - type: ItemToggle
@@ -297,6 +432,40 @@
     zapHeal:
       types:
         Asphyxiation: -40
+
+- type: entity
+  parent: [ ModsuitModuleWidth2, ModsuitModuleTogglePower ]
+  id: ModsuitModuleKinesis
+  name: kinesis module
+  description: A module that allows the user to project 
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: kinesismodule
+  - type: ModsuitPartAttachedModule
+    slots:
+    - gloves
+  - type: InteractInWorldAction
+  - type: ModsuitModuleActionGrant
+    actions: 
+    - ActionKinesisUse
+  - type: UseDelay
+    delay: 3.0
+  - type: ItemToggle
+    onUse: false
+    onActivate: false
+  - type: ModulePowerDraw
+    drawRate: 1.5
+  - type: ForceGun
+    frequency: 15
+    dampingRatio: 4
+    massLimit: 50
+    lineColor: "#18a2d5"
+    soundLaunch:
+      path: /Audio/Weapons/soup.ogg
+      params:
+        volume: 2
 
 - type: entity
   parent: MiningDrill
@@ -319,7 +488,8 @@
     layers:
     - state: drill_module
   - type: ModsuitModuleActionGrant
-    action: ActionRetractableItemModsuitDrill
+    actions: 
+    - ActionRetractableItemModsuitDrill
   - type: ModsuitPartAttachedModule
     slots:
     - gloves
@@ -449,6 +619,29 @@
     addOnToggle:
     - type: MiningScanner
       range: 10
+
+- type: entity
+  parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]
+  id: ModsuitModuleTrayScanner
+  name: t-ray scanner visor module
+  description: A module which provides a built in t-ray scanner hud to the modsuit helmet.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: traymodule
+  - type: ModsuitPartAttachedModule
+    slots:
+    - head
+  - type: ModsuitModuleTogglePart
+  - type: ModulePowerDraw
+    drawRate: 0.3
+  - type: ModsuitModuleTogglePartComponents
+    addOnToggle:
+    - type: TrayScanner
+    - type: ItemToggle
+      onUse: false
+      onActivate: false
 
 - type: entity
   parent: [ModsuitModuleWidth1, ModsuitModuleTogglePower]

@@ -24,6 +24,25 @@ public sealed partial class SpringlockSystem : EntitySystem
         SubscribeLocalEvent<SpringlockedComponent, ExaminedEvent>(OnSpringlockedExamined);
     }
 
+    public void SetSpringlocked(EntityUid target, bool locked)
+    {
+        if (!HasComp<SealableClothingComponent>(target))
+            return;
+
+        if (locked)
+        {
+            var evt = new SpringlockActivatedEvent();
+            RaiseLocalEvent(target, evt);
+            EnsureComp<SpringlockedComponent>(target);
+        }
+        else
+        {
+            var evt = new SpringlockDeactivatedEvent();
+            RaiseLocalEvent(target, evt);
+            RemComp<SpringlockedComponent>(target);
+        }
+    }
+
     private void OnSpringlockedExamined(Entity<SpringlockedComponent> entity, ref ExaminedEvent args)
     {
         if (_sealableSystem.IsSealed(entity.Owner))
@@ -56,3 +75,7 @@ public sealed partial class SpringlockSystem : EntitySystem
         }
     }
 }
+
+public readonly record struct SpringlockActivatedEvent;
+
+public readonly record struct SpringlockDeactivatedEvent;

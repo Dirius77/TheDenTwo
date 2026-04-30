@@ -1,8 +1,8 @@
-using System.Security.Cryptography;
 using Content.Shared._DEN.Clothing.Modsuits.Components;
 using Content.Shared.Armor;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
+using Content.Shared.Explosion;
 using Content.Shared.Inventory;
 using Content.Shared.Item.ItemToggle;
 
@@ -19,6 +19,26 @@ public sealed partial class ModsuitArmorSystem : EntitySystem
         SubscribeLocalEvent<ModsuitArmorModuleComponent, ModsuitRelayedEvent<InventoryRelayedEvent<DamageModifyEvent>>>(
             OnDamageModify);
         SubscribeLocalEvent<ModsuitArmorModuleComponent, ModsuitRelayedEvent<ArmorExamineEvent>>(OnArmorExamine);
+
+        SubscribeLocalEvent<ModsuitExplosionResistanceModuleComponent,
+            ModsuitRelayedEvent<InventoryRelayedEvent<GetExplosionResistanceEvent>>>(OnGetModuleExplosionResistance);
+        SubscribeLocalEvent<ModsuitExplosionResistanceModuleComponent, ModsuitRelayedEvent<ArmorExamineEvent>>(OnExplosionResistanceExamine);
+    }
+
+    private void TryGetSlotFromModulePart(EntityUid ent, EntityUid part, out string? slot)
+    {
+        slot = null;
+        if (!TryComp<ModsuitPartAttachedModuleComponent>(ent, out var attached)) 
+            return;
+        
+        foreach (var kvp in _modsuitSystem.GetModuleAttachedParts((ent, attached)))
+        {
+            if (kvp.Item2 != part) 
+                continue;
+                
+            slot = kvp.Item1;
+            return;
+        }
     }
 
     private void OnCoefficientQuery(Entity<ModsuitArmorModuleComponent> ent,
@@ -26,29 +46,12 @@ public sealed partial class ModsuitArmorSystem : EntitySystem
     {
         var evt = args.Args.Args;
 
-        string? slot = null;
-        
-        // If we care about specific parts then only set for those parts.
-        if (TryComp<ModsuitPartAttachedModuleComponent>(ent, out var attached))
-        {
-            foreach (var kvp in _modsuitSystem.GetModuleAttachedParts((ent, attached)))
-            {
-                if (kvp.Item2 != args.Owner) 
-                    continue;
-                
-                slot = kvp.Item1;
-                break;
-            }
-
-            if (slot is null)
-                return;
-        }
+        TryGetSlotFromModulePart(ent, args.Owner, out var slot);
         
         // If we're toggleable and we're off then don't set. ModsuitPartAttachedModuleComponent handles not enabling
         // if our parts aren't sealed.
         if (!_toggleSystem.IsActivated(ent.Owner))
             return;
-
 
         Dictionary<string, float>? armorCoefficients = null;
         if (ent.Comp.Modifiers is { } modifiers)
@@ -78,23 +81,7 @@ public sealed partial class ModsuitArmorSystem : EntitySystem
     {
         var evt = args.Args.Args;
 
-        string? slot = null;
-        
-        // If we care about specific parts then only set for those parts.
-        if (TryComp<ModsuitPartAttachedModuleComponent>(ent, out var attached))
-        {
-            foreach (var kvp in _modsuitSystem.GetModuleAttachedParts((ent, attached)))
-            {
-                if (kvp.Item2 != args.Owner) 
-                    continue;
-                
-                slot = kvp.Item1;
-                break;
-            }
-
-            if (slot is null)
-                return;
-        }
+        TryGetSlotFromModulePart(ent, args.Owner, out var slot);
         
         // If we're toggleable and we're off then don't set. ModsuitPartAttachedModuleComponent handles not enabling
         // if our parts aren't sealed.
@@ -123,23 +110,7 @@ public sealed partial class ModsuitArmorSystem : EntitySystem
     {
         var evt = args.Args;
 
-        string? slot = null;
-        
-        // If we care about specific parts then only set for those parts.s
-        if (TryComp<ModsuitPartAttachedModuleComponent>(ent, out var attached))
-        {
-            foreach (var kvp in _modsuitSystem.GetModuleAttachedParts((ent, attached)))
-            {
-                if (kvp.Item2 != args.Owner) 
-                    continue;
-                
-                slot = kvp.Item1;
-                break;
-            }
-
-            if (slot is null)
-                return;
-        }
+        TryGetSlotFromModulePart(ent, args.Owner, out var slot);
         
         // If we're toggleable and we're off then don't set. ModsuitPartAttachedModuleComponent handles not enabling
         // if our parts aren't sealed.
@@ -184,5 +155,56 @@ public sealed partial class ModsuitArmorSystem : EntitySystem
                 ("value", flatArmor.Value)
             ));
         }
+    }
+    
+    private void OnGetModuleExplosionResistance(Entity<ModsuitExplosionResistanceModuleComponent> ent, ref ModsuitRelayedEvent<InventoryRelayedEvent<GetExplosionResistanceEvent>> args)
+    {
+        var evt = args.Args.Args;
+
+        TryGetSlotFromModulePart(ent, args.Owner, out var slot);
+
+        float? coefficient = null;
+        if (ent.Comp.DamageCoefficient is { } damageCoefficient)
+        {
+            coefficient = damageCoefficient;
+        }
+        
+        if (slot is not null && ent.Comp.SlotCoefficients.TryGetValue(slot, out var slotCoefficient))
+        {
+            coefficient = slotCoefficient;
+        }
+
+        if (coefficient is null)
+            return;
+        
+        evt.DamageCoefficient *= coefficient.Value;
+    }
+    
+    private void OnExplosionResistanceExamine(Entity<ModsuitExplosionResistanceModuleComponent> ent, ref ModsuitRelayedEvent<ArmorExamineEvent> args)
+    {
+        var evt = args.Args;
+
+        TryGetSlotFromModulePart(ent, args.Owner, out var slot);
+
+        float? coefficient = null;
+        if (ent.Comp.DamageCoefficient is { } damageCoefficient)
+        {
+            coefficient = damageCoefficient;
+        }
+        
+        if (slot is not null && ent.Comp.SlotCoefficients.TryGetValue(slot, out var slotCoefficient))
+        {
+            coefficient = slotCoefficient;
+        }
+
+        if (coefficient is null)
+            return;
+        
+        coefficient = MathF.Round((1f - coefficient.Value) * 100, 1);
+        
+        evt.Msg.PushNewline();
+        evt.Msg.AddMarkupOrThrow(Loc.GetString("explosion-resist-module-examine", ("entity", ent.Owner)));
+        evt.Msg.PushNewline();
+        evt.Msg.AddMarkupOrThrow(Loc.GetString("explosion-resistance-coefficient-value", ("value", coefficient.Value)));
     }
 }

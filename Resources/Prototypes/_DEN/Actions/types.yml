@@ -24,11 +24,25 @@
 - type: entity
   parent: BaseToggleAction
   id: ActionToggleModsuitModule
-  name: Toggle Modsuit Modules
+  name: Toggle Modsuit Module
   description: Toggles the modsuit module.
   components:
   - type: Action
     itemIconStyle: BigItem
+
+- type: entity
+  parent: BaseAction
+  id: ActionModsuitBikeHorn
+  name: Bike Horn Module
+  description: Honks that bike horn!
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: BigItem
+  - type: InstantAction
+    event: !type:ActivateUsingActionEvent
+  - type: ModsuitPowerDrainAction
+    drainOnAction: 1.0
 
 - type: entity
   parent: BaseAction
@@ -115,3 +129,24 @@
   - type: ModsuitPowerDrainAction
     drainOnAction: 100
   - type: ContainerExamineRelay
+
+- type: entity
+  parent: BaseAction
+  id: ActionKinesisUse
+  name: Modsuit Kinesis Module
+  description: Use the kinesis module of your MODsuit gauntlets.
+  components:
+  - type: Action
+    useDelay: 1.0
+    icon: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: kinesismodule }
+    iconOn: { sprite: _DEN/Objects/ModsuitModules/modules.rsi, state: kinesismodule }
+    itemIconStyle: BigAction
+  - type: TargetAction
+    range: 0
+    checkCanAccess: false
+  - type: EntityTargetAction
+    event: null
+  - type: WorldTargetAction
+    event: !type:InteractInWorldActionEvent
+  - type: ModsuitPowerDrainAction
+    drainOnAction: 3.5

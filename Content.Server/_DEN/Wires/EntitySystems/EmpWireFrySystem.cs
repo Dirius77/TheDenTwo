@@ -23,6 +23,11 @@ public sealed class EmpWireFrySystem : EntitySystem
         if (!TryComp<WiresComponent>(entity, out var wires))
             return;
 
+        var attemptEv = new AttemptEmpBreakWiresEvent();
+        RaiseLocalEvent(entity, attemptEv);
+        if (attemptEv.Cancelled)
+            return;
+
         foreach (var wire in wires.WiresList)
         {
             if (_random.Prob(entity.Comp.Chance))

@@ -7,9 +7,7 @@ using Content.Shared._DEN.Modules.EntitySystems;
 using Content.Shared.Actions;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Clothing.EntitySystems;
-using Content.Shared.Examine;
 using Content.Shared.Interaction;
-using Content.Shared.Inventory;
 using Content.Shared.Inventory.Events;
 using Content.Shared.Item.ItemToggle;
 using Robust.Shared.Serialization;
@@ -22,14 +20,13 @@ public abstract partial class SharedModsuitSystem : EntitySystem
     [Dependency] private readonly SealableClothingSystem _sealableSystem = default!;
     [Dependency] private readonly SharedUserInterfaceSystem _uiSystem = default!;
     [Dependency] private readonly ItemToggleSystem _toggleSystem = default!;
+    [Dependency] private readonly SpringlockSystem _springlockSystem = default!;
     
-    private EntityQuery<AttachedClothingComponent> _attachedClothingQuery;
     private EntityQuery<ModsuitControllerComponent> _modsuitControllerQuery;
     private EntityQuery<ClothingComponent> _clothingQuery;
     
     public override void Initialize()
     {
-        _attachedClothingQuery = GetEntityQuery<AttachedClothingComponent>();
         _modsuitControllerQuery = GetEntityQuery<ModsuitControllerComponent>();
         _clothingQuery = GetEntityQuery<ClothingComponent>();
 
@@ -251,7 +248,15 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         {
             entity.Comp.SlotToPart[part.Value] = part.Key;
             entity.Comp.PartToSlot[part.Key] = part.Value;
+
+            if (TryComp<ModsuitPartComponent>(part.Key, out var partComp))
+            {
+                partComp.Controller = entity.Owner;
+                Dirty(part.Key, partComp);
+            }
         }
+        if (TryComp<ModsuitPartComponent>(entity, out var controllerPartComp))
+            controllerPartComp.Controller = entity;
         Dirty(entity);
     }
 
@@ -313,6 +318,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
     private void OnModsuitModuleRemoved(Entity<ModsuitModuleComponent> entity, ref ModuleRemovedEvent args)
     {
         entity.Comp.ModController = null;
+        _toggleSystem.TryDeactivate(entity.Owner);
         Dirty(entity);
     }
 
@@ -323,18 +329,12 @@ public abstract partial class SharedModsuitSystem : EntitySystem
             var target = part.Key;
             // Doesn't make sense to seal it if it's not this, also if this somehow happened something has gone really
             // really wrong.
-            if (!HasComp<ModsuitPartComponent>(target) || !HasComp<SealableClothingComponent>(target)) 
+            if (!HasComp<ModsuitPartComponent>(target)) 
                 continue;
             
-            if (locked)
-                EnsureComp<SpringlockedComponent>(target);
-            else
-                RemComp<SpringlockedComponent>(target);
+            _springlockSystem.SetSpringlocked(target, locked);
         }
-        if (locked)
-            EnsureComp<SpringlockedComponent>(entity);
-        else
-            RemComp<SpringlockedComponent>(entity);
+        _springlockSystem.SetSpringlocked(entity, locked);
         
         entity.Comp.PartsSpringlocked = locked;
         Dirty(entity);

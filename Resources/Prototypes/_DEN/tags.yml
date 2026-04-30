@@ -71,7 +71,13 @@
   id: TeddyRibbon # Ribbon slot for teddy bears
 
 - type: Tag
+  id: XenoQueen # Xeno Queen tag for hivemind
+
+- type: Tag
   id: StorageModule # Storage modules for modsuits
 
 - type: Tag
-  id: XenoQueen # Xeno Queen tag for hivemind
+  id: MagbootModule # Magboot modules for modsuits
+
+- type: Tag
+  id: ArmorModule # Armor modules for modsuits

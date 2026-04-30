@@ -4,23 +4,23 @@
   name: bluespace storage module
   description: A storage module utilizing bluespace technology.
   components:
-    - type: Sprite
-      sprite: _DEN/Objects/ModsuitModules/modules.rsi
-      layers:
-        - state: bluespace_storage
-    - type: Module
-      siblingBlacklist:
-        tags:
-          - StorageModule
-    - type: Tag
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: bluespace_storage
+  - type: Module
+    siblingBlacklist:
       tags:
-        - StorageModule
-    - type: ModsuitStorageModule
-      storageComponent:
-        - type: Storage
-          grid:
-            - 0,0,19,9
-      maxItemSize: Huge
+      - StorageModule
+  - type: Tag
+    tags:
+    - StorageModule
+  - type: ModsuitStorageModule
+    storageComponent:
+    - type: Storage
+      grid:
+      - 0,0,19,9
+    maxItemSize: Huge
 
 - type: entity
   parent: ModsuitModuleWidth4
@@ -28,25 +28,25 @@
   name: storage module
   description: A storage module for a modsuit.
   components:
-    - type: Sprite
-      sprite: _DEN/Objects/ModsuitModules/modules.rsi
-      layers:
-        - state: mod_storage
-    - type: Module
-      siblingBlacklist:
-        tags:
-          - StorageModule
-    - type: Tag
+  - type: Sprite
+    sprite: _DEN/Objects/ModsuitModules/modules.rsi
+    layers:
+    - state: mod_storage
+  - type: Module
+    siblingBlacklist:
       tags:
-        - StorageModule
-    - type: ModsuitStorageModule
-      storageComponent:
-        - type: Storage
-          grid:
-            - 0,0,1,3
-            - 3,0,5,3
-            - 7,0,7,3
-      maxItemSize: Huge
+      - StorageModule
+  - type: Tag
+    tags:
+    - StorageModule
+  - type: ModsuitStorageModule
+    storageComponent:
+    - type: Storage
+      grid:
+      - 0,0,1,3
+      - 3,0,5,3
+      - 7,0,7,3
+    maxItemSize: Huge
 
 - type: entity
   parent: ModsuitModuleWidth4
@@ -57,20 +57,20 @@
   - type: Sprite
     sprite: _DEN/Objects/ModsuitModules/modules.rsi
     layers:
-      - state: large_storage
+    - state: large_storage
   - type: Module
     siblingBlacklist:
       tags:
-        - StorageModule
+      - StorageModule
   - type: Tag
     tags:
-      - StorageModule
+    - StorageModule
   - type: ModsuitStorageModule
     storageComponent:
-      - type: Storage
-        grid:
-          - 0,0,0,3
-          - 2,0,8,3
+    - type: Storage
+      grid:
+      - 0,0,0,3
+      - 2,0,8,3
     maxItemSize: Huge
 
 - type: entity
@@ -94,7 +94,7 @@
     storageComponent:
     - type: Storage
       grid:
-        - 0,0,6,4
-        - 8,0,8,1
-        - 8,3,8,4
+      - 0,0,6,4
+      - 8,0,8,1
+      - 8,3,8,4
     maxItemSize: Huge
