@@ -15,19 +15,16 @@ namespace Content.Server._DEN.Language.EntitySystems;
 
 public sealed partial class GestaltSystem : EntitySystem
 {
-    [Dependency] private readonly SharedLanguageSystem _language = default!;
-    [Dependency] private readonly IPlayerManager _playerManager = default!;
-    [Dependency] private readonly EntityWhitelistSystem _whitelist = default!;
-    [Dependency] private readonly MobStateSystem _mobState = default!;
-    [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
-    [Dependency] private readonly IRobustRandom _random = default!;
-
-    private EntityQuery<GestaltComponent> _gestaltQuery;
+    [Dependency] private SharedLanguageSystem _language = default!;
+    [Dependency] private IPlayerManager _playerManager = default!;
+    [Dependency] private EntityWhitelistSystem _whitelist = default!;
+    [Dependency] private MobStateSystem _mobState = default!;
+    [Dependency] private SharedPopupSystem _popupSystem = default!;
+    [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private EntityQuery<GestaltComponent> _gestaltQuery = default!;
 
     public override void Initialize()
     {
-        _gestaltQuery = GetEntityQuery<GestaltComponent>();
-
         SubscribeLocalEvent<ExpandICChatRecipientsEvent>(OnExpandICChatRecipients);
         SubscribeLocalEvent<GestaltComponent, LanguageRelayedEvent<SpeakLanguageAttemptEvent>>(OnSpeakLanguageAttempt);
 

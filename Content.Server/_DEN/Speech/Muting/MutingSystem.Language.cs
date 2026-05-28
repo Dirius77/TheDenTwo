@@ -8,12 +8,10 @@ namespace Content.Server.Speech.Muting;
 
 public sealed partial class MutingSystem
 {
-    private EntityQuery<AudibleComponent> _audibleQuery;
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!;
 
     public void InitializeLanguage()
     {
-        _audibleQuery = GetEntityQuery<AudibleComponent>();
-
         SubscribeLocalEvent<MutedComponent, SpeakLanguageAttemptEvent>(OnSpeakLanguageAttempt);
     }
 

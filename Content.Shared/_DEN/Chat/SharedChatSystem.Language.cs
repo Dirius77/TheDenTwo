@@ -11,9 +11,9 @@ namespace Content.Shared.Chat;
 public abstract partial class SharedChatSystem
 {
 
-    [Dependency] private readonly IConfigurationManager _cfg = default!;
+    [Dependency] private IConfigurationManager _cfg = default!;
 
-    // TODO: Kill the other spot where this is getting called from and more this into WhisperMuffle (if we even keep using it)
+    // TODO: Kill the other spot where this is getting called from and move this into WhisperMuffle (if we even keep using it)
     public ComplexChatMessage ObfuscateComplexChatMessage(ComplexChatMessage message, float amount)
     {
         var newParts = new List<(ChatPart, string)>();

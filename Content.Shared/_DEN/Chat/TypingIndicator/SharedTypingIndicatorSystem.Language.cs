@@ -4,7 +4,7 @@ namespace Content.Shared.Chat.TypingIndicator;
 
 public abstract partial class SharedTypingIndicatorSystem
 {
-    [Dependency] private readonly SharedLanguageSystem _language = default!;
+    [Dependency] private SharedLanguageSystem _language = default!;
 
     private void OnTypingLanguageChanged(TypingChangedEvent ev, EntitySessionEventArgs args)
     {

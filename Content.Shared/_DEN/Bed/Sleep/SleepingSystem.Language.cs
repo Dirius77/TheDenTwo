@@ -6,12 +6,10 @@ namespace Content.Shared.Bed.Sleep;
 
 public sealed partial class SleepingSystem
 {
-    private EntityQuery<UnconsciousLanguageComponent> _unconsciousLanguageQuery;
+    [Dependency] private EntityQuery<UnconsciousLanguageComponent> _unconsciousLanguageQuery = default!;
 
     public void InitializeLanguage()
     {
-        _unconsciousLanguageQuery = GetEntityQuery<UnconsciousLanguageComponent>();
-
         SubscribeLocalEvent<SleepingComponent, SpeakLanguageAttemptEvent>(OnSpeakLanguageAttempt);
     }
 

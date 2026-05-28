@@ -19,13 +19,13 @@ using Robust.Shared.Timing;
 namespace Content.Client._DEN.UserInterface.Systems.Language;
 
 [UsedImplicitly]
-public sealed class LanguageUIController : UIController, IOnStateChanged<GameplayState>, IOnSystemChanged<LanguageSystem>
+public sealed partial class LanguageUIController : UIController, IOnStateChanged<GameplayState>, IOnSystemChanged<LanguageSystem>
 {
-    [Dependency] private readonly IPlayerManager _playerManager = default!;
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
-    [Dependency] private readonly IEntityManager _entities = default!;
+    [Dependency] private IPlayerManager _playerManager = default!;
+    [Dependency] private IPrototypeManager _prototypeManager = default!;
+    [Dependency] private IEntityManager _entities = default!;
 
-    [UISystemDependency] private readonly LanguageSystem _languageSystem = default!;
+    [UISystemDependency] private LanguageSystem _languageSystem = default!;
 
     private MenuButton? LanguageButton =>
         UIManager.GetActiveUIWidgetOrNull<GameTopMenuBar>()?.LanguageButton;

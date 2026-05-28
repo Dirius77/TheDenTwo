@@ -18,8 +18,8 @@ namespace Content.Server.Chat.Systems;
 
 public sealed partial class ChatSystem
 {
-    [Dependency] private readonly LanguageSystem _language = default!;
-    [Dependency] private readonly SharedMindSystem _mindSystem = default!;
+    [Dependency] private LanguageSystem _language = default!;
+    [Dependency] private SharedMindSystem _mindSystem = default!;
 
     public static readonly ProtoId<LanguageWrapperPrototype> SpeakWrapper = "SpeakWrapper";
     public static readonly ProtoId<LanguageWrapperPrototype> WhisperWrapper = "WhisperWrapper";

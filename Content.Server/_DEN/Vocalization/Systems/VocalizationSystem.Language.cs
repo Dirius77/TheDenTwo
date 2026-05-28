@@ -9,7 +9,7 @@ namespace Content.Server.Vocalization.Systems;
 
 public sealed partial class VocalizationSystem
 {
-    [Dependency] private readonly SharedLanguageSystem _languageSystem = default!;
+    [Dependency] private SharedLanguageSystem _languageSystem = default!;
 
     private void InitializeLanguage()
     {

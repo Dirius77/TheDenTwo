@@ -17,16 +17,13 @@ namespace Content.Server.Telephone;
 
 public sealed partial class TelephoneSystem
 {
-    public static readonly ProtoId<LanguageWrapperPrototype> TelephoneWrapper = "TelephoneWrapper";
+    private static readonly ProtoId<LanguageWrapperPrototype> TelephoneWrapper = "TelephoneWrapper";
 
-    private EntityQuery<AudibleComponent> _audibleQuery;
-    private EntityQuery<LineOfSightLanguageComponent> _losQuery;
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!;
+    [Dependency] private EntityQuery<LineOfSightLanguageComponent> _losQuery = default!;
 
     private void InitializeLanguage()
     {
-        _audibleQuery = GetEntityQuery<AudibleComponent>();
-        _losQuery = GetEntityQuery<LineOfSightLanguageComponent>();
-
         SubscribeLocalEvent<TelephoneComponent, ListenLanguageAttemptEvent>(OnAttemptLanguageListen);
         SubscribeLocalEvent<TelephoneComponent, ListenLanguageEvent>(OnLanguageListen);
         SubscribeLocalEvent<TelephoneComponent, TelephoneMessageLanguageReceivedEvent>(OnTelephoneMessageLanguageReceived);

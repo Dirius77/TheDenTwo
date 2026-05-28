@@ -14,11 +14,11 @@ using Robust.Shared.Prototypes;
 namespace Content.Client._DEN.UserInterface.Systems.Language;
 
 [UsedImplicitly]
-public sealed class LanguageQuickMenuController : UIController, IOnStateChanged<GameplayState>, IOnSystemChanged<LanguageSystem>
+public sealed partial class LanguageQuickMenuController : UIController, IOnStateChanged<GameplayState>, IOnSystemChanged<LanguageSystem>
 {
-    [Dependency] private readonly IPlayerManager _playerManager = default!;
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
-    [UISystemDependency] private readonly LanguageSystem _languageSystem = default!;
+    [Dependency] private IPlayerManager _playerManager = default!;
+    [Dependency] private IPrototypeManager _prototypeManager = default!;
+    [UISystemDependency] private LanguageSystem _languageSystem = default!;
 
     private SimpleRadialMenu? _menu;
 

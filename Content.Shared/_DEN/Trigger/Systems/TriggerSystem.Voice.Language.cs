@@ -10,14 +10,11 @@ namespace Content.Shared.Trigger.Systems;
 
 public sealed partial class TriggerSystem
 {
-    [Dependency] private readonly IPrototypeManager _proto = default!;
-
-    private EntityQuery<AudibleComponent> _audibleQuery;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!;
 
     private void InitializeLanguage()
     {
-        _audibleQuery = GetEntityQuery<AudibleComponent>();
-
         SubscribeLocalEvent<TriggerOnVoiceComponent, ListenLanguageEvent>(OnListenLanguage);
     }
 

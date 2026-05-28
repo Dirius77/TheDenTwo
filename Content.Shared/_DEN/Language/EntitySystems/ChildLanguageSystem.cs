@@ -4,10 +4,10 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
 
-public sealed class ChildLanguageSystem : EntitySystem
+public sealed partial class ChildLanguageSystem : EntitySystem
 {
-    [Dependency] private readonly IPrototypeManager _proto = default!;
-    [Dependency] private readonly SharedLanguageSystem _language = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private SharedLanguageSystem _language = default!;
 
     public override void Initialize()
     {

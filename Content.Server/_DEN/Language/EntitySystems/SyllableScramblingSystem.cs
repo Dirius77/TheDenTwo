@@ -13,10 +13,10 @@ using Robust.Shared.Random;
 
 namespace Content.Server._DEN.Language.EntitySystems;
 
-public sealed class SyllableScramblingSystem : SharedSyllableScramblingSystem
+public sealed partial class SyllableScramblingSystem : SharedSyllableScramblingSystem
 {
-    [Dependency] private readonly IPrototypeManager _proto = default!;
-    [Dependency] private readonly IConfigurationManager _cfg = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private IConfigurationManager _cfg = default!;
 
     // 1000 most common words and their order. This is a dictionary to make looking up specific words faster.
     public Dictionary<string, int> CommonWordFrequency = new();

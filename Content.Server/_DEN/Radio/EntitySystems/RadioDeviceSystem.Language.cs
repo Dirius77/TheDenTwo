@@ -9,12 +9,10 @@ namespace Content.Server.Radio.EntitySystems;
 
 public sealed partial class RadioDeviceSystem
 {
-    private EntityQuery<RadioTransmittableComponent> _radioLang;
+    [Dependency] private EntityQuery<RadioTransmittableComponent> _radioLang = default!;
 
     private void InitializeLanguage()
     {
-        _radioLang = GetEntityQuery<RadioTransmittableComponent>();
-
         SubscribeLocalEvent<RadioMicrophoneComponent, ListenLanguageEvent>(OnListenLanguage);
         SubscribeLocalEvent<RadioMicrophoneComponent, ListenLanguageAttemptEvent>(OnAttemptListenLanguage);
 

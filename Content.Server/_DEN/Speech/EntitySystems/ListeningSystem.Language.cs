@@ -9,7 +9,7 @@ namespace Content.Server.Speech.EntitySystems;
 
 public sealed partial class ListeningSystem
 {
-    [Dependency] private readonly SharedChatSystem _chat = default!;
+    [Dependency] private SharedChatSystem _chat = default!;
 
     private void InitializeLanguage()
     {
@@ -25,10 +25,9 @@ public sealed partial class ListeningSystem
     {
         // TODO whispering / audio volume? Microphone sensitivity?
         // for now, whispering just arbitrarily reduces the listener's max range.
-
-        var xformQuery = GetEntityQuery<TransformComponent>();
-        var sourceXform = xformQuery.GetComponent(source);
-        var sourcePos = _xforms.GetWorldPosition(sourceXform, xformQuery);
+        
+        var sourceXform = Transform(source);
+        var sourcePos = _xforms.GetWorldPosition(sourceXform);
 
         var attemptEv = new ListenLanguageAttemptEvent(source, languageEnt);
         var ev = new ListenLanguageEvent(message, source, languageEnt, verb, channel);
@@ -43,7 +42,7 @@ public sealed partial class ListeningSystem
             if (xform.MapID != sourceXform.MapID)
                 continue;
 
-            var distance = (sourcePos - _xforms.GetWorldPosition(xform, xformQuery)).LengthSquared();
+            var distance = (sourcePos - _xforms.GetWorldPosition(xform)).LengthSquared();
             if (distance > listener.Range * listener.Range)
                 continue;
 

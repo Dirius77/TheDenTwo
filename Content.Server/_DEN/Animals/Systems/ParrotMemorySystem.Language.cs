@@ -17,15 +17,12 @@ namespace Content.Server.Animals.Systems;
 
 public sealed partial class ParrotMemorySystem
 {
-    [Dependency] private readonly IPrototypeManager _proto = default!;
-    [Dependency] private readonly SharedLanguageSystem _language = default!;
-
-    private EntityQuery<AudibleComponent> _audibleQuery;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private SharedLanguageSystem _language = default!;
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!;
 
     private void InitializeLanguage()
     {
-        _audibleQuery = GetEntityQuery<AudibleComponent>();
-
         SubscribeLocalEvent<ParrotListenerComponent, ListenLanguageEvent>(OnLanguageListen);
         SubscribeLocalEvent<ParrotListenerComponent, HeadsetRadioReceiveLanguageRelayEvent>(OnHeadsetReceiveLanguage);
         SubscribeLocalEvent<ParrotMemoryComponent, TryVocalizeLanguageEvent>(OnTryVocalizeLanguage);

@@ -7,8 +7,8 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 
 public sealed partial class ChatChannelWhitelistSystem : EntitySystem
 {
-    [Dependency] private readonly SharedPopupSystem _popup = default!;
-    [Dependency] private readonly IRobustRandom _random = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private IRobustRandom _random = default!;
 
     public override void Initialize()
     {

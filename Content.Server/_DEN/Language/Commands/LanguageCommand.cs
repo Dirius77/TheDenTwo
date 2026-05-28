@@ -100,8 +100,8 @@ public sealed partial class LanguageCommand : ToolshedCommand
 // accept a TypeParser, only a CustomTypeParser :(
 public sealed class FluencyProtoIdParser : CustomTypeParser<string>
 {
-    [Dependency] private readonly IConfigurationManager _config = default!;
-    [Dependency] private readonly IPrototypeManager _proto = default!;
+    [Dependency] private IConfigurationManager _config = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
 
     public override bool TryParse(ParserContext ctx, out string result)
     {

@@ -7,8 +7,8 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 
 public sealed partial class MinimumFluencySystem : EntitySystem
 {
-    [Dependency] private readonly IPrototypeManager _proto = default!;
-    [Dependency] private readonly IRobustRandom _random = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private IRobustRandom _random = default!;
 
     public override void Initialize()
     {

@@ -6,7 +6,7 @@ namespace Content.Server.EntityEffects.Effects;
 
 public sealed partial class MakeSentientEntityEffectSystem
 {
-    [Dependency] private readonly SharedLanguageSystem _languageSystem = default!;
+    [Dependency] private SharedLanguageSystem _languageSystem = default!;
 
     private static readonly ProtoId<LanguagePrototype> _animalLanugage = "Animal";
 

@@ -11,11 +11,12 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 {
     public bool LanguagesEnabled { get; private set; }
 
-    [Dependency] protected readonly IConfigurationManager _cfg = default!;
-    [Dependency] protected readonly SharedContainerSystem _container = default!;
-    [Dependency] private readonly IPrototypeManager _proto = default!;
-    [Dependency] private readonly INetManager _netMan = default!;
-
+    [Dependency] protected IConfigurationManager _cfg = default!;
+    [Dependency] protected SharedContainerSystem _container = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private INetManager _netMan = default!;
+    [Dependency] private EntityQuery<LanguageComponent> _languageQuery = default!;
+    
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
     public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
 
@@ -23,8 +24,6 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
     private static ProtoId<LanguagePrototype> _defaultLanguage = "Basic";
     private bool _fallbackDefaultLanguage;
-
-    private EntityQuery<LanguageComponent> _languageQuery;
 
     public override void Initialize()
     {

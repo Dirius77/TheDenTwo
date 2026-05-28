@@ -7,17 +7,12 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 
 public sealed partial class WhisperMuffleSystem : EntitySystem
 {
-    [Dependency] private readonly ExamineSystemShared _examine = default!;
-    [Dependency] private readonly SharedChatSystem _chat = default!;
-
-    private EntityQuery<TransformComponent> _xforms;
-    private EntityQuery<GhostHearingComponent> _ghostHearings;
+    [Dependency] private ExamineSystemShared _examine = default!;
+    [Dependency] private SharedChatSystem _chat = default!;
+    [Dependency] private EntityQuery<GhostHearingComponent> _ghostHearings = default!;
 
     public override void Initialize()
     {
-        _xforms = GetEntityQuery<TransformComponent>();
-        _ghostHearings = GetEntityQuery<GhostHearingComponent>();
-
         SubscribeLocalEvent<WhisperMuffleComponent, LanguageModifyMessageEvent>(
             OnModifyMessage);
     }
@@ -27,8 +22,8 @@ public sealed partial class WhisperMuffleSystem : EntitySystem
         if (args.Channel != ChatChannel.Whisper || _ghostHearings.HasComp(args.Listener))
             return;
 
-        var sourceCoords = _xforms.GetComponent(args.Sender).Coordinates;
-        var listenXform = _xforms.GetComponent(args.Listener);
+        var sourceCoords = Transform(args.Sender).Coordinates;
+        var listenXform = Transform(args.Listener);
         if (!sourceCoords.TryDistance(EntityManager, listenXform.Coordinates, out var distance))
             return;
 

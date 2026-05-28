@@ -9,7 +9,7 @@ namespace Content.Client._DEN.Language.EntitySystems;
 
 public sealed class LanguageSystem : SharedLanguageSystem
 {
-    [Dependency] private readonly IPlayerManager _playerManager = default!;
+    [Dependency] private IPlayerManager _playerManager = default!;
 
     public event Action<Entity<LanguageComponent>>? OnLanguageEntityUpdate;
     public event Action<Entity<LanguageComponent>?>? OnLanguageCommunicatorUpdate;

@@ -5,15 +5,14 @@ using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Chat;
 using Content.Shared.Mind;
 using Content.Shared.Polymorph;
-using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._DEN.Language.EntitySystems;
 
 public sealed partial class LanguageSystem : SharedLanguageSystem
 {
-    [Dependency] private readonly IPrototypeManager _proto = default!;
-    [Dependency] private readonly SharedMindSystem _mindSystem = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private SharedMindSystem _mindSystem = default!;
 
     public override void Initialize()
     {

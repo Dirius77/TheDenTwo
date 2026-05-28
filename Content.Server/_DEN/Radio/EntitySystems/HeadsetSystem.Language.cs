@@ -9,15 +9,12 @@ namespace Content.Server.Radio.EntitySystems;
 
 public sealed partial class HeadsetSystem
 {
-    [Dependency] private readonly IPrototypeManager _prototype = default!;
-    [Dependency] private readonly ChatSystem _chat = default!;
-
-    private EntityQuery<RadioTransmittableComponent> _radioLang;
+    [Dependency] private IPrototypeManager _prototype = default!;
+    [Dependency] private ChatSystem _chat = default!;
+    [Dependency] private EntityQuery<RadioTransmittableComponent> _radioLang = default!;
 
     private void InitializeLanguage()
     {
-        _radioLang = GetEntityQuery<RadioTransmittableComponent>();
-
         SubscribeLocalEvent<HeadsetComponent, RadioReceiveLanguageEvent>(OnHeadsetReceiveLanguage);
         SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeLanguageEvent>(OnSpeakLanguage);
     }

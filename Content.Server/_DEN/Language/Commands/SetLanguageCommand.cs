@@ -9,10 +9,10 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._DEN.Language.Commands;
 
 [AnyCommand]
-public sealed class SetLanguageCommand : LocalizedEntityCommands
+public sealed partial class SetLanguageCommand : LocalizedEntityCommands
 {
-    [Dependency] private readonly LanguageSystem _language = default!;
-    [Dependency] private readonly IPrototypeManager _proto = default!;
+    [Dependency] private LanguageSystem _language = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
 
     public override string Command => "setlang";
 

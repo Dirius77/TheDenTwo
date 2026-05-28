@@ -16,16 +16,13 @@ namespace Content.Server.Radio.EntitySystems;
 
 public sealed partial class RadioSystem
 {
-    [Dependency] private readonly LanguageSystem _language = default!;
-
-    private EntityQuery<RadioTransmittableComponent> _radioLang;
+    [Dependency] private LanguageSystem _language = default!;
+    [Dependency] private EntityQuery<RadioTransmittableComponent> _radioLang = default!;
 
     public static readonly ProtoId<LanguageWrapperPrototype> RadioWrapper = "RadioWrapper";
 
     private void InitializeLanguage()
     {
-        _radioLang = GetEntityQuery<RadioTransmittableComponent>();
-
         SubscribeLocalEvent<IntrinsicRadioReceiverComponent, RadioReceiveLanguageEvent>(OnIntrinsicLanguageReceive);
         SubscribeLocalEvent<IntrinsicRadioTransmitterComponent, EntitySpokeLanguageEvent>(OnIntrinsicSpeakLanguage);
     }
@@ -34,7 +31,7 @@ public sealed partial class RadioSystem
         IntrinsicRadioReceiverComponent component,
         ref RadioReceiveLanguageEvent args)
     {
-        if (TryComp(uid, out ActorComponent? actor))
+        if (HasComp<ActorComponent>(uid))
         {
             _chat.SendComplexMessageToEntity(
                 args.RadioSource,

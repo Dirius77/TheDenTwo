@@ -7,12 +7,10 @@ namespace Content.Server.Speech;
 
 public sealed partial class SpeechSoundSystem
 {
-    private EntityQuery<AudibleComponent> _audibleQuery;
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!;
 
     private void InitializeLanguage()
     {
-        _audibleQuery = GetEntityQuery<AudibleComponent>();
-
         SubscribeLocalEvent<SpeechComponent, EntitySpokeLanguageEvent>(OnEntitySpokeLanguage);
     }
 

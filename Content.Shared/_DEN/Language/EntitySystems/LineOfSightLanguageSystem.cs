@@ -8,16 +8,13 @@ namespace Content.Shared._DEN.Language.EntitySystems;
 
 public sealed partial class LineOfSightLanguageSystem : EntitySystem
 {
-    [Dependency] private readonly SharedInteractionSystem _interactionSystem = default!;
+    [Dependency] private SharedInteractionSystem _interactionSystem = default!;
+    [Dependency] private EntityQuery<GhostHearingComponent> _ghostHearings = default!;
 
     private readonly CollisionGroup _sightMask = CollisionGroup.Opaque;
 
-    private EntityQuery<GhostHearingComponent> _ghostHearings;
-
     public override void Initialize()
     {
-        _ghostHearings = GetEntityQuery<GhostHearingComponent>();
-
         SubscribeLocalEvent<LineOfSightLanguageComponent, LanguageModifyMessageEvent>(
             OnModifyMessage);
     }

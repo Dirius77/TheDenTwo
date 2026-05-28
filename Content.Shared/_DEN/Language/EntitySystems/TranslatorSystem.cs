@@ -17,9 +17,9 @@ public sealed partial class TranslatorSystem : EntitySystem
     // This would need some hacky timer stuff to fix. Or for movement between pockets and hands to not also include
     // an invisible "drop on the floor" step. <-- Upstream wants to fix this, if they do it'll fix this bug.
 
-    [Dependency] private readonly SharedLanguageSystem _language = default!;
-    [Dependency] private readonly ItemToggleSystem _itemToggle = default!;
-    [Dependency] private readonly SharedContainerSystem _containerSystem = default!;
+    [Dependency] private SharedLanguageSystem _language = default!;
+    [Dependency] private ItemToggleSystem _itemToggle = default!;
+    [Dependency] private SharedContainerSystem _containerSystem = default!;
 
     public override void Initialize()
     {
@@ -67,7 +67,7 @@ public sealed partial class TranslatorSystem : EntitySystem
 
     private void OnLanguageRemovedImplant(Entity<TranslatorComponent> ent, ref ImplantRelayEvent<LanguageRemovedFromCommunicatorEvent> args)
     {
-        OnLanguageRemoved(ent, args.ImplantedEntity, args.Event);
+        OnLanguageRemoved(ent, args.ImplantedEntity, args.Args);
     }
 
     private void OnLanguageRemoved(Entity<TranslatorComponent> ent,
@@ -92,7 +92,7 @@ public sealed partial class TranslatorSystem : EntitySystem
     private void OnLanguageAddedImplant(Entity<TranslatorComponent> ent,
         ref ImplantRelayEvent<LanguageAddedToCommunicatorEvent> args)
     {
-        OnLanguageAdded(ent, args.ImplantedEntity, args.Event);
+        OnLanguageAdded(ent, args.ImplantedEntity, args.Args);
     }
 
     private void OnLanguageAddedInventory(Entity<TranslatorComponent> ent,
