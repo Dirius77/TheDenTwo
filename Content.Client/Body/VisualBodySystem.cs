@@ -12,13 +12,13 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.Body;
 
-public sealed class VisualBodySystem : SharedVisualBodySystem
+public sealed partial class VisualBodySystem : SharedVisualBodySystem
 {
-    [Dependency] private readonly IConfigurationManager _cfg = default!;
-    [Dependency] private readonly IPrototypeManager _prototype = default!;
-    [Dependency] private readonly DisplacementMapSystem _displacement = default!;
-    [Dependency] private readonly MarkingManager _marking = default!;
-    [Dependency] private readonly SpriteSystem _sprite = default!;
+    [Dependency] private IConfigurationManager _cfg = default!;
+    [Dependency] private IPrototypeManager _prototype = default!;
+    [Dependency] private DisplacementMapSystem _displacement = default!;
+    [Dependency] private MarkingManager _marking = default!;
+    [Dependency] private SpriteSystem _sprite = default!;
 
     public override void Initialize()
     {
@@ -209,6 +209,15 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
 
                 if (displacement != null && proto.CanBeDisplaced)
                     _displacement.TryAddDisplacement(displacement, (target, target.Comp), index + i + 1, layerId, out _);
+
+                // MACRO START - marking layer shaders
+                if (proto.Shaders is not null &&
+                    proto.Shaders.TryGetValue(rsi.RsiState, out var shader))
+                {
+                    EnsureComp<SpriteComponent>(target, out var spriteComp); // why is this method in the component?????
+                    spriteComp.LayerSetShader(index + i + 1, shader);
+                }
+                // MACRO END
             }
 
             applied.Add(marking);

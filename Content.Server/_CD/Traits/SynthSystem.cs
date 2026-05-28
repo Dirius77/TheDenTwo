@@ -5,13 +5,13 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server._CD.Traits;
 
-public sealed class SynthSystem : EntitySystem
+public sealed partial class SynthSystem : EntitySystem
 {
     private static readonly ProtoId<TypingIndicatorPrototype> RobotTypingIndicator = "robot"; // Misfit - Type safety
     private static readonly ProtoId<ReagentPrototype> SynthBlood = "SynthBlood"; // Misfit - Type safety
 
-    [Dependency] private readonly BloodstreamSystem _bloodstream = default!;
-    [Dependency] private readonly SharedTypingIndicatorSystem _typingIndicator = default!; // TheDen - Switch to set indicator prototype
+    [Dependency] private BloodstreamSystem _bloodstream = default!; // TheDen - remove readonly
+    [Dependency] private SharedTypingIndicatorSystem _typingIndicator = default!; // TheDen - Switch to set indicator prototype & remove readonly
 
     public override void Initialize()
     {

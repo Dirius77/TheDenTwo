@@ -15,8 +15,8 @@ namespace Content.Client._DEN.Lobby.UI.Traits;
 [GenerateTypedNameReferences]
 public sealed partial class EntityTraitSelector : BoxContainer
 {
-    [Dependency] private readonly IPlayerManager _player = default!;
-    [Dependency] private readonly IPlayerRequirementManager _requirements = default!;
+    [Dependency] private IPlayerManager _player = default!;
+    [Dependency] private IPlayerRequirementManager _requirements = default!;
 
     public event Action<bool>? PreferenceChanged;
 

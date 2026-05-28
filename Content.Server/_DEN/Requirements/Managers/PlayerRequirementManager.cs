@@ -9,8 +9,8 @@ namespace Content.Server._DEN.Requirements.Managers;
 /// <inheritdoc />
 public sealed partial class PlayerRequirementManager : SharedPlayerRequirementManager
 {
-    [Dependency] private readonly ISharedPlaytimeManager _playtimeManager = default!;
-    [Dependency] private readonly IServerPreferencesManager _prefsManager = default!;
+    [Dependency] private ISharedPlaytimeManager _playtimeManager = default!;
+    [Dependency] private IServerPreferencesManager _prefsManager = default!;
 
     /// <inheritdoc />
     public override PlayerRequirementContext GetPlayerContext(ICommonSession session)

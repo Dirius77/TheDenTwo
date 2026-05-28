@@ -16,10 +16,10 @@ namespace Content.Shared._DEN.Traits.EntitySystems;
 
 public abstract partial class SharedTraitSystem : EntitySystem
 {
-    [Dependency] private readonly SharedContainerSystem _container = default!;
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
-    [Dependency] private readonly ISerializationManager _serialization = default!;
-    [Dependency] private readonly EntityWhitelistSystem _whitelist = default!;
+    [Dependency] private SharedContainerSystem _container = default!;
+    [Dependency] private IPrototypeManager _prototypeManager = default!;
+    [Dependency] private ISerializationManager _serialization = default!;
+    [Dependency] private EntityWhitelistSystem _whitelist = default!;
 
     private EntityQuery<TraitHolderComponent> _holderQuery;
     private EntityQuery<TraitComponent> _traitQuery;

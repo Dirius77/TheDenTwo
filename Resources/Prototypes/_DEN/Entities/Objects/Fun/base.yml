@@ -37,7 +37,7 @@
 
 - type: entity
   abstract: true
-  parent: BaseSqueakyToy
+  parent: [SolutionFood, SolutionSmall, BaseSqueakyToy]
   id: BasePlushieWithoutStash
   components:
   - type: PhysicalComposition
@@ -47,13 +47,11 @@
     requiresSpecialDigestion: true
     useSound: *BasePlushieSound
     delay: 2
-  - type: SolutionContainerManager
-    solutions:
-      food:
-        maxVol: 10
-        reagents:
-        - ReagentId: Fiber
-          Quantity: 10
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: Fiber
+        Quantity: 30
   - type: Tag
     tags:
     - Payload

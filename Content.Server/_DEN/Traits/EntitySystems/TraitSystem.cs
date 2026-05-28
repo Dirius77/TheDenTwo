@@ -10,8 +10,8 @@ namespace Content.Server._DEN.Traits.EntitySystems;
 
 public sealed partial class TraitSystem : SharedTraitSystem
 {
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
-    [Dependency] private readonly IPlayerRequirementManager _requirements = default!;
+    [Dependency] private IPrototypeManager _prototypeManager = default!;
+    [Dependency] private IPlayerRequirementManager _requirements = default!;
 
     public override void Initialize()
     {

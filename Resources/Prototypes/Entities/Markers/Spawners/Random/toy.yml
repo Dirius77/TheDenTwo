@@ -43,6 +43,8 @@
     - id: PlushieAzalea
     - id: PlushieOvinia
     - id: PlushieWhistler
+    - id: PlushieSheep
+    - id: PlushieSpaceSheep
     - !type:GroupSelector
       children:
       - id: PlushieTeddyBear

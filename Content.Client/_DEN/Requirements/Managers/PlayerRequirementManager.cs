@@ -9,9 +9,9 @@ namespace Content.Client._DEN.Requirements.Managers;
 /// <inheritdoc />
 public sealed partial class PlayerRequirementManager : SharedPlayerRequirementManager
 {
-    [Dependency] private readonly IPlayerManager _player = default!;
-    [Dependency] private readonly IClientPreferencesManager _preferences = default!;
-    [Dependency] private readonly ISharedPlaytimeManager _playtimeManager = default!;
+    [Dependency] private IPlayerManager _player = default!;
+    [Dependency] private IClientPreferencesManager _preferences = default!;
+    [Dependency] private ISharedPlaytimeManager _playtimeManager = default!;
 
     /// <inheritdoc />
     public override PlayerRequirementContext GetPlayerContext(ICommonSession session)

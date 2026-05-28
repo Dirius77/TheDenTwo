@@ -244,12 +244,6 @@
   - type: Sprite
     sprite: _DEN/Objects/Fun/teddybear.rsi
     state: plush_heart
-  - type: SolutionContainerManager
-    solutions:
-      food:
-        reagents:
-        - ReagentId: Fiber
-          Quantity: 5
   - type: FoodSequenceElement
     entries:
       CottonBurger: HeartInsertPlushie

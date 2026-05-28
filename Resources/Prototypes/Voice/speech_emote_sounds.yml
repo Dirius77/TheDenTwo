@@ -248,6 +248,10 @@
       path: /Audio/Effects/Gasp/vox_gasp.ogg
     DefaultDeathgasp:
       path: /Audio/Effects/Gasp/vox_DeathGasp.ogg
+    # Macrocosm start
+    Hiss:
+      path: /Audio/_MACRO/Voice/Vox/voxhiss.ogg
+    # Macrocosm end
   params:
     variation: 0.125
     # TODO: We need vox sounds for the other emotes
@@ -300,8 +304,8 @@
     DefaultDeathgasp:
       collection: DeathGasp
     # Macrocosm start
-    #Hiss:
-    #  path: /Audio/_MACRO/Voice/Arachnid/arachnid_hiss.ogg
+    Hiss:
+      path: /Audio/_MACRO/Voice/Arachnid/arachnid_hiss.ogg
     Sneeze:
       collection: UnisexSneezes #placeholder
     Cough:
@@ -726,6 +730,20 @@
     path: /Audio/Animals/goat_bah.ogg
     params:
       variation: 0.125
+
+- type: emoteSounds
+  id: Sheep
+  sound:
+    collection: Sheep
+    params:
+      variation: 0.05
+
+- type: emoteSounds
+  id: SheepSpace
+  sound:
+    collection: SheepSpace
+    params:
+      variation: 0.05
 
 - type: emoteSounds
   id: Scurret
