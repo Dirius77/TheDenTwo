@@ -1,4 +1,4 @@
-using Content.Shared._DEN.CCVars;
+using Content.Shared._DEN.CCVar;
 using Content.Shared._DEN.Language.Components;
 using Robust.Shared.Configuration;
 using Robust.Shared.Containers;

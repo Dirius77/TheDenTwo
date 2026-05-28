@@ -1,6 +1,5 @@
 using System.Linq;
-using System.Text;
-using Content.Shared._DEN.CCVars;
+using Content.Shared._DEN.CCVar;
 using Content.Shared._DEN.Language;
 using Content.Shared.Speech;
 using Robust.Shared.Configuration;

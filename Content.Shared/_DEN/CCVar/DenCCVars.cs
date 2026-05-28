@@ -1,6 +1,6 @@
 using Robust.Shared.Configuration;
 
-namespace Content.Shared._DEN.CCVars;
+namespace Content.Shared._DEN.CCVar;
 
 [CVarDefs]
 public sealed class DenCCVars

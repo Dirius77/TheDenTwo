@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
-using Content.Shared._DEN.CCVars;
+using Content.Shared._DEN.CCVar;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;

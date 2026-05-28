@@ -1,4 +1,4 @@
-using Content.Shared._DEN.CCVars;
+using Content.Shared._DEN.CCVar;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._DEN.Language;
