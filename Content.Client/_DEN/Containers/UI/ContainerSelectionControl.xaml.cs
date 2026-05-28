@@ -10,7 +10,7 @@ namespace Content.Client._DEN.Containers.UI;
 [GenerateTypedNameReferences]
 public sealed partial class ContainerSelectionControl : Control
 {
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
+    [Dependency] private IPrototypeManager _prototypeManager = default!;
 
     public ContainerSelectionControl()
     {
