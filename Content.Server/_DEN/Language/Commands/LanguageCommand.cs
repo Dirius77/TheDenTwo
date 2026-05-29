@@ -98,7 +98,7 @@ public sealed partial class LanguageCommand : ToolshedCommand
 // C# won't convert from a default 'string' to 'ProtoId' in method parameters.
 // This is gross and a copy paste of ProtoIdTypeParser because CommandArgument also won't
 // accept a TypeParser, only a CustomTypeParser :(
-public sealed class FluencyProtoIdParser : CustomTypeParser<string>
+public sealed partial class FluencyProtoIdParser : CustomTypeParser<string>
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private IPrototypeManager _proto = default!;

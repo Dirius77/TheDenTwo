@@ -7,7 +7,7 @@ using Robust.Client.Player;
 
 namespace Content.Client._DEN.Language.EntitySystems;
 
-public sealed class LanguageSystem : SharedLanguageSystem
+public sealed partial class LanguageSystem : SharedLanguageSystem
 {
     [Dependency] private IPlayerManager _playerManager = default!;
 

@@ -227,25 +227,7 @@ public sealed partial class ChatSystem
     {
     }
 
-    private string ObfuscateMessageReadability(string message, float chance)
-    {
-        var modifiedMessage = new StringBuilder(message);
-
-        for (var i = 0; i < message.Length; i++)
-        {
-            if (char.IsWhiteSpace((modifiedMessage[i])))
-            {
-                continue;
-            }
-
-            if (_random.Prob(1 - chance))
-            {
-                modifiedMessage[i] = '~';
-            }
-        }
-
-        return modifiedMessage.ToString();
-    }
+    // DEN: Move ObfuscateMessageReadability to shared.
 
     public string BuildGibberishString(IReadOnlyList<char> charOptions, int length)
     {

@@ -16,7 +16,7 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private INetManager _netMan = default!;
     [Dependency] private EntityQuery<LanguageComponent> _languageQuery = default!;
-    
+
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
     public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
 
@@ -28,8 +28,6 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-
-        _languageQuery = GetEntityQuery<LanguageComponent>();
 
         SubscribeLocalEvent<LanguageCommunicatorComponent, ComponentInit>(OnLanguageCommunicatorCompInit);
         SubscribeLocalEvent<LanguageCommunicatorComponent, MapInitEvent>(OnLanguageCommunicatorMapInit);
