@@ -9,8 +9,12 @@
         <Label Text="{Loc 'language-ui-language-currently-speaking'}" Margin="2"></Label>
         <PanelContainer Name="CurrentlySpeaking" Access="Public">
         </PanelContainer>
-        <controls:HLine Color="#404040" Thickness="4"/>
-        <ScrollContainer HorizontalExpand="True" VerticalExpand="True" HScrollEnabled="False" VScrollEnabled="True">
+        <controls:HLine Color="#404040" Thickness="4" Margin="0 4"/>
+        <ScrollContainer HorizontalExpand="True" 
+                         VerticalExpand="True" 
+                         HScrollEnabled="False" 
+                         VScrollEnabled="True" 
+                         Margin="4">
             <BoxContainer Name="LanguageList" Access="Public" HorizontalExpand="True" Orientation="Vertical">
                 <!-->Rest is filled in by LanguageUIController</-->
             </BoxContainer>
