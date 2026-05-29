@@ -7,11 +7,11 @@ using Robust.Shared.Containers;
 
 namespace Content.Shared._DEN.Bed.Cryostorage.Systems;
 
-public sealed class CryoSilentlySystem : EntitySystem
+public sealed partial class CryoSilentlySystem : EntitySystem
 {
-    [Dependency] private readonly ActionBlockerSystem _actionBlocker = default!;
-    [Dependency] private readonly SharedContainerSystem _container = default!;
-    [Dependency] private readonly DragInsertContainerSystem _dragInsertContainer = default!;
+    [Dependency] private ActionBlockerSystem _actionBlocker = default!;
+    [Dependency] private SharedContainerSystem _container = default!;
+    [Dependency] private DragInsertContainerSystem _dragInsertContainer = default!;
 
     public override void Initialize()
     {
