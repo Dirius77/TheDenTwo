@@ -6,7 +6,6 @@ using Robust.Shared.Utility;
 
 namespace Content.Server._DEN.Language.EntitySystems;
 
-// If this gets moved to shared it breaks the client UI because it creates a clientside only language.
 public sealed partial class UniversalLanguageSpeakerSystem : EntitySystem
 {
     [Dependency] private SharedLanguageSystem _language = default!;

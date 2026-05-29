@@ -3,7 +3,7 @@ using Content.Shared.Speech;
 
 namespace Content.Server.Speech.EntitySystems;
 
-public sealed partial class BlockListeningSystem : EntitySystem // DEN: Make Partial
+public sealed partial class BlockListeningSystem : EntitySystem
 {
     public override void Initialize()
     {

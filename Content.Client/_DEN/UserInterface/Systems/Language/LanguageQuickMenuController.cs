@@ -37,6 +37,7 @@ public sealed partial class LanguageQuickMenuController : UIController, IOnState
         }
     }
 
+    // Build all the buttons based on the languages that this player speaks and return them in a list.
     private IEnumerable<RadialMenuOptionBase>? BuildLanguageButtons(EntityUid player)
     {
         if (!_languageSystem.TryGetSpokenLanguageEntities(player, out var languages))
@@ -60,6 +61,7 @@ public sealed partial class LanguageQuickMenuController : UIController, IOnState
         _languageSystem.TrySetSpokenLanguage(language);
     }
 
+    // Handles languages being disabled by removing the menu and disabling hotkeys.
     private void CheckLanguageEnabled(bool enabled)
     {
         if (_menu is { IsOpen: true } && !enabled)

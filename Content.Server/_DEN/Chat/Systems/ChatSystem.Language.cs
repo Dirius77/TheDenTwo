@@ -24,6 +24,22 @@ public sealed partial class ChatSystem
     public static readonly ProtoId<LanguageWrapperPrototype> SpeakWrapper = "SpeakWrapper";
     public static readonly ProtoId<LanguageWrapperPrototype> WhisperWrapper = "WhisperWrapper";
 
+    /// <summary>
+    /// Attempts to make an entity speak using complex speech (languages, mixed actions and dialog).
+    /// </summary>
+    /// <param name="source">The entity doing the speaking.</param>
+    /// <param name="originalMessage">The message before any modifications are applied.</param>
+    /// <param name="wrapperProto">The wrapper to use for formatting the message to users.</param>
+    /// <param name="chatChannel">The chat channel to speak on.</param>
+    /// <param name="range">The range to which the message will attempt to be transmitted. Keep in mind that language
+    /// features and things like radios and cameras may cause it to be broadcast outside this range.</param>
+    /// <param name="radioChannel">The radio channel to speak on, or null if no radio is being used.</param>
+    /// <param name="nameOverride">The name to display for the speaker in place of their usual one.</param>
+    /// <param name="hideLog">Whether to ignore logging this message.</param>
+    /// <param name="ignoreActionBlocker">Whether this speech attempt ignores things that would usually prevent speaking.</param>
+    /// <param name="verbOverride">The verb to use for this message, if one is needed, skips usual verb selection.</param>
+    /// <param name="languageOverride">Forces the use of this specific language entity rather than selecting the one
+    /// that the entity is currently configured to speak.</param>
     public void SendEntityComplexSpeech(EntityUid source,
         ComplexChatMessage originalMessage,
         ProtoId<LanguageWrapperPrototype> wrapperProto,
@@ -56,11 +72,15 @@ public sealed partial class ChatSystem
 
         var language = _prototypeManager.Index(languageEnt.Comp.Language);
 
+        // Do language transformation, things like accents.
         var message = TransformComplexSpeech(source, originalMessage);
 
+        // Transformation could cause there to be nothing left of the message, in which case, don't bother.
         if (message.Parts.Count == 0)
             return;
 
+        // Do the logic to figure out the SpeechVerbPrototype for this language and message.
+        // We need this even if a forced verb is passed because it also influences things like bolding shouted text.
         var speech = GetComplexSpeechVerb(source, message, language, chatChannel);
 
         string name;
@@ -70,6 +90,7 @@ public sealed partial class ChatSystem
         }
         else
         {
+            // We don't have a forced name, so figure out what our name should be displayed as.
             var nameEv = new TransformSpeakerNameEvent(source, Name(source));
             RaiseLocalEvent(source, nameEv);
             name = nameEv.VoiceName;
@@ -79,7 +100,7 @@ public sealed partial class ChatSystem
         }
 
         name = FormattedMessage.EscapeText(name);
-
+        
         var verb = verbOverride ?? Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
 
         if (language.WrapperOverrides is { } wrapperOverrides &&
@@ -89,6 +110,7 @@ public sealed partial class ChatSystem
         var wrapper = _prototypeManager.Index(wrapperProto);
 
         // TODO: It's still weird that this is hardcoded, but you can expand it anyway so it's not the end of the world.
+        // Find all of the recipients in our provided range and send the message to them.
         foreach (var (session, data) in GetRecipients(source,
                      chatChannel == ChatChannel.Whisper ? WhisperMuffledRange : VoiceRange))
         {
@@ -121,6 +143,7 @@ public sealed partial class ChatSystem
             }
         }
 
+        // Handle constructing and formatting the message for the purpose of logging and replay.
         var (unwrappedMessage, wrappedMessage) = BuildComplexMessage(message,
             wrapper,
             language,
@@ -142,6 +165,8 @@ public sealed partial class ChatSystem
         var ev = new EntitySpokeLanguageEvent(source, languageEnt, message, radioChannel, verb, chatChannel);
         RaiseLocalEvent(source, ev, true);
 
+        // The message wasn't sent by a player, so don't log it. Prevents radios and cameras from causing a player's
+        // message to be logged many times.
         if (!HasComp<ActorComponent>(source) || hideLog)
             return;
 
@@ -189,6 +214,23 @@ public sealed partial class ChatSystem
         }
     }
 
+    /// <summary>
+    /// Sends a complex message to a specific listener, handling that listener's unique interpretation of the message.
+    /// </summary>
+    /// <param name="source">The original source of the message.</param>
+    /// <param name="listener">The entity listening to the message.</param>
+    /// <param name="speakingEnt">The entity actually speaking the message, may be different from source
+    /// in the case of telephones/holopads.</param>
+    /// <param name="originalMessage">The message as it was sent before any listener based transformations are
+    /// applied to it.</param>
+    /// <param name="wrapper">The wrapper to be used for formatting the message as it is displayed to a player.</param>
+    /// <param name="channel">The ChatChannel this message is being spoken on.</param>
+    /// <param name="name">The name to be used for the message.</param>
+    /// <param name="verb">The verb to be used for the message.</param>
+    /// <param name="bold">If the message should be bolded.</param>
+    /// <param name="hideChat">If the message should be hidden from the chat UI (just a popup).</param>
+    /// <param name="radioChannel">The radio channel name to be included in the message.</param>
+    /// <param name="color">Force the color of the message (IE, radio messages).</param>
     public void SendComplexMessageToEntity(EntityUid source,
         Entity<ActorComponent?> listener,
         Entity<LanguageComponent> speakingEnt,
@@ -210,11 +252,12 @@ public sealed partial class ChatSystem
         var understandEv = new AttemptUnderstandingEvent(source, language);
         RaiseLocalEvent(listener, understandEv);
 
+        // Some languages can't be seen at all if the user doesn't understand them, like telepathy or hiveminds.
         if (understandEv.HideMessage)
             return;
 
         var message = originalMessage;
-
+        
         var understanding = _prototypeManager.Index(SharedLanguageSystem.MinimumFluency);
 
         if (understandEv is { Handled: true, Understanding: not null })
@@ -222,6 +265,8 @@ public sealed partial class ChatSystem
             understanding = _prototypeManager.Index(understandEv.Understanding.Value.Comp.Fluency);
         }
 
+        // Pass the message off to the language system to allow for mangling it based on the specific language.
+        // This can also do things such as hide the name or change the verb involved with speaking.
         message = _language.ModifyMessageWithLanguage(speakingEnt,
             source,
             listener,
@@ -234,9 +279,11 @@ public sealed partial class ChatSystem
             out name,
             out verb);
 
+        // If the modification completely removed the message, just don't bother.
         if (message.Parts.Count == 0)
             return;
 
+        // Handle this listener's preferences in regard to seeing language fonts.
         var hasMaxUnderstanding = understanding >= _prototypeManager.Index(SharedLanguageSystem.MaximumFluency);
         var useLanguageFont = true;
         if (_mindSystem.TryGetMind(listener, out var mindId, out _) &&
@@ -247,7 +294,8 @@ public sealed partial class ChatSystem
         var hideLanguage = !(language.DisplayInChat &&
                              _prototypeManager.Index(language.UnderstandingForDisplay) <= understanding) ||
                            understandEv.HideLanguage;
-
+        
+        // Put the pieces of the modified message together with the wrapper and various variables and send it off to them.
         var (unwrappedMessage, wrappedMessage) = BuildComplexMessage(message,
             wrapper,
             language,
@@ -267,7 +315,20 @@ public sealed partial class ChatSystem
             listener.Comp.PlayerSession.Channel);
     }
 
-    // Returns the unwrapped message, as well as a wrapped version of the message based on the provided settings.
+    /// <summary>
+    /// Constructs an unwrapped and wrapped version of a Complex message given various properties about the message.
+    /// </summary>
+    /// <param name="message">The complex message to use for construction.</param>
+    /// <param name="wrapper">The wrapper prototype to use for wrapping the message.</param>
+    /// <param name="language">The language that the message is in.</param>
+    /// <param name="bold">If the message should be bold.</param>
+    /// <param name="hideLanguage">If the language name should be hidden from the message.</param>
+    /// <param name="useLanguageFont">If the language font should be included in the wrapping.</param>
+    /// <param name="name">The name of the speaker.</param>
+    /// <param name="verb">The verb to use for speaking.</param>
+    /// <param name="channel">The radio channel name being spoken on, if any.</param>
+    /// <param name="color">The override color to use, if any.</param>
+    /// <returns></returns>
     public (string, string) BuildComplexMessage(ComplexChatMessage message,
         LanguageWrapperPrototype wrapper,
         LanguagePrototype language,
@@ -282,11 +343,13 @@ public sealed partial class ChatSystem
         var langStr = "";
         if (!hideLanguage)
         {
+            // Build the language prefix if the language should be visible.
             langStr = Loc.GetString(wrapper.Language,
                 ("language", language.LocalizedAbbreviation),
                 ("color", language.FontColor));
         }
 
+        // Build the beginning parts of the message, language, speaker name, and channel being spoken on.
         var prefix = Loc.GetString(wrapper.Prefix,
             ("language", langStr),
             ("spacing", message.NeedsSeparation ? "(" : ""),
@@ -316,6 +379,8 @@ public sealed partial class ChatSystem
         }
         else
         {
+            // Loop over the parts of the complex speech.
+            // Dialog gets a lot of special formatting where as emotes just get default action formatting.
             foreach (var (kind, part) in message.Parts)
             {
                 if (kind == ChatPart.Dialog)
@@ -341,6 +406,7 @@ public sealed partial class ChatSystem
 
         var needsVerb = message.IsDetailed || string.IsNullOrEmpty(verb);
 
+        // Put the prefix, verb, and the built message together to produce the final result.
         var wrapResult = Loc.GetString(mainWrapper,
             ("space", message.NeedsSpacing ? " " : ""),
             ("verb", needsVerb ? "" : verb + ", "),
@@ -350,6 +416,18 @@ public sealed partial class ChatSystem
         return (unwrappedBuilder.ToString(), wrapResult);
     }
 
+    // I have no idea why 'author' is here, The API is from SentEntityEmote
+    /// <summary>
+    /// Send a pure emote that still handles the special '!' ''' and ',' cases. This skips most of the language system.
+    /// </summary>
+    /// <param name="source">The entity that is emoting.</param>
+    /// <param name="action">The message string being emoted.</param>
+    /// <param name="range">The range in which the emote should be visible.</param>
+    /// <param name="nameOverride">The forced name to use, if any.</param>
+    /// <param name="hideLog">Skip logging this emote.</param>
+    /// <param name="checkEmote">If we should check for emote text in the action and cause emotes to occur.</param>
+    /// <param name="ignoreActionBlocker">If we should ignore things that would normally prevent emoting.</param>
+    /// <param name="author">The author of the emote.</param>
     private void SendEntityComplexEmote(EntityUid source,
         string action,
         ChatTransmitRange range,
@@ -421,6 +499,7 @@ public sealed partial class ChatSystem
         return transformEvt.Message;
     }
 
+    // Runs sanitation but only on the dialog parts of the message.
     private ComplexChatMessage SanitizeComplexMessage(EntityUid source,
         ComplexChatMessage message,
         out List<string> emoteStrs,

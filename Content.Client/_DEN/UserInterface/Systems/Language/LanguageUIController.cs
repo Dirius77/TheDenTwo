@@ -75,21 +75,26 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
         if (_window == null)
             return;
 
+        // Get the currently spoken language container if there is one.
         LanguageContainer? speakingContainer = null;
         if (_window.CurrentlySpeaking.ChildCount > 0 &&
             _window.CurrentlySpeaking.Children.First() is LanguageContainer languageContainer)
         {
             speakingContainer = languageContainer;
         }
-
+        
+        // If we have a speaking container already we need to update it.
         if (speakingContainer is not null)
         {
+            // The speaking container is already the language we're speaking, just ensure it's marked as such.
             if (speakingContainer.LanguageEnt == currentLang)
             {
                 speakingContainer.SetCurrentSpoken(true);
                 return;
             }
 
+            // The current speaking container is no longer the language we're speaking, mark it as such and move it
+            // into the normal language list instead of the speaking spot.
             speakingContainer.SetCurrentSpoken(false);
             if (_window.CurrentlySpeaking.Children.Contains(speakingContainer))
                 _window.CurrentlySpeaking.RemoveChild(speakingContainer);
@@ -99,6 +104,7 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
 
         if (currentLang is { } currLangEnt)
         {
+            // Find the container for the language we're now speaking and set it as the current speaking container.
             if (_languageContainers.TryGetValue(currLangEnt, out var container))
             {
                 container.SetCurrentSpoken(true);
@@ -112,6 +118,7 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
                     _window.CurrentlySpeaking.AddChild(container);
                 }
             }
+            // Or make a container and do the same.
             else
             {
                 var newCont = new LanguageContainer(_entities, _playerManager, _prototypeManager, _languageSystem);
@@ -131,18 +138,23 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
         if (_window == null)
             return;
 
+        // Is this language in our UI already?
         if (_languageContainers.TryGetValue(langEnt, out var container))
         {
             if (_languageSystem.GetLocalCommunicator() is not { } localComm)
                 return;
 
+            // The update is that we no longer have this language.
             if (localComm.Comp.Languages is { } langs && !langs.Contains(langEnt) && _window is not null)
             {
                 if(_window.LanguageList.Children.Contains(container))
                     _window.LanguageList.RemoveChild(container);
                 else if(_window.CurrentlySpeaking.Children.Contains(container))
+                    // We can just remove the currently spoken language. LanguageSystem will give us a new one and we'll
+                    // get an update for it.
                     _window.CurrentlySpeaking.RemoveChild(container);
             }
+            // Any other change besides loss of the language.
             else
             {
                 container.UpdateLanguage(langEnt);
@@ -150,6 +162,7 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
         }
         else
         {
+            // This language is new to us, make a container for it.
             var newCont = new LanguageContainer(_entities, _playerManager, _prototypeManager, _languageSystem);
             newCont.UpdateLanguage(langEnt);
             _window.LanguageList.AddChild(newCont);
@@ -174,9 +187,10 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
             if (q.LanguageEnt is null)
                 return 1;
 
-            return string.Compare(p.LanguageEnt.Value.Comp.Language.Id,
-                q.LanguageEnt.Value.Comp.Language.Id,
-                StringComparison.CurrentCulture);
+            var langProto1 = _prototypeManager.Index(p.LanguageEnt.Value.Comp.Language);
+            var langProto2 = _prototypeManager.Index(p.LanguageEnt.Value.Comp.Language);
+
+            return string.Compare(langProto1.LocalizedName, langProto2.LocalizedName, StringComparison.CurrentCulture);
         });
         foreach (var child in children)
         {
@@ -190,6 +204,7 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
             RebuildWindow();
     }
 
+    // Replace and create new containers for every language we speak.
     private void RebuildWindow()
     {
         if (_window == null)
@@ -242,6 +257,7 @@ public sealed partial class LanguageUIController : UIController, IOnStateChanged
             _window.NeedsFullRebuild = true;
     }
 
+    // Handle disabling Languages as a feature by hiding the menu and disabling access to it.
     private void CheckLanguageEnabled(bool enabled)
     {
         if (_window is { IsOpen: true } && !enabled)

@@ -33,9 +33,11 @@ public sealed partial class LanguageSystem : SharedLanguageSystem
 
         foreach (var language in languages)
         {
+            // If the language doesn't follow the mind it stays behind with the old body.
             if (!HasComp<LanguageFollowsMindComponent>(language))
                 continue;
 
+            // This language does follow the mind, so it gets removed from the old body and put into the new one.
             _container.TryRemoveFromContainer(language.Owner, true);
             TryAddLanguage(evt.NewEntity, language);
         }

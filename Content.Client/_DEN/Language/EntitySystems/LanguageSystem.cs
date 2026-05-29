@@ -43,6 +43,10 @@ public sealed class LanguageSystem : SharedLanguageSystem
         RaiseNetworkEvent(new HideFontsMessage(hide));
     }
 
+    /// <summary>
+    /// Attempts to set the local player's spoken language to the passed language entity.
+    /// </summary>
+    /// <param name="lang">The language entity to set.</param>
     public void TrySetSpokenLanguage(Entity<LanguageComponent> lang)
     {
         if (_playerManager.LocalEntity is not { } localEnt ||

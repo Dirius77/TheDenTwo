@@ -68,9 +68,11 @@ public sealed partial class ParrotMemorySystem
         ComplexChatMessage incomingMessage,
         EntityUid source)
     {
+        // Do a ton of checks to see if the message is valid.
         if (!Resolve(entity, ref entity.Comp1, ref entity.Comp2))
             return;
 
+        // Parrots only hear audible languages.
         if (!_audibleQuery.HasComponent(languageEnt))
             return;
 
@@ -83,6 +85,7 @@ public sealed partial class ParrotMemorySystem
         if (_gameTiming.CurTime < entity.Comp1.NextLearnInterval)
             return;
 
+        // The message actually has to have dialog, not just actions.
         var dialogParts = incomingMessage.Parts.Where(part => part.Item1 == ChatPart.Dialog)
             .Select(part => part.Item2)
             .ToList();
@@ -130,6 +133,8 @@ public sealed partial class ParrotMemorySystem
         }
         else
         {
+            // The parrot doesn't already know the language, it tries to learn it to be able to repeat in the right
+            // language.
             if (!_language.TryAddLanguage(entity, language.ID, out var addedLangs))
             {
                 Log.Warning("Failed to teach " + Name(entity) + " language: " + language.Name);
@@ -139,7 +144,7 @@ public sealed partial class ParrotMemorySystem
             spokenLanguage = addedLangs.First();
         }
 
-
+        // Store the learned message now that we have the language.
         var newMemory = new SpeechMemory(sourceNetUserId, message, GetNetEntity(spokenLanguage));
 
         if (entity.Comp.SpeechMemories.Count < entity.Comp.MaxSpeechMemory)
