@@ -91,6 +91,7 @@ public enum ChatPart
 {
     Dialog,
     Emote,
+    Tag
 }
 
 public readonly record struct ComplexChatMessage()
@@ -112,7 +113,7 @@ public readonly record struct ComplexChatMessage()
         Parts = parts;
     }
 
-    public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing, bool needsSeparation, bool escapeMarkup = true) : this()
+    public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing, bool needsSeparation, bool escapeMarkup = false) : this()
     {
         OriginalMessage = message;
         Delimiter = delimiter;
