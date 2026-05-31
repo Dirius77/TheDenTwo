@@ -53,6 +53,12 @@ public sealed class DenCCVars
     /// </summary>
     public static readonly CVarDef<HideLanguageFontSetting> HideLanguageFonts =
         CVarDef.Create("languages.hide_fonts", HideLanguageFontSetting.None, CVar.CLIENTONLY | CVar.ARCHIVE);
+  
+    /// <summary>
+    /// Stops the server from sending the station broadcast about people cryoing to this client.
+    /// </summary>
+    public static readonly CVarDef<bool> IgnoreCryoMessage =
+        CVarDef.Create("den.ignore_cryo_message", false, CVar.CLIENTONLY | CVar.ARCHIVE);
 }
 
 public enum HideLanguageFontSetting

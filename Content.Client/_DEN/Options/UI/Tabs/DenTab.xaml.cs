@@ -14,6 +14,7 @@ public sealed partial class DenTab : Control
     {
         RobustXamlLoader.Load(this);
 
+        Control.AddOptionCheckBox(DenCCVars.IgnoreCryoMessage, IgnoreCryoMessages);
         Control.AddOptionDropDown(DenCCVars.HideLanguageFonts,
             HideLanguageFonts,
             [
