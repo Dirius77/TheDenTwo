@@ -1,28 +1,5 @@
 - type: entity
   abstract: true
-  id: BaseHolosign
-  placement:
-    mode: SnapgridCenter
-  components:
-  - type: Transform
-    anchored: true
-  - type: Physics
-    bodyType: Static
-    canCollide: false
-  - type: Damageable
-  - type: Injurable
-    damageContainer: Inorganic
-  - type: Destructible
-    thresholds:
-    - trigger: 
-        !type:DamageTrigger
-        damage: 30
-      behaviors:
-      - !type:DoActsBehavior
-        acts: ["Destruction"]
-
-- type: entity
-  abstract: true
   id: BaseIndicatorHolosign
   placement:
     mode: SnapgridCenter
@@ -50,6 +27,9 @@
     bypassClumsy: true
   - type: Clickable
   - type: Occluder
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Inorganic
   - type: Destructible
     thresholds:
     - trigger:
@@ -61,7 +41,7 @@
 
 - type: entity
   id: HolosignNSFW
-  parent: [ BaseIndicatorHolosign, BaseHolosign ]
+  parent: [ BaseIndicatorHolosign ]
   name: nsfw holographic barrier
   description: A barrier of hard light that indicates an area where adult activities are occurring.
   placement:
@@ -74,7 +54,7 @@
 
 - type: entity
   id: HolosignPrivate
-  parent: [ BaseIndicatorHolosign, BaseHolosign ]
+  parent: [ BaseIndicatorHolosign ]
   name: private holographic barrier
   description: A barrier of hard light that indicates an area where private activities are occurring.
   placement:

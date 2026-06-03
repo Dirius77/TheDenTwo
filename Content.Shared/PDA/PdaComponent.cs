@@ -12,6 +12,7 @@ namespace Content.Shared.PDA
         public const string PdaIdSlotId = "PDA-id";
         public const string PdaPenSlotId = "PDA-pen";
         public const string PdaPaiSlotId = "PDA-pai";
+        public const string ProjectorSlotId = "PDA-projector"; // DEN: Projector slot in PDA.
 
         [DataField("idSlot")]
         public ItemSlot IdSlot = new();
@@ -20,6 +21,10 @@ namespace Content.Shared.PDA
         public ItemSlot PenSlot = new();
         [DataField("paiSlot")]
         public ItemSlot PaiSlot = new();
+        
+        // DEN: Allow slotting civilian projectors into the PDA.
+        [DataField("projectorSlot")]
+        public ItemSlot ProjectorSlot = new();
 
         // Really this should just be using ItemSlot.StartingItem. However, seeing as we have so many different starting
         // PDA's and no nice way to inherit the other fields from the ItemSlot data definition, this makes the yaml much

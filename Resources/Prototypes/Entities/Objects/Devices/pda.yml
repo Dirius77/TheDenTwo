@@ -45,6 +45,11 @@
       whitelist:
         components:
         - IdCard
+    projectorSlot:
+      priority: -2
+      whitelist:
+        tags:
+        - CivilianHoloprojector
   - type: PdaVisuals
   - type: Item
     size: Small
