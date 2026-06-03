@@ -1,0 +1,7 @@
+- type: latheRecipe
+  parent: BaseToolRecipe
+  id: HoloprojectorPrivate
+  result: HoloprojectorPrivate
+  materials:
+    Steel: 100
+    Plastic: 100

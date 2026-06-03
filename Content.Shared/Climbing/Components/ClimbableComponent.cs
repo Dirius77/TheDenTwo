@@ -38,5 +38,11 @@ namespace Content.Shared.Climbing.Components
         /// </summary>
         [DataField("finishClimbSound")]
         public SoundSpecifier? FinishClimbSound = null;
+
+        // DEN: Allow climbing while clumsy
+        /// <summary>
+        ///     Should this be climbable even while clumsy?
+        /// </summary>
+        [DataField] public bool BypassClumsy = false;
     }
 }

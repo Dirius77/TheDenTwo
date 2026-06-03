@@ -133,6 +133,10 @@ public sealed partial class ClumsySystem : EntitySystem
         if (!ent.Comp.ClumsyVaulting)
             return;
 
+        // DEN: Allow climbables to bypass clumsy.
+        if (args.BeingClimbedOn.Comp.BypassClumsy)
+            return;
+
         if (!_cfg.GetCVar(CCVars.GameTableBonk)
             && !SharedRandomExtensions.PredictedProb(_timing, ent.Comp.ClumsyDefaultCheck, GetNetEntity(ent)))
             return;

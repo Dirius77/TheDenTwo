@@ -4,3 +4,6 @@
 
 - type: consent
   id: Mew
+
+- type: consent
+  id: NSFWDescriptions

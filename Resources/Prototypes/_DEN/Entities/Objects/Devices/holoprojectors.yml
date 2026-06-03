@@ -1,0 +1,50 @@
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: BaseIndicatorHoloprojector
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Item
+    storedRotation: -90
+  - type: UseDelay
+    delay: 2.0
+  - type: ActivatableUI
+    key: enum.LabelableHolosignUIKey.Signs
+    inHandsOnly: true
+  - type: UserInterface
+    interfaces:
+      enum.LabelableHolosignUIKey.Signs:
+        type: LabelableHolosignProjectorSignBUI
+      enum.LabelableHolosignUIKey.Description:
+        type: LabelableHolosignProjectorDescriptionBUI
+  - type: LimitedCharges
+    maxCharges: 8
+    charges: 8
+  - type: AutoRecharge
+    rechargeDuration: 60
+  - type: Tag
+    tags:
+    - HolofanProjector
+    - CivilianHoloprojector
+  - type: StaticPrice
+    price: 80
+
+- type: entity
+  parent: BaseIndicatorHoloprojector
+  id: HoloprojectorPrivate
+  name: privacy holobarrier projector
+  description: Creates a holographic barrier indicating a private area.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/Devices/Holoprojectors/private.rsi
+    state: icon
+  - type: LabelableHolosignProjector
+    signProtos:
+      - HolosignNSFW
+      - HolosignPrivate
+    isNsfw: false
+    usesCharges: true
+    signWhitelist:
+      components:
+      - Holobarrier
+      - LabeledHolosign

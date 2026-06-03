@@ -1,0 +1,9 @@
+labelable-holoprojector-reclaim = You stop projecting {THE($sign)}.
+labelable-holoprojector-reclaim-others = {CAPITALIZE($user)} stops projecting {THE($sign)}.
+labelable-holoprojector-no-charges = {CAPITALIZE(THE($item))} is empty, reclaim an old holo first!
+labelable-holoprojector-consent-not-available = Additional information is hidden by your consent settings.
+labelable-holoprojector-ui-header = Labelable Holoprojector
+labelable-holoprojector-current-text-label = Description:
+labelable-holoprojector-is-nsfw-label = Requires NSFW Consent?
+labelable-holoprojector-ui-set-description = Set the description of your projected barrier.
+labelable-holoprojector-selected-sign = Currently selected: {$sign}
