@@ -1,0 +1,38 @@
+- type: entity
+  parent: BasePDA
+  id: MantisPDA
+  name: mantis PDA
+  description: This PDA marks its bearer as a member of the Outer Chamber--a mantis, the Greek word for \"seer.\" The eye on its display seems to track whoever dares to look back. Carried in a pocket, because you couldn't bear to hang this hunk of plastic on your belt.
+  components:
+  - type: Pda
+    id: MantisIDCard
+  - type: Appearance
+    appearanceDataInit:
+     enum.PdaVisuals.PdaType:
+       !type:String
+       pda-mantis
+  - type: PdaBorderColor
+    borderColor: "#3b3640"
+    accentVColor: "#431b57"
+    accentHColor: "#8c1c54"
+  - type: Icon
+    sprite: _DEN/Objects/Devices/pda.rsi
+    state: pda-mantis
+  - type: Sprite
+    sprite: _DEN/Objects/Devices/pda.rsi
+    layers:
+    - map: [ "enum.PdaVisualLayers.Base" ]
+      state: "pda-mantis"
+    - state: "light_overlay"
+      map: [ "enum.PdaVisualLayers.Flashlight" ]
+      shader: "unshaded"
+      visible: false
+    - state: "id_overlay"
+      map: [ "enum.PdaVisualLayers.IdLight" ]
+      shader: "unshaded"
+      visible: false
+  - type: PointLight
+    enabled: false
+    radius: 1.75
+    energy: 2
+    color: "#d9418d"

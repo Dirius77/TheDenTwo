@@ -1,14 +1,14 @@
 {
-    "version": 1,
-    "license": "CC-BY-SA-3.0",
-    "copyright": "Mantis by Sha-Seng (GitHub), edited by juniwoofs (GitHub)",
-    "size": {
-        "x": 8,
-        "y": 8
-    },
-    "states": [
-        {
-            "name": "Mantis"
-        }
-    ]
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Original by Shaseng (Github) edited by juniwoofs (Github)",
+  "size": {
+    "x": 8,
+    "y": 8
+  },
+  "states": [
+    {
+      "name": "Mantis"
+    }
+  ]
 }
