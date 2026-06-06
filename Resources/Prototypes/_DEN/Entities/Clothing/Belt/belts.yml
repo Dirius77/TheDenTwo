@@ -1,0 +1,188 @@
+- type: entity
+  abstract: true
+  parent: [ClothingBeltStorageBase, BaseMantisContraband]
+  id: ClothingBeltMantisBase
+  components:
+  - type: Appearance # needed for sheathes
+  - type: Storage
+    maxItemSize: Large
+    grid:
+    - 0,0,9,1
+    whitelist:
+      tags:
+        - Folder
+        - Document
+        - Write
+#        - HandLabeler # tag doesnt exist yet, but should with the items pr
+        - Flashlight
+        - Syringe
+        - Bottle
+        - PillCanister
+        - Pill
+        - Flash
+        - ScienceTool
+        - MantisBeltStorable
+#  - type: Appearance # undo after items and weapons are ported
+#  - type: ContainerContainer
+#    containers:
+#      storagebase: !type:Container
+#        ents: []
+#      mantisknife: !type:ContainerSlot {}
+#      mantissickle: !type:ContainerSlot {}
+#      mantiscane: !type:ContainerSlot {}
+#  - type: ItemSlots
+#    slots:
+#      mantisknife:
+#        name: clothing-belt-mantisknife
+#        insertVerbText: sheath-insert-verb
+#        ejectVerbText: sheath-eject-verb
+#        insertSound: /Audio/Items/sheath.ogg
+#        ejectSound: /Audio/Items/unsheath.ogg
+#        whitelist:
+#          tags:
+#          - MantisKnife
+#        priority: 3
+#      mantissickle:
+#        name: clothing-belt-mantissickle
+#        insertVerbText: sheath-insert-verb
+#        ejectVerbText: sheath-eject-verb
+#        insertSound: /Audio/Items/sheath.ogg
+#        ejectSound: /Audio/Items/unsheath.ogg
+#        whitelist:
+#          tags:
+#          - MantisSickle
+#        priority: 3
+#      mantiscane:
+#        name: clothing-belt-mantiscane
+#        insertVerbText: sheath-insert-verb
+#        ejectVerbText: sheath-eject-verb
+#        insertSound: /Audio/Items/sheath.ogg
+#        ejectSound: /Audio/Items/unsheath.ogg
+#        whitelist:
+#          tags:
+#          - MantisCane
+#        priority: 3
+#  - type: ItemMapper
+#    mapLayers:
+#      mantisknife:
+#        whitelist:
+#          tags:
+#          - MantisKnife
+#      mantissickle:
+#        whitelist:
+#          tags:
+#          - MantisSickle
+#      mantiscane:
+#        whitelist:
+#          tags:
+#          - MantisCane
+#    sprite: _DEN/Clothing/Belt/belt_overlay.rsi
+  - type: Tag
+    tags:
+    - WhitelistChameleon # We really need chameleon belts...
+#  - type: GuideHelp # guide doesnt exist yet!!!
+#    guides: [ MantisGuide ]
+
+- type: entity
+  parent: [ClothingBeltMantisBase, BaseFoldable]
+  id: ClothingBeltMantisAiry
+  name: airy mantis belt
+  description: "A finely-woven rope belt with loops to carry mantis equipment. The loose end can be tucked in, if you prefer clean lines. It has sheaths for certain weapons."
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Belt/mantis_belt_airy.rsi
+    layers:
+    - state: icon
+      map: ["unfoldedLayer"]
+    - state: icon-folded
+      map: ["foldedLayer"]
+      visible: false
+  - type: Clothing
+    sprite: _DEN/Clothing/Belt/mantis_belt_airy.rsi
+  - type: Foldable
+    canFoldInsideContainer: true
+    foldVerbText: fold-verb
+    unfoldVerbText: unfold-verb
+  - type: FoldableClothing
+    foldedEquippedPrefix: folded
+
+- type: entity
+  parent: [ClothingBeltMantisBase, BaseFoldable]
+  id: ClothingBeltMantisDark
+  name: dark mantis belt
+  description: "A structured, layered sash designed to carry mantis equipment. The loose end can be tucked in, if you prefer clean lines. It has sheaths for certain weapons."
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Belt/mantis_belt_dark.rsi
+    layers:
+    - state: icon
+      map: ["unfoldedLayer"]
+    - state: icon-folded
+      map: ["foldedLayer"]
+      visible: false
+  - type: Clothing
+    sprite: _DEN/Clothing/Belt/mantis_belt_dark.rsi
+  - type: Foldable
+    canFoldInsideContainer: true
+    foldVerbText: fold-verb
+    unfoldVerbText: unfold-verb
+  - type: FoldableClothing
+    foldedEquippedPrefix: folded
+
+- type: entity
+  parent: ClothingBeltMantisBase
+  id: ClothingBeltMantisOrnate
+  name: ornate mantis belt
+  description: "A thick band fastened by an electrum chain, with inner pockets designed to carry mantis equipment. It has sheaths for certain weapons."
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Belt/mantis_belt_ornate.rsi
+  - type: Clothing
+    sprite: _DEN/Clothing/Belt/mantis_belt_ornate.rsi
+
+# These belts contain some mantis loot if salvagers find dead mantes in space
+#- type: entity # undo after items and weapons are ported
+#  parent: ClothingBeltMantisAiry
+#  id: ClothingBeltMantisAiryLoot
+#  categories: [ HideSpawnMenu ]
+#  components:
+#  - type: StorageFill
+#    contents:
+#    - id: MantisMeleeSickle
+#    - id: BoxFolderMantis
+#    - id: CigPackMnemolith
+#    - id: FlippoLighterMantis
+#    - id: SomberChairLeatherMantisWheelchairFolded
+#    - id: ClothingNeckMantisPendulum
+#  - type: Foldable
+#    folded: true
+#  - type: Clothing
+#    equippedPrefix: rolled
+
+#- type: entity # undo after items and weapons are ported
+#  parent: ClothingBeltMantisDark
+#  id: ClothingBeltMantisDarkLoot
+#  categories: [ HideSpawnMenu ]
+#  components:
+#  - type: StorageFill
+#    contents:
+#    - id: MantisMeleeKnife
+#    - id: ClothingUniformJumpsuitMantisLoincloth
+#    - id: ClothingNeckMantisShackles
+#    - id: LeashMantis
+#    - id: FlippoLighterMantis
+#    - id: CandleSomberMantisCluster
+
+#- type: entity # undo after items and weapons are ported
+#  parent: ClothingBeltMantisOrnate
+#  id: ClothingBeltMantisOrnateLoot
+#  categories: [ HideSpawnMenu ]
+#  components:
+#  - type: StorageFill
+#    contents:
+#    - id: MantisMeleeCane
+#    - id: PillCanisterMnemolithMantis
+#    - id: PillCanisterSpaceDrugsMantis
+#    - id: PlushieDollMantis
+#    - id: PersonalAISomber
+#    - id: MantisTailorsKnife

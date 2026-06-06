@@ -22,6 +22,7 @@ namespace Content.Server.Database
         public DbSet<Profile> Profile { get; set; } = null!;
         public DbSet<AssignedUserId> AssignedUserId { get; set; } = null!;
         public DbSet<Player> Player { get; set; } = default!;
+        public DbSet<ConsentData> ConsentData { get; set; } = null!;
         public DbSet<Admin> Admin { get; set; } = null!;
         public DbSet<AdminRank> AdminRank { get; set; } = null!;
         public DbSet<Round> Round { get; set; } = null!;
@@ -174,6 +175,12 @@ namespace Content.Server.Database
                 .HasOne(p => p.Server)
                 .WithMany(p => p.ConnectionLogs)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // DEN Start: Consent system
+            modelBuilder.Entity<ConsentData>()
+                .HasIndex(c => new { c.Id, c.UserId } )
+                .IsUnique();
+            // DEN End
 
             // SetNull is necessary for created by/edited by-s here,
             // so you can safely delete admins (GDPR right to erasure) while keeping the notes intact
@@ -520,6 +527,17 @@ namespace Content.Server.Database
         public List<Ban> AdminServerBansLastEdited { get; set; } = null!;
         public List<RoleWhitelist> JobWhitelists { get; set; } = null!;
     }
+
+    // DEN Start: Consent database
+    [Table("global_consent_info")]
+    public class ConsentData
+    {
+        [Key] public int Id { get; set; }
+        [Required] public Guid UserId { get; set; }
+        [Required] public string ConsentId { get; set; } = null!;
+        [Required] public bool ConsentValue { get; set; }
+    }
+    // DEN End
 
     [Table("whitelist")]
     public class Whitelist

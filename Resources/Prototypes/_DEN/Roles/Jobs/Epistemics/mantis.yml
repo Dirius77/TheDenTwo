@@ -10,6 +10,7 @@
       department: Science
       time: 8h
   startingGear: MantisGear
+  icon: "JobIconMantis"
   supervisors: job-supervisors-rd # change to job-supervisors-Epi when Mystagogue is added if we go that path
   access:
   - Mantis
@@ -19,19 +20,22 @@
 - type: startingGear
   id: MantisGear
   equipment:
-    id: RnDPDA
-    ears: ClothingHeadsetRD
-  storage:
-    back:
-    - Flash
+    id: MantisPDA
+    ears: ClothingHeadsetMantis
+#  storage:
+#    back:
+#    - Stuff
 
-#- type: chameleonOutfit @
-#  id: MantisChameleonOutfit
-#  job: Mantis
-#  equipment:
-#    head:
-#    eyes:
-#    mask:
-#    neck:
-#    outerClothing:
-#    gloves:
+- type: chameleonOutfit
+  id: MantisChameleonOutfit
+  job: Mantis
+  equipment:
+    head: ClothingHeadHoodMantisDark
+    eyes: ClothingEyesGlassesEpistemicsMantisMirrored
+    mask: ClothingMaskMantisRitual
+    neck: ClothingNeckCloakMantisDark
+    jumpsuit: ClothingUniformJumpsuitMantisDark
+    outerClothing: ClothingOuterWinterCoatMantisDarkFolded
+    gloves: ClothingHandsGlovesMantisDark
+    shoes: ClothingShoesSandalsMantisDark
+    back: ClothingBackpackMantis
