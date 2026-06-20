@@ -1,6 +1,6 @@
 using Content.Shared._DEN.Language.Components;
-using Content.Shared._DEN.Speech;
 using Content.Shared.Popups;
+using Content.Shared.Speech;
 using Robust.Shared.Random;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
@@ -12,12 +12,12 @@ public sealed partial class ChatChannelWhitelistSystem : EntitySystem
 
     public override void Initialize()
     {
-        SubscribeLocalEvent<ChatChannelWhitelistComponent, LanguageRelayedEvent<SpeakLanguageAttemptEvent>>(
+        SubscribeLocalEvent<ChatChannelWhitelistComponent, LanguageRelayedEvent<SpeakAttemptEvent>>(
             OnSpeakLanguageAttempt);
     }
 
     private void OnSpeakLanguageAttempt(Entity<ChatChannelWhitelistComponent> ent,
-        ref LanguageRelayedEvent<SpeakLanguageAttemptEvent> args)
+        ref LanguageRelayedEvent<SpeakAttemptEvent> args)
     {
         var evt = args.Args;
 

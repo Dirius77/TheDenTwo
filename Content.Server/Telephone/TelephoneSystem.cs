@@ -21,6 +21,8 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Replays;
 using System.Linq;
+using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 
 namespace Content.Server.Telephone;
 
@@ -37,8 +39,13 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
     [Dependency] private IAdminLogManager _adminLogger = default!;
     [Dependency] private IReplayRecordingManager _replay = default!;
 
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!; // DEN: Languages
+    [Dependency] private EntityQuery<LineOfSightLanguageComponent> _losQuery = default!; // DEN: Languages
+
     // Has set used to prevent telephone feedback loops
     private HashSet<(EntityUid, string, Entity<TelephoneComponent>)> _recentChatMessages = new();
+    
+    private static readonly ProtoId<LanguageWrapperPrototype> TelephoneWrapper = "TelephoneWrapper"; // DEN: Languages
 
     public override void Initialize()
     {
@@ -46,11 +53,9 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
 
         SubscribeLocalEvent<TelephoneComponent, ComponentShutdown>(OnComponentShutdown);
         SubscribeLocalEvent<TelephoneComponent, PowerChangedEvent>(OnPowerChanged);
-        //SubscribeLocalEvent<TelephoneComponent, ListenAttemptEvent>(OnAttemptListen); // DEN: Languages, see ListenLanguageAttemptEvent
-        //SubscribeLocalEvent<TelephoneComponent, ListenEvent>(OnListen); // DEN: Languages, see ListenLanguageEvent
-        //SubscribeLocalEvent<TelephoneComponent, TelephoneMessageReceivedEvent>(OnTelephoneMessageReceived); // DEN: Languages, see TelephoneMessageReceivedEvent
-
-        InitializeLanguage(); // DEN: Languages
+        SubscribeLocalEvent<TelephoneComponent, ListenAttemptEvent>(OnAttemptListen);
+        SubscribeLocalEvent<TelephoneComponent, ListenEvent>(OnListen);
+        SubscribeLocalEvent<TelephoneComponent, TelephoneMessageReceivedEvent>(OnTelephoneMessageReceived);
     }
 
     #region: Events
@@ -66,7 +71,6 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
             TerminateTelephoneCalls(entity);
     }
 
-    [Obsolete("Use OnAttemptLanguageListen instead.", true)] // DEN: Languages
     private void OnAttemptListen(Entity<TelephoneComponent> entity, ref ListenAttemptEvent args)
     {
         if (!IsTelephonePowered(entity) ||
@@ -78,7 +82,6 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
         }
     }
 
-    [Obsolete("Use OnLanguageListen instead.", true)] // DEN: Languages
     private void OnListen(Entity<TelephoneComponent> entity, ref ListenEvent args)
     {
         if (args.Source == entity.Owner)
@@ -89,13 +92,14 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
             return;
 
         // Simple check to make sure that we haven't sent this message already this frame
-        if (!_recentChatMessages.Add((args.Source, args.Message, entity)))
+        if (!_recentChatMessages.Add((args.Source, args.Message.OriginalMessage, entity))) // DEN: ComplexChatMessages
             return;
 
-        SendTelephoneMessage(args.Source, args.Message, entity);
+        // DEN: Only transmit spoken languages, or in the case of holopads, visual (LOS) languages.
+        if (_audibleQuery.HasComp(args.LanguageEnt) || entity.Comp.TransmitsVisuals && _losQuery.HasComp(args.LanguageEnt))
+            SendTelephoneMessage(args.Source, args.LanguageEnt, args.Message, entity); // DEN: Languages
     }
 
-    [Obsolete("Use OnTelephoneMessageLanguageReceived instead.", true)] // DEN: Languages
     private void OnTelephoneMessageReceived(Entity<TelephoneComponent> entity, ref TelephoneMessageReceivedEvent args)
     {
         // Prevent message feedback loops
@@ -119,9 +123,16 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
             ("speaker", Name(speaker)));
 
         var range = args.TelephoneSource.Comp.LinkedTelephones.Count > 1 ? ChatTransmitRange.HideChat : ChatTransmitRange.GhostRangeLimit;
-        var volume = entity.Comp.SpeakerVolume == TelephoneVolume.Speak ? InGameICChatType.Speak : InGameICChatType.Whisper;
+        var whisper = entity.Comp.SpeakerVolume == TelephoneVolume.Whisper; // DEN: Languages.
 
-        _chat.TrySendInGameICMessage(speaker, args.Message, volume, range, nameOverride: name, checkRadioPrefix: false);
+        _chat.SendEntityComplexSpeech(speaker,
+            args.Message,
+            TelephoneWrapper,
+            whisper ? ChatChannel.Whisper : ChatChannel.Local,
+            range,
+            null,
+            name,
+            languageOverride: args.LanguageEnt); // DEN: Languages
     }
 
     #endregion
@@ -356,13 +367,13 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
         SetTelephoneState(entity, newState);
         SetTelephoneMicrophoneState(entity, false);
     }
-
-    [Obsolete("Use SendTelephoneLanguageMessage instead.", true)] // DEN: Languages
-    private void SendTelephoneMessage(EntityUid messageSource, string message, Entity<TelephoneComponent> source, bool escapeMarkup = true)
+    
+    private void SendTelephoneMessage(EntityUid messageSource, Entity<LanguageComponent> languageEnt, ComplexChatMessage message, Entity<TelephoneComponent> source) // DEN: Languages
     {
         // This method assumes that you've already checked that this
         // telephone is able to transmit messages and that it can
         // send messages to any telephones linked to it
+        var language = _prototype.Index(languageEnt.Comp.Language); // DEN: Languages
 
         var ev = new TransformSpeakerNameEvent(messageSource, MetaData(messageSource).EntityName);
         RaiseLocalEvent(messageSource, ev);
@@ -374,34 +385,15 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
         if (ev.SpeechVerb != null && _prototype.Resolve(ev.SpeechVerb, out var evntProto))
             speech = evntProto;
         else
-            speech = _chat.GetSpeechVerb(messageSource, message);
+            speech = _chat.GetComplexSpeechVerb(messageSource, message, language, ChatChannel.Radio); // DEN: language and complex speech.
 
-        var content = escapeMarkup
-            ? FormattedMessage.EscapeText(message)
-            : message;
-
-        var wrappedMessage = Loc.GetString(speech.Bold ? "chat-telephone-message-wrap-bold" : "chat-telephone-message-wrap",
-            ("color", Color.White),
-            ("fontType", speech.FontId),
-            ("fontSize", speech.FontSize),
-            ("verb", Loc.GetString(_random.Pick(speech.SpeechVerbStrings))),
-            ("name", name),
-            ("message", content));
-
-        var chat = new ChatMessage(
-            ChatChannel.Local,
-            message,
-            wrappedMessage,
-            NetEntity.Invalid,
-            null);
-
-        var chatMsg = new MsgChatMessage { Message = chat };
-
-        var evSentMessage = new TelephoneMessageSentEvent(message, chatMsg, messageSource);
+        var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings)); // DEN languages
+        
+        var evSentMessage = new TelephoneMessageSentEvent(message, languageEnt, messageSource); // DEN Languages
         RaiseLocalEvent(source, ref evSentMessage);
         source.Comp.StateStartTime = _timing.CurTime;
 
-        var evReceivedMessage = new TelephoneMessageReceivedEvent(message, chatMsg, messageSource, source);
+        var evReceivedMessage = new TelephoneMessageReceivedEvent(message, languageEnt, verb, name, messageSource, source); // DEN: Languages
 
         foreach (var receiverUid in source.Comp.LinkedTelephones)
         {
@@ -411,11 +403,31 @@ public sealed partial class TelephoneSystem : SharedTelephoneSystem
             RaiseLocalEvent(receiverUid, ref evReceivedMessage);
             receiverTelephone.StateStartTime = _timing.CurTime;
         }
+        
+        // DEN Start: Format complex message and log
+        var (unwrappedMessage, wrappedMessage) = _chat.BuildComplexMessage(message,
+            _prototype.Index(TelephoneWrapper),
+            language,
+            speech.Bold,
+            language.DisplayInChat,
+            true,
+            name,
+            verb,
+            null,
+            null);
+
+        var chat = new ChatMessage(
+            ChatChannel.Radio,
+            unwrappedMessage,
+            wrappedMessage,
+            NetEntity.Invalid,
+            null);
 
         if (name != Name(messageSource))
-            _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Telephone message from {ToPrettyString(messageSource):user} as {name} on {source}: {message}");
+            _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Telephone message from {ToPrettyString(messageSource):user} as {name} on {source} in {language.LocalizedName}: {unwrappedMessage}");
         else
-            _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Telephone message from {ToPrettyString(messageSource):user} on {source}: {message}");
+            _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Telephone message from {ToPrettyString(messageSource):user} on {source} in {language.LocalizedName}: {unwrappedMessage}");
+        // DEN End
 
         _replay.RecordServerMessage(chat);
     }

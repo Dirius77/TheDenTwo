@@ -6,8 +6,7 @@ namespace Content.Shared.Speech
         {
             base.Initialize();
 
-            //SubscribeLocalEvent<SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Languages, see SpeakLanguageAttemptEvent
-            InitializeLanguage(); // DEN: Languages
+            SubscribeLocalEvent<SpeakAttemptEvent>(OnSpeakAttempt);
         }
 
         public void SetSpeech(EntityUid uid, bool value, SpeechComponent? component = null)
@@ -25,7 +24,6 @@ namespace Content.Shared.Speech
             Dirty(uid, component);
         }
 
-        [Obsolete("Use OnSpeakLanguageAttempt instead.", true)] // DEN: Languages
         private void OnSpeakAttempt(SpeakAttemptEvent args)
         {
             if (!TryComp(args.Uid, out SpeechComponent? speech) || !speech.Enabled)

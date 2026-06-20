@@ -61,7 +61,7 @@ public sealed partial class HolopadSystem : SharedHolopadSystem
         SubscribeLocalEvent<HolopadComponent, TelephoneStateChangeEvent>(OnTelephoneStateChange);
         SubscribeLocalEvent<HolopadComponent, TelephoneCallCommencedEvent>(OnHoloCallCommenced);
         SubscribeLocalEvent<HolopadComponent, TelephoneCallEndedEvent>(OnHoloCallEnded);
-        //SubscribeLocalEvent<HolopadComponent, TelephoneMessageSentEvent>(OnTelephoneMessageSent); // DEN: Languages
+        SubscribeLocalEvent<HolopadComponent, TelephoneMessageSentEvent>(OnTelephoneMessageSent);
 
         // Networked events
         SubscribeNetworkEvent<HolopadUserTypingChangedEvent>(OnTypingChanged);
@@ -81,8 +81,6 @@ public sealed partial class HolopadSystem : SharedHolopadSystem
         SubscribeLocalEvent<HolopadComponent, PowerChangedEvent>(OnPowerChanged);
         SubscribeLocalEvent<HolopadComponent, AnchorStateChangedEvent>(OnAnchorChanged);
         SubscribeLocalEvent<HolopadUserComponent, MobStateChangedEvent>(OnMobStateChanged);
-
-        InitializeLanguage(); // DEN: Languages
     }
 
     #region: Holopad UI bound user interface messages
@@ -289,7 +287,6 @@ public sealed partial class HolopadSystem : SharedHolopadSystem
             _userInterfaceSystem.CloseUi(entity.Owner, HolopadUiKey.AiRequestWindow, insertedAi);
     }
 
-    [Obsolete("Use OnTelephoneMessageLanguageSent instead.", true)] // DEN: Languages
     private void OnTelephoneMessageSent(Entity<HolopadComponent> holopad, ref TelephoneMessageSentEvent args)
     {
         LinkHolopadToUser(holopad, args.MessageSource);

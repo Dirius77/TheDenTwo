@@ -9,12 +9,9 @@ public sealed partial class BlockListeningSystem : EntitySystem
     {
         base.Initialize();
 
-        // SubscribeLocalEvent<BlockListeningComponent, ListenAttemptEvent>(OnListenAttempt); // DEN: Languages, see ListenLanguageAttemptEvent
-
-        InitializeLanguage(); // DEN: Languages
+        SubscribeLocalEvent<BlockListeningComponent, ListenAttemptEvent>(OnListenAttempt);
     }
 
-    [Obsolete("See OnListenLanguageAttempt", true)] // DEN: Languages
     private void OnListenAttempt(EntityUid uid, BlockListeningComponent component, ListenAttemptEvent args)
     {
         args.Cancel();

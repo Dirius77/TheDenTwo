@@ -1,4 +1,5 @@
 using Content.Server.Chat.Systems;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
@@ -11,24 +12,21 @@ namespace Content.Server.Speech.EntitySystems;
 public sealed partial class ListeningSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _xforms = default!;
+    [Dependency] private ChatSystem _chat = default!;
 
     public override void Initialize()
     {
         base.Initialize();
 
-        InitializeLanguage(); // DEN: Languages
-
-        //SubscribeLocalEvent<EntitySpokeEvent>(OnSpeak); // DEN: Languages, see EntitySpokeLanguageEvent
+        SubscribeLocalEvent<EntitySpokeEvent>(OnSpeak);
     }
 
-    [Obsolete("Use OnSpeakLanguage instead.", true)] // DEN: Languages
     private void OnSpeak(EntitySpokeEvent ev)
     {
-        PingListeners(ev.Source, ev.Message, ev.ObfuscatedMessage);
+        PingListeners(ev.Source, ev.LanguageEnt, ev.Message, ev.Verb, ev.ChatChannel); // DEN: Languages
     }
 
-    [Obsolete("Use PingListenersLanguage instead.", true)] // DEN: Languages
-    public void PingListeners(EntityUid source, string message, string? obfuscatedMessage)
+    public void PingListeners(EntityUid source, Entity<LanguageComponent> languageEnt, ComplexChatMessage message, string verb, ChatChannel channel) // DEN: Languages
     {
         // TODO whispering / audio volume? Microphone sensitivity?
         // for now, whispering just arbitrarily reduces the listener's max range.
@@ -36,9 +34,12 @@ public sealed partial class ListeningSystem : EntitySystem
         var sourceXform = Transform(source);
         var sourcePos = _xforms.GetWorldPosition(sourceXform);
 
-        var attemptEv = new ListenAttemptEvent(source);
-        var ev = new ListenEvent(message, source);
-        var obfuscatedEv = obfuscatedMessage == null ? null : new ListenEvent(obfuscatedMessage, source);
+        var attemptEv = new ListenAttemptEvent(source, languageEnt); // DEN: Languages
+        var ev = new ListenEvent(message, source, languageEnt, verb, channel); // DEN: Languages
+        // TODO: Hardcoded obfuscation bad.
+        var obfuscatedEv = channel == ChatChannel.Whisper
+            ? new ListenEvent(_chat.ObfuscateComplexChatMessage(message, 0.2f), source, languageEnt, verb, channel)
+            : null; // DEN: Languages. Use complex obfuscation and language.
         var query = EntityQueryEnumerator<ActiveListenerComponent, TransformComponent>();
 
         while(query.MoveNext(out var listenerUid, out var listener, out var xform))

@@ -1,3 +1,5 @@
+using Content.Server.Chat.Systems;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Inventory.Events;
 using Content.Shared.Radio;
@@ -5,6 +7,7 @@ using Content.Shared.Radio.Components;
 using Content.Shared.Radio.EntitySystems;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server.Radio.EntitySystems;
 
@@ -12,15 +15,17 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
 {
     [Dependency] private INetManager _netMan = default!;
     [Dependency] private RadioSystem _radio = default!;
+    [Dependency] private ChatSystem _chat = default!; // DEN: Languages
+    [Dependency] private IPrototypeManager _prototype = default!; // DEN: Languages
+    [Dependency] private EntityQuery<RadioTransmittableComponent> _radioLang = default!; // DEN: Languages
 
     public override void Initialize()
     {
         base.Initialize();
-        //SubscribeLocalEvent<HeadsetComponent, RadioReceiveEvent>(OnHeadsetReceive); // DEN: Languages, see RadioReceiveLanguageEvent
+        SubscribeLocalEvent<HeadsetComponent, RadioReceiveEvent>(OnHeadsetReceive);
         SubscribeLocalEvent<HeadsetComponent, EncryptionChannelsChangedEvent>(OnKeysChanged);
 
-        InitializeLanguage(); // DEN: Languages
-        //SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeEvent>(OnSpeak); // DEN: Languages, see EntitySpokeLanguageEvent
+        SubscribeLocalEvent<WearingHeadsetComponent, EntitySpokeEvent>(OnSpeak);
     }
 
     private void OnKeysChanged(EntityUid uid, HeadsetComponent component, EncryptionChannelsChangedEvent args)
@@ -43,14 +48,14 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
             EnsureComp<ActiveRadioComponent>(uid).Channels = new(keyHolder.Channels);
     }
 
-    [Obsolete("Use OnSpeakLanguage instead.")] // DEN: Languages
     private void OnSpeak(EntityUid uid, WearingHeadsetComponent component, EntitySpokeEvent args)
     {
         if (args.Channel != null
             && TryComp(component.Headset, out EncryptionKeyHolderComponent? keys)
-            && keys.Channels.Contains(args.Channel.ID))
+            && keys.Channels.Contains(args.Channel.ID)
+            && _radioLang.HasComp(args.LanguageEnt))
         {
-            _radio.SendRadioMessage(uid, args.Message, args.Channel, component.Headset);
+            _radio.SendRadioMessage(uid, args.LanguageEnt, args.Message, args.Channel, component.Headset);
             args.Channel = null; // prevent duplicate messages from other listeners.
         }
     }
@@ -97,7 +102,6 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
         }
     }
 
-    [Obsolete("Use OnHeadsetReceiveLanguage instead.", true)] // DEN: Languages
     private void OnHeadsetReceive(EntityUid uid, HeadsetComponent component, ref RadioReceiveEvent args)
     {
         // TODO: change this when a code refactor is done
@@ -112,7 +116,23 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
             RaiseLocalEvent(parent, ref relayEvent);
         }
 
-        if (TryComp(parent, out ActorComponent? actor))
-            _netMan.ServerSendMessage(args.ChatMsg, actor.PlayerSession.Channel);
+        // DEN Start: Languages and Complex Speech
+        if (HasComp<ActorComponent>(parent))
+        {
+            _chat.SendComplexMessageToEntity(
+                args.RadioSource,
+                parent,
+                args.LanguageEnt,
+                args.Message,
+                _prototype.Index(RadioSystem.RadioWrapper),
+                ChatChannel.Radio,
+                args.Name,
+                args.Verb,
+                args.Speech.Bold,
+                false,
+                args.Channel.LocalizedName,
+                args.Channel.Color);
+        }
+        // DEN End
     }
 }

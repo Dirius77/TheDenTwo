@@ -1,5 +1,6 @@
 using Content.Server.Popups;
 using Content.Server.Speech.EntitySystems;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Abilities.Mime;
 using Content.Shared.Chat;
 using Content.Shared.Chat.Prototypes;
@@ -12,14 +13,14 @@ namespace Content.Server.Speech.Muting
     public sealed partial class MutingSystem : EntitySystem
     {
         [Dependency] private PopupSystem _popupSystem = default!;
+        [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!; // DEN: Language
+        
         public override void Initialize()
         {
             base.Initialize();
-            //SubscribeLocalEvent<MutedComponent, SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Languages, see SpeakLanguageAttemptEvent
+            SubscribeLocalEvent<MutedComponent, SpeakAttemptEvent>(OnSpeakAttempt);
             SubscribeLocalEvent<MutedComponent, EmoteEvent>(OnEmote, before: new[] { typeof(VocalSystem), typeof(MumbleAccentSystem) });
             SubscribeLocalEvent<MutedComponent, ScreamActionEvent>(OnScreamAction, before: new[] { typeof(VocalSystem) });
-
-            InitializeLanguage(); // DEN: Languages
         }
 
         private void OnEmote(EntityUid uid, MutedComponent component, ref EmoteEvent args)
@@ -46,11 +47,14 @@ namespace Content.Server.Speech.Muting
         }
 
 
-        [Obsolete("Use OnSpeakLanguageAttempt instead", true)] // DEN: Languages
         private void OnSpeakAttempt(EntityUid uid, MutedComponent component, SpeakAttemptEvent args)
         {
             // TODO something better than this.
 
+            // DEN: Non-audible languages are not impacted by being unable to make sound.
+            if (!_audibleQuery.HasComp(args.LanguageEnt))
+                return;
+            
             if (HasComp<MimePowersComponent>(uid))
                 _popupSystem.PopupEntity(Loc.GetString("mime-cant-speak"), uid, uid);
             else if (HasComp<VentriloquistPuppetComponent>(uid))

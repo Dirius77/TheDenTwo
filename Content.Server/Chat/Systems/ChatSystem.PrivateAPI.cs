@@ -12,7 +12,7 @@ namespace Content.Server.Chat.Systems;
 
 public sealed partial class ChatSystem
 {
-    
+
     [Obsolete("Use SendEntityComplexSpeech instead.", true)] // DEN: Languages
     private void SendEntitySpeak(
         EntityUid source,
@@ -23,6 +23,7 @@ public sealed partial class ChatSystem
         bool ignoreActionBlocker = false
         )
     {
+        /* DEN: Kill all of this and use languages instead.
         if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
             return;
 
@@ -60,8 +61,8 @@ public sealed partial class ChatSystem
 
         SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range);
 
-        var ev = new EntitySpokeEvent(source, message, null, null);
-        RaiseLocalEvent(source, ev, true);
+        //var ev = new EntitySpokeEvent(source, message, null, null); // DEN: Languages, this has changed, this function isn't used anymore anyway.
+        //RaiseLocalEvent(source, ev, true); // DEN: Languages, this has changed, this function isn't used anymore anyway.
 
         // To avoid logging any messages sent by entities that are not players, like vendors, cloning, etc.
         // Also doesn't log if hideLog is true.
@@ -84,6 +85,7 @@ public sealed partial class ChatSystem
                 _adminLogger.Add(LogType.Chat, LogImpact.Low,
                     $"Say from {source}, original: {originalMessage}, transformed: {message}.");
         }
+        */
     }
 
     [Obsolete("Use SendEntityComplexSpeech instead.", true)] // DEN: Languages
@@ -97,6 +99,7 @@ public sealed partial class ChatSystem
         bool ignoreActionBlocker = false
         )
     {
+        /* DEN: Kill all of this and use languages instead.
         if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
             return;
 
@@ -157,8 +160,8 @@ public sealed partial class ChatSystem
 
         _replay.RecordServerMessage(new ChatMessage(ChatChannel.Whisper, message, wrappedMessage, GetNetEntity(source), null, MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeEvent(source, message, channel, obfuscatedMessage);
-        RaiseLocalEvent(source, ev, true);
+        // var ev = new EntitySpokeEvent(source, message, channel, obfuscatedMessage); // DEN: Languages, this has changed, this function isn't used anymore anyway.
+        // RaiseLocalEvent(source, ev, true); // DEN: Languages, this has changed, this function isn't used anymore anyway.
         if (!hideLog)
             if (originalMessage == message)
             {
@@ -176,6 +179,7 @@ public sealed partial class ChatSystem
                     _adminLogger.Add(LogType.Chat, LogImpact.Low,
                     $"Whisper from {source}, original: {originalMessage}, transformed: {message}.");
             }
+        */
     }
 
     protected override void SendEntityEmote(

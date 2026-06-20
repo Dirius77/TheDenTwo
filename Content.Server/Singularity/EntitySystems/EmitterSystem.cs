@@ -318,7 +318,7 @@ namespace Content.Server.Singularity.EntitySystems
                 locString,
                 ("location", FormattedMessage.RemoveMarkupOrThrow(_navMap.GetNearestBeaconString(ent.Owner)))
             );
-            _radio.SendLanguageRadioMessage(ent.Owner, message, ent.Comp.RadioChannel, ent.Owner); // DEN: Languages
+            _radio.SendRadioMessage(ent.Owner, message, ent.Comp.RadioChannel, ent.Owner);
         }
 
         private void OnLockToggled(Entity<EmitterComponent> ent, ref LockToggledEvent args)

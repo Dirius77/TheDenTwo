@@ -1,3 +1,5 @@
+using System.Linq;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Speech;
 using Robust.Shared.Audio;
@@ -14,14 +16,13 @@ namespace Content.Server.Speech
         [Dependency] private IPrototypeManager _protoManager = default!;
         [Dependency] private IRobustRandom _random = default!;
         [Dependency] private SharedAudioSystem _audio = default!;
+        [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!; // DEN: Languages
 
         public override void Initialize()
         {
             base.Initialize();
 
-            InitializeLanguage(); // DEN: Languages
-
-            //SubscribeLocalEvent<SpeechComponent, EntitySpokeEvent>(OnEntitySpoke); // DEN: Languages, see EntitySpokeLanguageEvent
+            SubscribeLocalEvent<SpeechComponent, EntitySpokeEvent>(OnEntitySpoke);
         }
 
         public SoundSpecifier? GetSpeechSound(Entity<SpeechComponent> ent, string message)
@@ -69,10 +70,13 @@ namespace Content.Server.Speech
             return contextSound;
         }
 
-        [Obsolete("Use OnEntitySpokeLanguage instead", true)] // DEN: Languages
         private void OnEntitySpoke(EntityUid uid, SpeechComponent component, EntitySpokeEvent args)
         {
             if (component.SpeechSounds == null)
+                return;
+
+            // DEN Only audible languages make sounds
+            if (!_audibleQuery.HasComponent(args.LanguageEnt))
                 return;
 
             var currentTime = _gameTiming.CurTime;
@@ -82,7 +86,15 @@ namespace Content.Server.Speech
             if (currentTime - component.LastTimeSoundPlayed < cooldown)
                 return;
 
-            var sound = GetSpeechSound((uid, component), args.Message);
+            // DEN Start: Use complex speech for sounds.
+            var lastDialog = args.Message.Parts.LastOrDefault(part => part.Item1 == ChatPart.Dialog).Item2;
+
+            // The "Speech" didn't actually contain any dialog.
+            if (lastDialog == null)
+                return;
+
+            var sound = GetSpeechSound((uid, component), lastDialog);
+            // DEN End
             component.LastTimeSoundPlayed = currentTime;
             _audio.PlayPvs(sound, uid);
         }

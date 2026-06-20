@@ -1,7 +1,8 @@
+using Content.Server._DEN.Language.EntitySystems;
 using Content.Server.Chat.Systems;
 using Content.Server.Power.Components;
 using Content.Server.Vocalization.Components;
-using Content.Shared.ActionBlocker;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
@@ -15,9 +16,9 @@ namespace Content.Server.Vocalization.Systems;
 /// </summary>
 public sealed partial class VocalizationSystem : EntitySystem
 {
-    [Dependency] private ActionBlockerSystem _actionBlocker = default!;
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private IGameTiming _gameTiming = default!;
+    [Dependency] private LanguageSystem _languageSystem = default!; // DEN: Languages
     [Dependency] private IRobustRandom _random = default!;
 
     public override void Initialize()
@@ -25,8 +26,7 @@ public sealed partial class VocalizationSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<VocalizerComponent, MapInitEvent>(OnMapInit);
-        //SubscribeLocalEvent<VocalizerRequiresPowerComponent, TryVocalizeEvent>(OnRequiresPowerTryVocalize); // DEN: Languages, see TryVocalizeLanguageEvent
-        InitializeLanguage(); // DEN: Languages
+        SubscribeLocalEvent<VocalizerRequiresPowerComponent, TryVocalizeEvent>(OnRequiresPowerTryVocalize);
     }
 
     private void OnMapInit(Entity<VocalizerComponent> ent, ref MapInitEvent args)
@@ -34,7 +34,6 @@ public sealed partial class VocalizationSystem : EntitySystem
         ent.Comp.NextVocalizeInterval = _random.Next(ent.Comp.MinVocalizeInterval, ent.Comp.MaxVocalizeInterval);
     }
 
-    [Obsolete("Use OnRequiresPowerTryVocalizeLanguage instead.", true)] // DEN: Languages
     private void OnRequiresPowerTryVocalize(Entity<VocalizerRequiresPowerComponent> ent, ref TryVocalizeEvent args)
     {
         if (!TryComp<ApcPowerReceiverComponent>(ent, out var receiver))
@@ -47,7 +46,6 @@ public sealed partial class VocalizationSystem : EntitySystem
     /// Try speaking by raising a TryVocalizeEvent
     /// This event is passed to systems adding a message to it and setting it to handled
     /// </summary>
-    [Obsolete("Use TrySpeakLanguage instead.", true)] // DEN: Languages
     private void TrySpeak(Entity<VocalizerComponent> entity)
     {
         var tryVocalizeEvent = new TryVocalizeEvent();
@@ -67,31 +65,34 @@ public sealed partial class VocalizationSystem : EntitySystem
         if (tryVocalizeEvent.Message is not { } message)
             return;
 
-        Speak(entity, message);
+        // DEN: Languages
+        var language = tryVocalizeEvent.Language ?? _languageSystem.GetCurrentLanguageEntity(entity);
+        if (language is null)
+            return;
+
+        Speak(entity, language.Value, message); // DEN: Languages
     }
 
     /// <summary>
     /// Actually say something.
     /// </summary>
-    [Obsolete("Use SpeakLanguage instead.", true)] // DEN: Languages
-    private void Speak(Entity<VocalizerComponent> entity, string message)
+    private void Speak(Entity<VocalizerComponent> entity, Entity<LanguageComponent> language, string message) // DEN: Languages
     {
         // raise a VocalizeEvent
         // this can be handled by other systems to speak using a method other than local chat
-        var vocalizeEvent = new VocalizeEvent(message);
+        var vocalizeEvent = new VocalizeEvent(message, language); // DEN: Languages
         RaiseLocalEvent(entity.Owner, ref vocalizeEvent);
 
         // if the event is handled, don't try speaking
         if (vocalizeEvent.Handled)
             return;
 
-        // default to local chat if no other system handles the event
-        // first check if the entity can speak
-        if (!_actionBlocker.CanSpeak(entity))
-            return;
-
-        // send the message
-        _chat.TrySendInGameICMessage(entity, message, InGameICChatType.Speak, entity.Comp.HideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal);
+        // DEN Start: Convert to complex and send.
+        // There used to be a "Can Speak" check here, but sending the speech already does that check and with languages
+        // it is not always trivial, so doing it twice is a waste.
+        var cmplxMessage = _chat.ConvertMessageToComplex(message);
+        _chat.SendEntityComplexSpeech(entity, cmplxMessage, ChatSystem.SpeakWrapper, ChatChannel.Local, entity.Comp.HideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, languageOverride: language);
+        // DEN End.
     }
 
     public override void Update(float frameTime)
@@ -119,7 +120,7 @@ public sealed partial class VocalizationSystem : EntitySystem
                 vocalizer.NextVocalizeInterval = _gameTiming.CurTime + randomSpeakInterval;
 
             // try to speak
-            TrySpeakLanguage((uid, vocalizer)); // DEN: Languages
+            TrySpeak((uid, vocalizer));
         }
     }
 }
@@ -128,17 +129,17 @@ public sealed partial class VocalizationSystem : EntitySystem
 /// Fired when the entity wants to try vocalizing, but doesn't have a message yet
 /// </summary>
 /// <param name="Message">Message to send, this is null when the event is just fired and should be set by a system</param>
+/// <param name="Language">Language to use, this is null when the event is just fired and may be set by a system.</param>
 /// <param name="Handled">Whether the message was handled by a system</param>
-[Obsolete("Use TryVocalizeLanguageEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
-public record struct TryVocalizeEvent(string? Message = null, bool Handled = false, bool Cancelled = false);
+public record struct TryVocalizeEvent(string? Message = null, Entity<LanguageComponent>? Language = null, bool Handled = false, bool Cancelled = false); // DEN: Add Languages
 
 /// <summary>
 /// Fired when the entity wants to vocalize and has a message. Allows for interception by other systems if the
 /// vocalization needs to be done some other way
 /// </summary>
 /// <param name="Message">Message to send</param>
+/// <param name="Language">Language entity to use</param>
 /// <param name="Handled">Whether the message was handled by a system</param>
-[Obsolete("Use VocalizeLanguageEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
-public record struct VocalizeEvent(string Message, bool Handled = false);
+public record struct VocalizeEvent(string Message, Entity<LanguageComponent> Language, bool Handled = false); // DEN: Languages

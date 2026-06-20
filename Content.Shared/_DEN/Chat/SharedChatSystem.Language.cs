@@ -14,6 +14,12 @@ public abstract partial class SharedChatSystem
     [Dependency] private IConfigurationManager _cfg = default!;
 
     // TODO: Kill the other spot where this is getting called from and move this into WhisperMuffle (if we even keep using it)
+    /// <summary>
+    /// Runs default whisper obfuscation on the dialog parts of the provided message based on the passed float.
+    /// </summary>
+    /// <param name="message">The message to obfuscate</param>
+    /// <param name="amount">The percentage of the message that should be obfuscated</param>
+    /// <returns>A new message with the dialog portions obfuscated</returns>
     public ComplexChatMessage ObfuscateComplexChatMessage(ComplexChatMessage message, float amount)
     {
         var newParts = new List<(ChatPart, string)>();
@@ -33,6 +39,15 @@ public abstract partial class SharedChatSystem
         return new ComplexChatMessage(message, newParts);
     }
 
+    /// <summary>
+    /// Finds the correct verb for an instance of complex speech. This takes into account the difference between dialog and actions when
+    /// searching for the correct verb prototype.
+    /// </summary>
+    /// <param name="source">The entity to find the verb for.</param>
+    /// <param name="message">The message to use for finding the verb.</param>
+    /// <param name="language">The language being spoken.</param>
+    /// <param name="channel">Which chat channel is being spoken on.</param>
+    /// <returns>The correct speech verb prototype to use.</returns>
     public SpeechVerbPrototype GetComplexSpeechVerb(EntityUid source, ComplexChatMessage message, LanguagePrototype language, ChatChannel channel)
     {
         var lastDialog = message.Parts.LastOrDefault(p => p.Item1 == ChatPart.Dialog).Item2;
@@ -64,6 +79,12 @@ public abstract partial class SharedChatSystem
         return current ?? GetSpeechVerb(source, lastDialog);
     }
 
+    /// <summary>
+    /// Converts a string into a ComplexChatMessage. This assumes the entire message is dialog, but does also handle
+    /// the special cases of starting a message with '!' '"' ',' or ''' for special formatting.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
     public ComplexChatMessage ConvertMessageToComplex(string message)
     {
         var isDetailed = false;
@@ -103,6 +124,12 @@ public readonly record struct ComplexChatMessage()
     public readonly bool NeedsSpacing;
     public readonly bool NeedsSeparation;
 
+    /// <summary>
+    /// Builds a new ComplexChatMessage with the new chat parts, but the same settings and original message as before.
+    /// This is for use in quickly building a new ComplexChatMessage after modifying it in some way, IE performing translation mangling.
+    /// </summary>
+    /// <param name="primary">The original ComplexChatMessage to copy settings from.</param>
+    /// <param name="parts">The new parts of the message.</param>
     public ComplexChatMessage(ComplexChatMessage primary, IReadOnlyList<(ChatPart, string)> parts) : this()
     {
         OriginalMessage = primary.OriginalMessage;
@@ -113,6 +140,17 @@ public readonly record struct ComplexChatMessage()
         Parts = parts;
     }
 
+    /// <summary>
+    /// Builds a new ComplexChatMessage from scratch, this will attempt to parse the message into dialog, actions, and tags.
+    /// </summary>
+    /// <param name="message">The full message string.</param>
+    /// <param name="delimiter">Which character differentiates dialog and actions.</param>
+    /// <param name="isDetailed">If the message should be considered detailed at all. Parsing is skipped if not and the
+    /// entire message is assumed to be dialog.</param>
+    /// <param name="needsSpacing">If spacing is needed between the speaker name and the message when formatting</param>
+    /// <param name="needsSeparation">Whether the speaker name should be formatted as its own separate chunk of the
+    /// message, IE: "(Bob) He performs some action." vs "Alice performs some action."</param>
+    /// <param name="escapeMarkup">Whether to run markup escaping on this message.</param>
     public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing, bool needsSeparation, bool escapeMarkup = false) : this()
     {
         OriginalMessage = message;

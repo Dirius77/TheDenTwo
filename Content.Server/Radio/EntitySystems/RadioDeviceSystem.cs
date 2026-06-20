@@ -3,6 +3,7 @@ using Content.Server.Chat.Systems;
 using Content.Server.Interaction;
 using Content.Server.Popups;
 using Content.Server.Power.EntitySystems;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Examine;
 using Content.Shared.Interaction;
@@ -27,6 +28,7 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
     [Dependency] private RadioSystem _radio = default!;
     [Dependency] private InteractionSystem _interaction = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
+    [Dependency] private EntityQuery<RadioTransmittableComponent> _radioLang = default!; // DEN: Languages
 
     // Used to prevent a shitter from using a bunch of radios to spam chat.
     private HashSet<(string, EntityUid, RadioChannelPrototype)> _recentlySent = new();
@@ -37,20 +39,18 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
         SubscribeLocalEvent<RadioMicrophoneComponent, ComponentInit>(OnMicrophoneInit);
         SubscribeLocalEvent<RadioMicrophoneComponent, ExaminedEvent>(OnExamine);
         SubscribeLocalEvent<RadioMicrophoneComponent, ActivateInWorldEvent>(OnActivateMicrophone);
-        //SubscribeLocalEvent<RadioMicrophoneComponent, ListenEvent>(OnListen); // DEN: Languages
-        //SubscribeLocalEvent<RadioMicrophoneComponent, ListenAttemptEvent>(OnAttemptListen); // DEN: Languages
+        SubscribeLocalEvent<RadioMicrophoneComponent, ListenEvent>(OnListen);
+        SubscribeLocalEvent<RadioMicrophoneComponent, ListenAttemptEvent>(OnAttemptListen);
         SubscribeLocalEvent<RadioMicrophoneComponent, PowerChangedEvent>(OnPowerChanged);
 
         SubscribeLocalEvent<RadioSpeakerComponent, ComponentInit>(OnSpeakerInit);
         SubscribeLocalEvent<RadioSpeakerComponent, ActivateInWorldEvent>(OnActivateSpeaker);
-        // SubscribeLocalEvent<RadioSpeakerComponent, RadioReceiveEvent>(OnReceiveRadio); // DEN: Languages
+        SubscribeLocalEvent<RadioSpeakerComponent, RadioReceiveEvent>(OnReceiveRadio);
 
         SubscribeLocalEvent<IntercomComponent, EncryptionChannelsChangedEvent>(OnIntercomEncryptionChannelsChanged);
         SubscribeLocalEvent<IntercomComponent, ToggleIntercomMicMessage>(OnToggleIntercomMic);
         SubscribeLocalEvent<IntercomComponent, ToggleIntercomSpeakerMessage>(OnToggleIntercomSpeaker);
         SubscribeLocalEvent<IntercomComponent, SelectIntercomChannelMessage>(OnSelectIntercomChannel);
-
-        InitializeLanguage(); // DEN: Languages
     }
 
     public override void Update(float frameTime)
@@ -150,29 +150,27 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
                 ("channel", proto.LocalizedName)));
         }
     }
-
-    [Obsolete("Use OnListenLanguage instead.", true)] // DEN: Languages
+    
     private void OnListen(EntityUid uid, RadioMicrophoneComponent component, ListenEvent args)
     {
         if (HasComp<RadioSpeakerComponent>(args.Source))
             return; // no feedback loops please.
 
         var channel = _protoMan.Index<RadioChannelPrototype>(component.BroadcastChannel)!;
-        if (_recentlySent.Add((args.Message, args.Source, channel)))
-            _radio.SendRadioMessage(args.Source, args.Message, channel, uid);
+        if (_recentlySent.Add((args.Message.OriginalMessage, args.Source, channel))) // DEN: Languages
+            _radio.SendRadioMessage(args.Source, args.LanguageEnt, args.Message, channel, uid); // DEN: Languages
     }
 
-    [Obsolete("Use OnAttemptListenLanguage instead.", true)] // DEN: Languages
     private void OnAttemptListen(EntityUid uid, RadioMicrophoneComponent component, ListenAttemptEvent args)
     {
         if (component.PowerRequired && !this.IsPowered(uid, EntityManager)
-            || component.UnobstructedRequired && !_interaction.InRangeUnobstructed(args.Source, uid, 0))
+            || component.UnobstructedRequired && !_interaction.InRangeUnobstructed(args.Source, uid, 0)
+            || !_radioLang.HasComp(args.LanguageEnt)) // DEN: Languages
         {
             args.Cancel();
         }
     }
 
-    [Obsolete("Use OnReceiveLanguageRadio instead.", true)] // DEN: Languages
     private void OnReceiveRadio(EntityUid uid, RadioSpeakerComponent component, ref RadioReceiveEvent args)
     {
         if (uid == args.RadioSource)
@@ -186,7 +184,15 @@ public sealed partial class RadioDeviceSystem : SharedRadioDeviceSystem
             ("originalName", nameEv.VoiceName));
 
         // log to chat so people can identity the speaker/source, but avoid clogging ghost chat if there are many radios
-        _chat.TrySendInGameICMessage(uid, args.Message, InGameICChatType.Whisper, ChatTransmitRange.GhostRangeLimit, nameOverride: name, checkRadioPrefix: false);
+        _chat.SendEntityComplexSpeech(uid,
+            args.Message,
+            ChatSystem.WhisperWrapper,
+            ChatChannel.Whisper,
+            ChatTransmitRange.GhostRangeLimit,
+            null,
+            name,
+            verbOverride: args.Verb,
+            languageOverride: args.LanguageEnt); // DEN: Languages
     }
 
     private void OnIntercomEncryptionChannelsChanged(Entity<IntercomComponent> ent, ref EncryptionChannelsChangedEvent args)

@@ -1,3 +1,4 @@
+using System.Linq;
 using Content.Server.Chat.Systems;
 using Content.Server.Speech;
 using Content.Server.SurveillanceCamera.Systems;
@@ -21,12 +22,9 @@ public sealed partial class SurveillanceCameraSpeakerSystem : EntitySystem
     /// <inheritdoc/>
     public override void Initialize()
     {
-        //SubscribeLocalEvent<SurveillanceCameraSpeakerComponent, SurveillanceCameraSpeechSendEvent>(OnSpeechSent); // DEN: Languages, see SurveillanceCameraSpeechLanguageSendEvent (sorry)
-
-        InitializeLanguage(); // DEN: Languages
+        SubscribeLocalEvent<SurveillanceCameraSpeakerComponent, SurveillanceCameraSpeechSendEvent>(OnSpeechSent);
     }
 
-    [Obsolete("Use OnSpeechLanguageSent instead.", true)] // DEN: Languages
     private void OnSpeechSent(EntityUid uid, SurveillanceCameraSpeakerComponent component,
         SurveillanceCameraSpeechSendEvent args)
     {
@@ -43,7 +41,8 @@ public sealed partial class SurveillanceCameraSpeakerSystem : EntitySystem
         if (time - component.LastSoundPlayed < cd
             && TryComp<SpeechComponent>(args.Speaker, out var speech))
         {
-            var sound = _speechSound.GetSpeechSound((args.Speaker, speech), args.Message);
+            var sound = _speechSound.GetSpeechSound((args.Speaker, speech),
+                args.Message.Parts.LastOrDefault(part => part.Item1 == ChatPart.Dialog).Item2); // DEN: Complex Speech
             _audioSystem.PlayPvs(sound, uid);
 
             component.LastSoundPlayed = time;
@@ -56,6 +55,14 @@ public sealed partial class SurveillanceCameraSpeakerSystem : EntitySystem
             ("originalName", nameEv.VoiceName));
 
         // log to chat so people can identity the speaker/source, but avoid clogging ghost chat if there are many radios
-        _chatSystem.TrySendInGameICMessage(uid, args.Message, InGameICChatType.Speak, ChatTransmitRange.GhostRangeLimit, nameOverride: name);
+        _chatSystem.SendEntityComplexSpeech(uid,
+            args.Message,
+            ChatSystem.SpeakWrapper,
+            ChatChannel.Whisper,
+            ChatTransmitRange.GhostRangeLimit,
+            null,
+            name,
+            verbOverride: args.Verb,
+            languageOverride: args.LanguageEnt); // DEN: Complex Speech and Languages.
     }
 }

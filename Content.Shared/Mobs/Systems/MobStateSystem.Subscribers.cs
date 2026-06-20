@@ -33,7 +33,7 @@ public partial class MobStateSystem
         SubscribeLocalEvent<MobStateComponent, AttackAttemptEvent>(CheckAct);
         SubscribeLocalEvent<MobStateComponent, ConsciousAttemptEvent>(CheckConcious);
         SubscribeLocalEvent<MobStateComponent, ThrowAttemptEvent>(CheckAct);
-        //SubscribeLocalEvent<MobStateComponent, SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Languages, see SpeakLanguageAttemptEvent
+        SubscribeLocalEvent<MobStateComponent, SpeakAttemptEvent>(OnSpeakAttempt);
         SubscribeLocalEvent<MobStateComponent, IsEquippingAttemptEvent>(OnEquipAttempt);
         SubscribeLocalEvent<MobStateComponent, EmoteAttemptEvent>(CheckAct);
         SubscribeLocalEvent<MobStateComponent, IsUnequippingAttemptEvent>(OnUnequipAttempt);
@@ -49,8 +49,6 @@ public partial class MobStateSystem
         SubscribeLocalEvent<MobStateComponent, DamageModifyEvent>(OnDamageModify);
 
         SubscribeLocalEvent<MobStateComponent, UnbuckleAttemptEvent>(OnUnbuckleAttempt);
-
-        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnUnbuckleAttempt(Entity<MobStateComponent> ent, ref UnbuckleAttemptEvent args)
@@ -159,9 +157,10 @@ public partial class MobStateSystem
             args.Multiplier /= 2;
     }
 
-    [Obsolete("Use OnSpeakLanguageAttempt instead.", true)] // DEN: Languages
     private void OnSpeakAttempt(EntityUid uid, MobStateComponent component, SpeakAttemptEvent args)
     {
+        // TODO: DEN: Decide if UnconsciousLanguages should be able to be spoken while critical.
+        
         if (HasComp<AllowNextCritSpeechComponent>(uid))
         {
             RemCompDeferred<AllowNextCritSpeechComponent>(uid);

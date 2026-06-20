@@ -31,11 +31,9 @@ public sealed partial class AdminFrozenSystem : EntitySystem
         SubscribeLocalEvent<AdminFrozenComponent, AttackAttemptEvent>(OnAttempt);
         SubscribeLocalEvent<AdminFrozenComponent, ChangeDirectionAttemptEvent>(OnAttempt);
         SubscribeLocalEvent<AdminFrozenComponent, EmoteAttemptEvent>(OnEmoteAttempt);
-        //SubscribeLocalEvent<AdminFrozenComponent, SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Languages, see SpeakLanguageAttemptEvent
+        SubscribeLocalEvent<AdminFrozenComponent, SpeakAttemptEvent>(OnSpeakAttempt);
         SubscribeLocalEvent<AdminFrozenComponent, InGameOocMessageAttemptEvent>(OnInGameOocMessageAttempt);
         SubscribeLocalEvent<InGameOocMessageAttemptEvent>(OnInGameOocMessageAttemptBroadcast);
-
-        InitializeLanguage(); // DEN: Languages
     }
 
     /// <summary>
@@ -53,7 +51,6 @@ public sealed partial class AdminFrozenSystem : EntitySystem
         args.Cancelled = true;
     }
 
-    [Obsolete("Use OnSpeakLanguageAttempt instead.", true)] // DEN: Languages
     private void OnSpeakAttempt(EntityUid uid, AdminFrozenComponent component, SpeakAttemptEvent args)
     {
         if (!component.Muted)

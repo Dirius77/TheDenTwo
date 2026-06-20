@@ -1,4 +1,7 @@
+using System.Linq;
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
+using Content.Shared.Chat;
 using Content.Shared.Trigger.Components.Triggers;
 using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
@@ -11,14 +14,15 @@ namespace Content.Shared.Trigger.Systems;
 
 public sealed partial class TriggerSystem
 {
+    [Dependency] private IPrototypeManager _proto = default!; // DEN Language
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!; // DEN Language
+    
     private void InitializeVoice()
     {
         SubscribeLocalEvent<TriggerOnVoiceComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<TriggerOnVoiceComponent, ExaminedEvent>(OnVoiceExamine);
-        //SubscribeLocalEvent<TriggerOnVoiceComponent, ListenEvent>(OnListen); // DEN: Languages, see ListenLanguageEvent
+        SubscribeLocalEvent<TriggerOnVoiceComponent, ListenEvent>(OnListen);
         SubscribeLocalEvent<TriggerOnVoiceComponent, GetVerbsEvent<AlternativeVerb>>(OnVoiceGetAltVerbs);
-
-        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnMapInit(Entity<TriggerOnVoiceComponent> ent, ref MapInitEvent args)
@@ -53,23 +57,30 @@ public sealed partial class TriggerSystem
         }
     }
 
-    /* // DEN: Gotta comment this all out because it doesn't compile anymore.
-    [Obsolete("Use OnListenLanguage instead.", true)] // DEN: Languages
     private void OnListen(Entity<TriggerOnVoiceComponent> ent, ref ListenEvent args)
     {
+        // DEN Start: Languages
+        var languageEnt = args.LanguageEnt;
+
+        if (!_audibleQuery.HasComponent(languageEnt))
+            return;
+
+        var language = _proto.Index(languageEnt.Comp.Language);
+        
         var component = ent.Comp;
-        var message = args.Message.Trim();
+        var message = string.Join(' ', args.Message.Parts.Where(part => part.Item1 == ChatPart.Dialog).Select(part => part.Item2)).Trim();
+        // DEN End
 
         if (component.IsRecording)
         {
-            var ev = new ListenAttemptEvent(args.Source);
+            var ev = new ListenAttemptEvent(args.Source, languageEnt); // DEN: Languages
             RaiseLocalEvent(ent, ev);
 
             if (ev.Cancelled)
                 return;
 
             if (message.Length >= component.MinLength && message.Length <= component.MaxLength)
-                FinishRecording(ent, args.Source, args.Message);
+                FinishRecording(ent, args.Source, message, language.ID); // DEN: Languages
             else if (message.Length > component.MaxLength)
                 _popup.PopupEntity(Loc.GetString("trigger-on-voice-record-failed-too-long"), ent);
             else if (message.Length < component.MinLength)
@@ -89,7 +100,6 @@ public sealed partial class TriggerSystem
             RaiseLocalEvent(ent, ref voice);
         }
     }
-    */
 
     private void OnVoiceGetAltVerbs(Entity<TriggerOnVoiceComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
     {

@@ -66,7 +66,7 @@ public sealed partial class ChatSystem
             return;
         }
 
-        if (!_actionBlocker.CanSpeakLanguage(source, (languageEnt, languageEnt.Comp), chatChannel) &&
+        if (!_actionBlocker.CanSpeak(source, (languageEnt, languageEnt.Comp), chatChannel) &&
             !ignoreActionBlocker)
             return;
 
@@ -162,7 +162,7 @@ public sealed partial class ChatSystem
             null,
             MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeLanguageEvent(source, languageEnt, message, radioChannel, verb, chatChannel);
+        var ev = new EntitySpokeEvent(source, languageEnt, message, radioChannel, verb, chatChannel);
         RaiseLocalEvent(source, ev, true);
 
         // The message wasn't sent by a player, so don't log it. Prevents radios and cameras from causing a player's
@@ -328,7 +328,7 @@ public sealed partial class ChatSystem
     /// <param name="verb">The verb to use for speaking.</param>
     /// <param name="channel">The radio channel name being spoken on, if any.</param>
     /// <param name="color">The override color to use, if any.</param>
-    /// <returns></returns>
+    /// <returns>(string, string) of (unwrapped message, wrapped message)</returns>
     public (string, string) BuildComplexMessage(ComplexChatMessage message,
         LanguageWrapperPrototype wrapper,
         LanguagePrototype language,

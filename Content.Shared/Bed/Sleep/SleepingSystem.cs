@@ -1,3 +1,4 @@
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Actions;
 using Content.Shared.Actions.Components;
 using Content.Shared.Buckle.Components;
@@ -41,6 +42,7 @@ public sealed partial class SleepingSystem : EntitySystem
     [Dependency] private SharedEmitSoundSystem _emitSound = default!;
     [Dependency] private StatusEffectsSystem _statusEffect = default!;
     [Dependency] private SharedStunSystem _stun = default!;
+    [Dependency] private EntityQuery<UnconsciousLanguageComponent> _unconsciousLanguageQuery = default!; // DEN: Languages
 
     public static readonly EntProtoId SleepActionId = "ActionSleep";
     public static readonly EntProtoId WakeActionId = "ActionWake";
@@ -62,7 +64,7 @@ public sealed partial class SleepingSystem : EntitySystem
         SubscribeLocalEvent<SleepingComponent, ComponentInit>(OnCompInit);
         SubscribeLocalEvent<SleepingComponent, ComponentRemove>(OnComponentRemoved);
         SubscribeLocalEvent<SleepingComponent, RejuvenateEvent>(OnRejuvenate);
-        //SubscribeLocalEvent<SleepingComponent, SpeakAttemptEvent>(OnSpeakAttempt); // DEN: Languages, see SpeakLanguageAttemptEvent
+        SubscribeLocalEvent<SleepingComponent, SpeakAttemptEvent>(OnSpeakAttempt);
         SubscribeLocalEvent<SleepingComponent, CanSeeAttemptEvent>(OnSeeAttempt);
         SubscribeLocalEvent<SleepingComponent, PointAttemptEvent>(OnPointAttempt);
         SubscribeLocalEvent<SleepingComponent, SlipAttemptEvent>(OnSlip);
@@ -79,8 +81,6 @@ public sealed partial class SleepingSystem : EntitySystem
         SubscribeLocalEvent<SleepingComponent, EmoteAttemptEvent>(OnEmoteAttempt);
 
         SubscribeLocalEvent<SleepingComponent, BeforeForceSayEvent>(OnChangeForceSay, after: new []{typeof(PainNumbnessSystem)});
-
-        InitializeLanguage(); // DEN: Languages
     }
 
     private void OnUnbuckleAttempt(Entity<SleepingComponent> ent, ref UnbuckleAttemptEvent args)
@@ -164,9 +164,11 @@ public sealed partial class SleepingSystem : EntitySystem
         _blindableSystem.UpdateIsBlind(ent.Owner);
     }
 
-    [Obsolete("Use OnSpeakLanguageAttempt instead.", true)] // DEN: Languages
     private void OnSpeakAttempt(Entity<SleepingComponent> ent, ref SpeakAttemptEvent args)
     {
+        if (_unconsciousLanguageQuery.HasComp(args.LanguageEnt)) // DEN: Languages that can be spoken while asleep.
+            return;
+        
         if (HasComp<AllowNextCritSpeechComponent>(ent))
         {
             RemCompDeferred<AllowNextCritSpeechComponent>(ent);

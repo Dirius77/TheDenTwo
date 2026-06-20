@@ -1,25 +1,36 @@
+using Content.Shared._DEN.Language.Components;
+using Content.Shared.Chat;
+
 namespace Content.Shared.Speech;
 
-[Obsolete("Use ListenLanguageEvent instead.", true)] // DEN: Languages
+// DEN Start: Switch to using ComplexChatMessage.
 public sealed class ListenEvent : EntityEventArgs
 {
-    public readonly string Message;
+    public readonly ComplexChatMessage Message;
+    public readonly Entity<LanguageComponent> LanguageEnt;
     public readonly EntityUid Source;
+    public readonly string Verb;
+    public readonly ChatChannel Channel;
 
-    public ListenEvent(string message, EntityUid source)
+    public ListenEvent(ComplexChatMessage msg, EntityUid source, Entity<LanguageComponent> languageEnt, string verb, ChatChannel channel)
     {
-        Message = message;
+        Message = msg;
         Source = source;
+        LanguageEnt = languageEnt;
+        Verb = verb;
+        Channel = channel;
     }
 }
+// DEN End.
 
-[Obsolete("Use ListenLanguageAttemptEvent instead.", true)] // DEN: Languages
 public sealed class ListenAttemptEvent : CancellableEntityEventArgs
 {
     public readonly EntityUid Source;
+    public readonly Entity<LanguageComponent> LanguageEnt; // DEN: Language
 
-    public ListenAttemptEvent(EntityUid source)
+    public ListenAttemptEvent(EntityUid source, Entity<LanguageComponent> languageEnt) // DEN: Language
     {
         Source = source;
+        LanguageEnt = languageEnt; // DEN: Language
     }
 }

@@ -1,6 +1,6 @@
 using Content.Shared._DEN.Language.Components;
-using Content.Shared._DEN.Speech;
 using Content.Shared.Chat;
+using Content.Shared.Speech;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
 
@@ -9,7 +9,7 @@ public sealed partial class LanguageRelaySystem : EntitySystem
     public override void Initialize()
     {
         SubscribeLocalEvent<LanguageCommunicatorComponent, AttemptUnderstandingEvent>(RelayKnownLanguagesEvent);
-        SubscribeLocalEvent<LanguageCommunicatorComponent, SpeakLanguageAttemptEvent>(RelaySpokenLanguageEvent);
+        SubscribeLocalEvent<LanguageCommunicatorComponent, SpeakAttemptEvent>(RelaySpokenLanguageEvent);
         SubscribeLocalEvent<LanguageCommunicatorComponent, TransformSpeakerNameEvent>(RelaySpokenLanguageEvent);
         SubscribeLocalEvent<LanguageCommunicatorComponent, TransformLanguageEvent>(RelaySpokenLanguageEvent);
     }

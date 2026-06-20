@@ -2,11 +2,11 @@ using Content.Server.Chat.Systems;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
-using Content.Shared._DEN.Speech;
 using Content.Shared.Examine;
 using Content.Shared.Ghost;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
+using Content.Shared.Speech;
 using Content.Shared.Whitelist;
 using Robust.Server.Player;
 using Robust.Shared.Random;
@@ -27,7 +27,7 @@ public sealed partial class GestaltSystem : EntitySystem
     public override void Initialize()
     {
         SubscribeLocalEvent<ExpandICChatRecipientsEvent>(OnExpandICChatRecipients);
-        SubscribeLocalEvent<GestaltComponent, LanguageRelayedEvent<SpeakLanguageAttemptEvent>>(OnSpeakLanguageAttempt);
+        SubscribeLocalEvent<GestaltComponent, LanguageRelayedEvent<SpeakAttemptEvent>>(OnSpeakLanguageAttempt);
 
         SubscribeLocalEvent<GestaltComponent, ComponentStartup>(OnGestaltLanguageStartup);
         SubscribeLocalEvent<GestaltComponent, ExaminedEvent>(OnGestaltLanguageExamined);
@@ -43,7 +43,7 @@ public sealed partial class GestaltSystem : EntitySystem
         args.PushMarkup(Loc.GetString("language-gestalt-language-description"));
     }
 
-    private void OnSpeakLanguageAttempt(Entity<GestaltComponent> entity, ref LanguageRelayedEvent<SpeakLanguageAttemptEvent> args)
+    private void OnSpeakLanguageAttempt(Entity<GestaltComponent> entity, ref LanguageRelayedEvent<SpeakAttemptEvent> args)
     {
         var gestalt = entity.Comp;
 

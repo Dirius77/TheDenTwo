@@ -176,7 +176,7 @@ public sealed partial class AnomalySystem
         Audio.PlayPvs(component.GeneratingFinishedSound, uid);
 
         var message = Loc.GetString("anomaly-generator-announcement");
-        _radio.SendLanguageRadioMessage(uid, message, _prototype.Index<RadioChannelPrototype>(component.ScienceChannel), uid); // DEN: Languages
+        _radio.SendRadioMessage(uid, message, _prototype.Index<RadioChannelPrototype>(component.ScienceChannel), uid);
     }
 
     private void UpdateGenerator()

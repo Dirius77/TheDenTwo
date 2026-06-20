@@ -1,16 +1,16 @@
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Radio;
+using Content.Shared.Speech;
 
 namespace Content.Server.Radio;
 
-[Obsolete("Use RadioReceiveLanguageEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
-public readonly record struct RadioReceiveEvent(string Message, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource, MsgChatMessage ChatMsg);
+public readonly record struct RadioReceiveEvent(ComplexChatMessage Message, Entity<LanguageComponent> LanguageEnt, SpeechVerbPrototype Speech, string Name, string Verb, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource); // DEN: Use ComplexChatMessage system instead of just passing network message structs around.
 
 /// <summary>
 /// Event raised on the parent entity of a headset radio when a radio message is received
 /// </summary>
-[Obsolete("Use HeadsetRadioReceiveLanguageRelayEvent instead.", true)] // DEN: Languages
 [ByRefEvent]
 public readonly record struct HeadsetRadioReceiveRelayEvent(RadioReceiveEvent RelayedEvent);
 

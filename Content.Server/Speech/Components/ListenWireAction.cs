@@ -85,7 +85,7 @@ public sealed partial class ListenWireAction : BaseToggleWireAction
         // The reason for the override is to make the voice sound like its coming from electrity rather than the intercom.
         voiceOverrideComp.NameOverride = Loc.GetString("wire-listen-pulse-identifier");
         voiceOverrideComp.Enabled = true;
-        _radio.SendLanguageRadioMessage(wire.Owner, noiseMsg, _protoMan.Index<RadioChannelPrototype>(radioMicroPhoneComp.BroadcastChannel), wire.Owner); // DEN: Languages
+        _radio.SendRadioMessage(wire.Owner, noiseMsg, _protoMan.Index<RadioChannelPrototype>(radioMicroPhoneComp.BroadcastChannel), wire.Owner);
         voiceOverrideComp.Enabled = false;
 
         base.Pulse(user, wire);

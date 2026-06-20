@@ -1,4 +1,5 @@
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Inventory;
 using Content.Shared.Radio;
 using Content.Shared.Speech;
@@ -56,12 +57,14 @@ public sealed class CheckIgnoreSpeechBlockerEvent : EntityEventArgs
 /// <summary>
 /// Raised on an entity when it speaks, either through 'say' or 'whisper'.
 /// </summary>
-[Obsolete("Use EntitySpokeLanguageEvent instead.", true)] // DEN: Languages
+// DEN Start: Convert to languages and ComplexChatMessage. Also pass the ChatChannel so systems can use it.
 public sealed class EntitySpokeEvent : EntityEventArgs
 {
     public readonly EntityUid Source;
-    public readonly string Message;
-    public readonly string? ObfuscatedMessage; // not null if this was a whisper
+    public readonly Entity<LanguageComponent> LanguageEnt; // DEN: Languages
+    public readonly ComplexChatMessage Message;
+    public readonly string Verb;
+    public readonly ChatChannel ChatChannel;
 
     /// <summary>
     /// If the entity was trying to speak into a radio, this was the channel they were trying to access. If a radio
@@ -69,11 +72,23 @@ public sealed class EntitySpokeEvent : EntityEventArgs
     /// </summary>
     public RadioChannelPrototype? Channel;
 
-    public EntitySpokeEvent(EntityUid source, string message, RadioChannelPrototype? channel, string? obfuscatedMessage)
+    /// <summary>
+    /// Event called on an entity when it speaks with a language.
+    /// </summary>
+    /// <param name="source">The entity speaking.</param>
+    /// <param name="languageEnt">The language entity being spoken.</param>
+    /// <param name="message">The message being spoken.</param>
+    /// <param name="channel">The radio channel being spoken on, if there is one.</param>
+    /// <param name="verb">The verb that will be used for this message, if one is needed.</param>
+    /// <param name="chatChannel">The ChatChannel that is being spoken on.</param>
+    public EntitySpokeEvent(EntityUid source, Entity<LanguageComponent> languageEnt, ComplexChatMessage message, RadioChannelPrototype? channel, string verb, ChatChannel chatChannel)
     {
         Source = source;
         Message = message;
+        LanguageEnt = languageEnt;
         Channel = channel;
-        ObfuscatedMessage = obfuscatedMessage;
+        Verb = verb;
+        ChatChannel = chatChannel;
     }
 }
+// DEN End
