@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Administration.Logs;
+using Content.Shared._DEN.Consent.Prototypes;
 using Content.Shared.Administration.Logs;
 using Content.Shared.CCVar;
 using Content.Shared.Construction.Prototypes;
@@ -131,6 +132,28 @@ namespace Content.Server.Database
         /// </summary>
         /// <returns><see cref="ServerBanExemptFlags.None"/> if the user is not exempt from any bans.</returns>
         Task<ServerBanExemptFlags> GetBanExemption(NetUserId userId, CancellationToken cancel = default);
+
+        #endregion
+
+        #region Consent
+
+        /// <summary>
+        /// Get all consent information on a player.
+        /// </summary>
+        /// <param name="player">The player to get the consent information from.</param>
+        /// <param name="cancel"></param>
+        /// <returns>All consent information belonging to the player.</returns>
+        Task<List<ConsentData>> GetConsentData(Guid player, CancellationToken cancel = default);
+
+        /// <summary>
+        /// Set the value of a consent toggle.
+        /// </summary>
+        /// <param name="player">The player to set the consent information of.</param>
+        /// <param name="protoId">The consent toggle ID to set.</param>
+        /// <param name="value">The new value.</param>
+        Task SetConsentData(Guid player,
+            ProtoId<ConsentTogglePrototype> protoId,
+            bool value);
 
         #endregion
 
@@ -542,10 +565,26 @@ namespace Content.Server.Database
             return RunDbCommand(() => _db.UpdateBanExemption(userId, flags));
         }
 
+        // DEN Start: Consent system
         public Task<ServerBanExemptFlags> GetBanExemption(NetUserId userId, CancellationToken cancel = default)
         {
             DbReadOpsMetric.Inc();
             return RunDbCommand(() => _db.GetBanExemption(userId, cancel));
+        }
+
+        public Task<List<ConsentData>> GetConsentData(Guid player, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetConsentData(player, cancel));
+        }
+        // DEN End
+
+        public Task SetConsentData(Guid player,
+            ProtoId<ConsentTogglePrototype> protoId,
+            bool value)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.SetConsentData(player, protoId, value));
         }
 
         #region Playtime

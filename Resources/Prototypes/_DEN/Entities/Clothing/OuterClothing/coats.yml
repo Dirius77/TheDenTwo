@@ -1,0 +1,88 @@
+- type: entity
+  abstract: true
+  parent: [ClothingOuterStorageBase, BaseMantisContraband]
+  id: ClothingOuterMantisBase
+  components:
+  - type: Armor # Migrating damage resistances, protections, and tags from DV's dated mantis stuff to our mantis stuff bc it would be there anyways.
+    modifiers:
+      coefficients:
+        Blunt: 0.8
+        Slash: 0.8
+        Piercing: 0.8
+        Heat: 0.8
+        Cold: 0.8
+#  - type: StaminaDamageResistance Doesnt exist?
+#    coefficient: 0.8
+  - type: TemperatureProtection
+    heatingCoefficient: 0.3
+    coolingCoefficient: 0.3
+  - type: Tag
+    tags:
+    - WhitelistChameleon
+    - MantisBeltStorable
+
+- type: entity
+  parent: [ClothingOuterMantisBase, BaseFoldable] # Changed to ClothingOuterStorageBase from ClothingOuterCoatMantis as that's a DV holdover
+  id: ClothingOuterCoatMantisAiry
+  name: airy mantis sash
+  description: "A colorful sash with swinging tassles. You can wear it over either shoulder."
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/OuterClothing/Coats/mantis_jacket_airy.rsi
+    layers:
+    - state: icon
+      map: ["unfoldedLayer"]
+    - state: icon-flipped
+      map: ["foldedLayer"]
+      visible: false
+  - type: Clothing
+    sprite: _DEN/Clothing/OuterClothing/Coats/mantis_jacket_airy.rsi
+  - type: Foldable
+    canFoldInsideContainer: true
+    foldVerbText: fold-flip-verb
+    unfoldVerbText: fold-flip-verb
+  - type: FoldableClothing
+    foldedEquippedPrefix: flipped
+
+- type: entity # So chameleon clothes can select the folded sprite
+  parent: ClothingOuterCoatMantisAiry
+  id: ClothingOuterCoatMantisAiryFlipped
+  suffix: Flipped
+  components:
+  - type: Foldable
+    folded: true
+  - type: Clothing
+    equippedPrefix: flipped
+
+- type: entity
+  parent: [ClothingOuterMantisBase, BaseFoldable]
+  id: ClothingOuterCoatMantisOrnate
+  name: ornate mantis waistplate # It's outerwear by design, not a belt
+  description: "A reinforced wrap fitted with a heavy Greek psi, built to protect your middle. You can fold the top down further, if you like."
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/OuterClothing/Coats/mantis_jacket_ornate.rsi
+    layers:
+    - state: icon
+      map: ["unfoldedLayer"]
+    - state: icon-folded
+      map: ["foldedLayer"]
+      visible: false
+  - type: Clothing
+    sprite: _DEN/Clothing/OuterClothing/Coats/mantis_jacket_ornate.rsi
+  - type: Foldable
+    canFoldInsideContainer: true
+    foldVerbText: fold-verb
+    unfoldVerbText: unfold-verb
+  - type: FoldableClothing
+    foldedEquippedPrefix: folded
+
+- type: entity # So chameleon clothes can select the folded sprite
+  parent: ClothingOuterCoatMantisOrnate
+  id: ClothingOuterCoatMantisOrnateFolded
+  suffix: Lowered
+  components:
+  - type: Foldable
+    folded: true
+  - type: Clothing
+    equippedPrefix: folded

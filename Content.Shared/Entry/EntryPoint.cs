@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using Content.Shared._DEN.Consent.Managers;
 using Content.Shared.Humanoid.Markings;
 using Content.Shared.Maps;
 using Robust.Shared;
@@ -47,6 +48,7 @@ namespace Content.Shared.Entry
 
             InitTileDefinitions();
             Dependencies.Resolve<MarkingManager>().Initialize();
+            Dependencies.Resolve<IConsentManager>().Initialize(); // DEN: Consent system
 
 #if DEBUG
             _configurationManager.OverrideDefault(CVars.NetFakeLagMin, 0.075f);

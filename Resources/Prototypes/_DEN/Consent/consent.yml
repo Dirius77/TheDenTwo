@@ -1,0 +1,6 @@
+- type: consent
+  id: Meow
+  defaultValue: true
+
+- type: consent
+  id: Mew

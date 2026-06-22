@@ -319,6 +319,43 @@ namespace Content.Server.Database
 
             await db.DbContext.SaveChangesAsync();
         }
+
+        #endregion
+
+        #region Consent System
+        public async Task<List<ConsentData>> GetConsentData(Guid player, CancellationToken token = default)
+        {
+            await using var db = await GetDb(token);
+
+            var data = db.DbContext.ConsentData.Where(c => c.UserId == player).ToList();
+
+            return data;
+        }
+
+        public async Task SetConsentData(Guid player, string toggleId, bool value)
+        {
+            await using var db = await GetDb();
+
+            var currentConsent = await db.DbContext.ConsentData
+                .SingleOrDefaultAsync(c => c.UserId == player && c.ConsentId == toggleId);
+
+            if (currentConsent == null)
+            {
+                db.DbContext.ConsentData.Add(currentConsent = new ConsentData
+                {
+                    UserId = player,
+                    ConsentId = toggleId,
+                    ConsentValue = value
+                });
+            }
+
+            currentConsent.UserId = player;
+            currentConsent.ConsentId = toggleId;
+            currentConsent.ConsentValue = value;
+
+            await db.DbContext.SaveChangesAsync();
+        }
+
         #endregion
 
         #region Bans

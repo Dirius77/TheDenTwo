@@ -1,0 +1,17 @@
+- type: entity
+  parent: IDCardStandard
+  id: MantisIDCard
+  name: mantis ID card
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#d9418d"
+    - state: stripe_bottom
+      color: "#b32d70"
+    - sprite: _DEN/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625 #3 pixels left, 2 pixels up
+      state: Mantis
+  - type: PresetIdCard
+    job: Mantis
