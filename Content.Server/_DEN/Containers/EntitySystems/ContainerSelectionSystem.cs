@@ -1,0 +1,120 @@
+using System.Linq;
+using System.Numerics;
+using Content.Shared._DEN.Containers.Components;
+using Content.Shared._DEN.Containers.EntitySystems;
+using Content.Shared._DEN.Containers.Events;
+using Content.Shared.ActionBlocker;
+using Content.Shared.Destructible;
+using Content.Shared.EntityTable;
+using Content.Shared.EntityTable.EntitySelectors;
+using Content.Shared.Storage.EntitySystems;
+using Robust.Shared.Containers;
+using Robust.Shared.Map;
+using Robust.Shared.Random;
+
+namespace Content.Server._DEN.Containers.EntitySystems;
+
+public sealed partial class ContainerSelectionSystem : SharedContainerSelectionSystem
+{
+    [Dependency] private SharedContainerSystem _containers = default!;
+    [Dependency] private EntityTableSystem _entityTable = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private ActionBlockerSystem _blockerSystem = default!;
+    [Dependency] private SharedUserInterfaceSystem _uiSystem = default!;
+    [Dependency] private IRobustRandom _random = default!;
+
+    public override void Initialize()
+    {
+        base.Initialize();
+        
+        SubscribeLocalEvent<EntityTableContainerSelectionComponent, ContainerSelectionMessage>(OnContainerSelectionMessage);
+        SubscribeLocalEvent<EntityTableContainerSelectionComponent, DestructionEventArgs>(OnDestruction,
+            before: [typeof(SharedStorageSystem)]);
+    }
+
+    private void OnContainerSelectionMessage(Entity<EntityTableContainerSelectionComponent> ent, ref ContainerSelectionMessage message)
+    {
+        // Can the user even reach the container anymore?
+        if (!_blockerSystem.CanInteract(message.Actor, ent))
+            return;
+
+        // Don't allow invalid selections.
+        if (message.SelectionIndex < 0 || ent.Comp.Selections.Count <= message.SelectionIndex)
+            return;
+
+        var selection = ent.Comp.Selections[message.SelectionIndex];
+        OnSelectionMade(ent, selection);
+    }
+
+    private void OnDestruction(Entity<EntityTableContainerSelectionComponent> ent,
+        ref DestructionEventArgs args)
+    {
+        // If no selection has been made but our container is destroyed, populate the contents with one of the choices
+        // at random so that the container still has everything someone breaking it open would expect it to have.
+        // There's no reasonable way to provide a selection UI and option on destruction, since it's an instant event
+        // that might not even have a player nearby, so random is the best they get.
+        OnSelectionMade(ent, _random.Pick(ent.Comp.Selections));
+    }
+
+    private void OnSelectionMade(Entity<EntityTableContainerSelectionComponent> ent,
+        ContainerSelectionEntry selection)
+    {
+        if (TerminatingOrDeleted(ent) || !Exists(ent))
+            return;
+
+        // This selection component has already delivered its goods, bail.
+        if (ent.Comp.SelectionMade)
+            return;
+
+        if (!TryComp(ent, out ContainerManagerComponent? containerComp))
+            return;
+
+        var xform = Transform(ent);
+        var coords = new EntityCoordinates(ent, Vector2.Zero);
+
+        foreach (var (containerId, table) in selection.Containers)
+        {
+            SpawnTableInTarget(ent, containerComp, xform, containerId, table, coords);
+        }
+
+        // Close the UI, mark the selection as made, and let all the clients know so they stop updating the UI.
+        _uiSystem.CloseUi(ent.Owner, ContainerSelectionUiKey.Key);
+        ent.Comp.SelectionMade = true;
+        Dirty(ent, ent.Comp);
+    }
+
+    private void SpawnTableInTarget(EntityUid target,
+        ContainerManagerComponent containerComp,
+        TransformComponent xform,
+        string containerId,
+        EntityTableSelector table,
+        EntityCoordinates coords)
+    {
+        // Does our target container actually exist?
+        if (!_containers.TryGetContainer(target, containerId, out var container, containerComp))
+        {
+            Log.Error(
+                $"Entity {ToPrettyString(target)} with a {nameof(EntityTableContainerSelectionComponent)} is missing a container ({containerId}).");
+            return;
+        }
+
+        // Get the contents we're filling with.
+        var spawns = _entityTable.GetSpawns(table);
+        foreach (var proto in spawns)
+        {
+            // Spawn the entity, try inserting it into the container, if we can't, log an error so someone knows
+            // their entity prototype is overfull and drop it on the ground instead.
+            var spawn = Spawn(proto, coords);
+            if (!_containers.Insert(spawn, container, containerXform: xform))
+            {
+                var alreadyContained = container.ContainedEntities.Count > 0
+                    ? string.Join("\n", container.ContainedEntities.Select(e => $"\t - {ToPrettyString(e)}"))
+                    : "< empty >";
+                Log.Error(
+                    $"Entity {ToPrettyString(target)} with a {nameof(EntityTableContainerSelectionComponent)} failed to insert an entity: {ToPrettyString(spawn)}.\nCurrent contents:\n{alreadyContained}");
+                _transform.AttachToGridOrMap(spawn);
+                break;
+            }
+        }
+    }
+}

@@ -1,0 +1,10 @@
+- type: entity
+  abstract: true
+  id: ContainerSelectionBase
+  components:
+  - type: ActivatableUI
+    key: enum.ContainerSelectionUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.ContainerSelectionUiKey.Key:
+        type: ContainerSelectionBoundUserInterface

@@ -29,4 +29,10 @@ public sealed partial class RangeNumberSelector : NumberSelector
     {
         return (Range.X + Range.Y) / 2f;
     }
+
+    // DEN: For accurate ListSpawns results.
+    public override float Maximum()
+    {
+        return Range.Y;
+    }
 }

@@ -28,4 +28,10 @@ public sealed partial class ConstantNumberSelector : NumberSelector
     {
         return Value;
     }
+
+    // DEN: Used for accurate ListSpawns
+    public override float Maximum()
+    {
+        return Value;
+    }
 }

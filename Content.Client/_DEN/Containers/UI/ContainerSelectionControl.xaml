@@ -1,0 +1,27 @@
+<Control xmlns="https://spacestation14.io"
+              xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client">
+    <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+        <PanelContainer Margin="4">
+            <PanelContainer.PanelOverride>
+                <gfx:StyleBoxFlat BorderThickness="2" BorderColor="#2F2F2F" />
+            </PanelContainer.PanelOverride>
+
+            <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="2">
+                    <!-- Set label text in C# -->
+                    <Label Name="HeaderLabel" HorizontalExpand="True" Margin="4" />
+                    <Button Name="ChooseButton" Text="{Loc container-selection-ui-choose-button}" Access="Public"/>
+                </BoxContainer>
+
+                <Collapsible Orientation="Vertical" HorizontalExpand="True" Margin="4">
+                    <CollapsibleHeading Title="{Loc 'container-selection-ui-contents'}" />
+                    <CollapsibleBody HorizontalExpand="True" Margin="6">
+                        <GridContainer Name="EntityGrid" MaxGridWidth="300">
+                            <!-- Populated in C# -->
+                        </GridContainer>
+                    </CollapsibleBody>
+                </Collapsible>
+            </BoxContainer>
+        </PanelContainer>
+    </BoxContainer>
+</Control>

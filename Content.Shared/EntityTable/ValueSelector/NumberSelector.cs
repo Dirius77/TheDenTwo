@@ -22,4 +22,11 @@ public abstract partial class NumberSelector
     /// </summary>
     /// <returns>The average amount of occurrences</returns>
     public abstract float Average();
+
+    // DEN: Used for accurate ListSpawns results
+    /// <summary>
+    /// Maximum number of occurrences
+    /// </summary>
+    /// <returns>The maximum number of occurrences</returns>
+    public abstract float Maximum();
 }
