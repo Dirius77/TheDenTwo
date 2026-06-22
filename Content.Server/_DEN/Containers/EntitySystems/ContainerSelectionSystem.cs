@@ -39,7 +39,7 @@ public sealed partial class ContainerSelectionSystem : SharedContainerSelectionS
             return;
 
         // Don't allow invalid selections.
-        if (ent.Comp.Selections.Count < message.SelectionIndex)
+        if (message.SelectionIndex < 0 || ent.Comp.Selections.Count <= message.SelectionIndex)
             return;
 
         var selection = ent.Comp.Selections[message.SelectionIndex];
