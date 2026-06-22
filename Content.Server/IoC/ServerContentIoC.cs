@@ -1,3 +1,4 @@
+using Content.Server._DEN.Discord;
 using Content.Server._DEN.Requirements.Managers;
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
@@ -85,5 +86,6 @@ internal static class ServerContentIoC
         deps.Register<ServerFeedbackManager>();
         deps.Register<ISharedFeedbackManager, ServerFeedbackManager>();
         deps.Register<IPlayerRequirementManager, PlayerRequirementManager>(); // DEN
+        deps.Register<DiscordCommands>(); // DEN
     }
 }
