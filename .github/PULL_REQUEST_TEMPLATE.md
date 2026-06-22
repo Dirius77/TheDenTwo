@@ -20,9 +20,8 @@ Describe how you tested the pull request, and how someone reviewing this PR can 
 ## Requirements
 <!-- Confirm the following by placing an X in the brackets without spaces inside (for example: [X] ): -->
 - [ ] I have read and am following the Macrocosm [Pull Request Conventions](https://docs.macrocosm.cool/docs/Conventions/pull-requests/).
-- [ ] I have tested this pull request and written instructions on how to test it
+- [ ] I have tested this pull request and written instructions on how to test it.
 - [ ] I have added media to this PR or it does not require an in-game showcase.
-- [ ] I have tested my changes and additions in-game.
 <!-- You should understand that not following the above may get your PR closed at maintainer’s discretion -->
 
 ### Licensing

@@ -1,0 +1,140 @@
+# Head
+
+- type: marking
+  id: SlimeEyesCyclopsPulsing
+  bodyPart: Head #used to be Eyes
+  groupWhitelist: [Slime]
+  coloring:
+    default:
+      type:
+        !type:EyeColoring
+        negative: false
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/cyclopseye.rsi
+    state: cyclopspulseeye
+  - sprite: _DEN/Mobs/Customization/Slime/cyclopseye.rsi
+    state: cyclopspulsering
+  # shader: unshaded # don't have marking shaders yet
+
+- type: marking
+  id: AnatomicalSkull
+  bodyPart: Head
+  groupWhitelist: [Slime]
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: bones-skull
+
+- type: marking
+  id: AnatomicalBrain
+  bodyPart: Head
+  groupWhitelist: [Slime]
+  coloring:
+    default:
+      type:
+        !type:SimpleColoring
+          color: "#c08f7b"
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-brain
+  
+# Chest
+
+- type: marking
+  id: AnatomicalRibs
+  bodyPart: Chest
+  groupWhitelist: [Slime]
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: bones-ribs
+
+- type: marking
+  id: AnatomicalPelvis
+  bodyPart: Chest
+  groupWhitelist: [Slime]
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: bones-pelvis
+
+- type: marking
+  id: AnatomicalLungs
+  bodyPart: Chest
+  groupWhitelist: [Slime]
+  coloring:
+    default:
+      type:
+        !type:SimpleColoring
+          color: "#88525c"
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-lungs
+
+- type: marking
+  id: AnatomicalHeart
+  bodyPart: Chest
+  groupWhitelist: [Slime]
+  coloring:
+    default:
+      type:
+        !type:SimpleColoring
+          color: "#9b0808"
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-heart
+
+- type: marking
+  id: AnatomicalOrgans
+  bodyPart: Chest
+  groupWhitelist: [Slime]
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-heart
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-lungs
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-pharynx
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-stomach
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-liver
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-large_intestine
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-small_intestine
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organ-bladder
+
+- type: marking
+  id: AnatomicalOrganBones
+  bodyPart: Chest
+  groupWhitelist: [Slime]
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-heart
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-lungs
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-pharynx
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-liver
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-stomach
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-large_intestine
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-small_intestine
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-bladder
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-bones
+
+- type: marking
+  id: AnatomicalFloatingTorso
+  bodyPart: Chest
+  groupWhitelist: [Slime]
+  sprites:
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-heart
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: organbones-lungs
+  - sprite: _DEN/Mobs/Customization/Slime/anatomical.rsi
+    state: bones-ribs

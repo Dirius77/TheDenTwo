@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Content.Server._DEN.Discord;
 using Content.Server.Acz;
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
@@ -81,6 +82,7 @@ namespace Content.Server.Entry
         [Dependency] private ServerInfoManager _serverInfo = default!;
         [Dependency] private ServerUpdateManager _updateManager = default!;
         [Dependency] private ServerFeedbackManager _feedbackManager = null!;
+        [Dependency] private DiscordCommands _discordCommands = null!; // DEN
 
         public override void PreInit()
         {
@@ -137,6 +139,7 @@ namespace Content.Server.Entry
             _watchlistWebhookManager.Initialize();
             _job.Initialize();
             _rateLimit.Initialize();
+            _discordCommands.Initialize();
         }
 
         public override void PostInit()
