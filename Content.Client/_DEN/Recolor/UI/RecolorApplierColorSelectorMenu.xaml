@@ -1,0 +1,9 @@
+<DefaultWindow xmlns="https://spacestation14.io"
+               Title="{Loc 'recolor-applier-color-selector-window-title'}"
+               MinSize="400 170"
+               SetSize="400 170"
+               MaxSize="800 170">
+    <BoxContainer Orientation="Vertical" SeparationOverride="5">
+        <ColorSelectorSliders Name="ColorSelector"/>
+    </BoxContainer>
+</DefaultWindow>

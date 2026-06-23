@@ -1,0 +1,32 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Sprites by honeyed-lemons (github)",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "icon"
+        },
+        {
+            "name": "icon-rainbow"
+        },
+        {
+            "name": "spray-can-base"
+        },
+        {
+            "name": "spray-can-color-closed"
+        },
+        {
+            "name": "spray-can-color-open"
+        },
+        {
+            "name": "spray-can-rainbow-closed"
+        },
+        {
+            "name": "spray-can-rainbow-open"
+        }
+    ]
+}

@@ -11,13 +11,13 @@
     - Donut
   - type: Sprite
     sprite: Objects/Consumable/Food/Baked/donut.rsi
-  - type: Solution
+  - type: Solution # DEN: Updated solution
     solution:
       reagents:
       - ReagentId: Nutriment
-        Quantity: 6
+        Quantity: 10
       - ReagentId: Sugar
-        Quantity: 3
+        Quantity: 2.5
   - type: Item
     sprite: Objects/Consumable/Food/Baked/donut.rsi
     size: Tiny
@@ -31,15 +31,13 @@
     tags:
     - Donut
     - Fruit
-  - type: Solution
+  - type: Solution # DEN: Updated solution
     solution:
       reagents:
       - ReagentId: Nutriment
-        Quantity: 6
+        Quantity: 10
       - ReagentId: Sugar
-        Quantity: 3
-      - ReagentId: Vitamin
-        Quantity: 1
+        Quantity: 5
 # Tastes like donut.
 
 # The sprinkles are now an overlay, so you can put them on any donut! If we really
@@ -61,6 +59,9 @@
       - sweet
   - type: Sprite
     state: plain
+  - type: Construction # DEN - this is a construction node
+    graph: NFDonut
+    node: donut
 
 - type: entity
   parent: FoodDonutFruitBase
@@ -72,6 +73,9 @@
       - jelly
   - type: Sprite
     state: jelly-plain
+  - type: Construction # DEN - this is a construction node
+    graph: JellyDonut
+    node: donut
 
 # Donuts
 
@@ -182,11 +186,11 @@
     state: choc
   - type: Solution
     solution:
-      reagents:
+      reagents: # DEN - Updated solution
       - ReagentId: Nutriment
-        Quantity: 6
+        Quantity: 10
       - ReagentId: Sugar
-        Quantity: 3
+        Quantity: 2.5
       - ReagentId: Theobromine
         Quantity: 1
 # Tastes like donut, bitterness.
@@ -307,13 +311,11 @@
     state: jelly-choc
   - type: Solution
     solution:
-      reagents:
+      reagents: # DEN - Updated solution
       - ReagentId: Nutriment
-        Quantity: 6
+        Quantity: 10
       - ReagentId: Sugar
-        Quantity: 3
-      - ReagentId: Vitamin
-        Quantity: 1
+        Quantity: 5
       - ReagentId: Theobromine
         Quantity: 1
 # Tastes like jelly-donut, bitterness.
@@ -380,6 +382,10 @@
   components:
   - type: Solution
     solution:
-      reagents:
+      reagents: # DEN - Updated solution
+      - ReagentId: Nutriment
+        Quantity: 10
+      - ReagentId: Sugar
+        Quantity: 2.5
       - ReagentId: Amatoxin
         Quantity: 10

@@ -1,0 +1,10 @@
+- type: entity
+  parent: SeedBase
+  name: packet of everyspice seeds
+  description: Wars were fought over less.
+  id: EveryspiceSeeds
+  components:
+    - type: Seed
+      seedId: everyspice
+    - type: Sprite
+      sprite: _NF/Objects/Specific/Hydroponics/everyspice.rsi

@@ -1,5 +1,5 @@
 - type: entity
-  parent: ClothingHeadMantisBase
+  parent: [ClothingHeadMantisBase, BaseSlicingRefinable]
   id: ClothingHeadHoodMantisDark
   name: dark mantis hood
   description: "A gloomy hood that sits low on the head, ornamented with magenta tassles. It matches your cloak nicely, though it can be worn on its own. If you have a knife, you could probably tailor it to fit more comfortably atop your shoulders."
@@ -13,10 +13,9 @@
     - Hair
     - HeadTop
     - HeadSide
-  - type: Butcherable # Butchering it lowers it
-    butcherDelay: 0.5
-    butcheringType: Knife
-    spawned:
+  - type: ToolRefinable # Butchering it lowers it
+    refineTime: 0.5
+    refineResult:
     - id: ClothingHeadHoodMantisDarkFolded
       amount: 1
 
@@ -33,9 +32,7 @@
   - type: Clothing
     sprite: _DEN/Clothing/Head/Hoods/mantis_hood_dark.rsi
     equippedPrefix: folded
-  - type: Butcherable # Butchering it raises it again
-    butcherDelay: 0.5
-    butcheringType: Knife
-    spawned:
+  - type: ToolRefinable # Butchering it raises it again
+    refineResult:
     - id: ClothingHeadHoodMantisDark
       amount: 1

@@ -1,0 +1,9 @@
+- type: flavor
+  id: spices
+  flavorType: Complex
+  description: flavor-complex-spices
+
+- type: flavor
+  id: cinnamon
+  flavorType: Complex
+  description: flavor-complex-cinnamon

@@ -1,0 +1,71 @@
+- type: entity
+  parent: BoxCardboard
+  id: BoxSprayPaintBase
+  abstract: true
+  suffix: Filled
+  components:
+  - type: Sprite
+    layers:
+    - state: box
+    - state: clown # placeholder
+  - type: Storage
+    grid:
+    - 0,0,5,3
+    whitelist:
+      components:
+      - RecolorApplier
+
+- type: entity
+  parent: BoxSprayPaintBase
+  id: BoxSprayPaintColors
+  name: colored spray paint
+  description: Box filled with a rainbow assortment of spray paints!
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: SprayPaintCanRed
+        - id: SprayPaintCanOrange
+        - id: SprayPaintCanYellow
+        - id: SprayPaintCanLimeGreen
+        - id: SprayPaintCanGreen
+        - id: SprayPaintCanCyan
+        - id: SprayPaintCanBlue
+        - id: SprayPaintCanPurple
+        - id: SprayPaintCanPink
+        - id: SprayPaintCanBrown
+
+- type: entity
+  parent: BoxSprayPaintBase
+  id: BoxSprayPaintShades
+  name: greyscale spray paint
+  description: Box filled with greyscale spray paints!
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: SprayPaintCanWhite
+          amount: 4
+        - id: SprayPaintCanGray
+          amount: 4
+        - id: SprayPaintCanBlack
+          amount: 4
+
+- type: entity
+  parent: BoxSprayPaintBase
+  id: BoxSprayPaintMetals
+  name: metallic spray paint
+  description: Box filled with metallic spray paints!
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: SprayPaintCanGold
+          amount: 4
+        - id: SprayPaintCanSilver
+          amount: 4
+        - id: SprayPaintCanCopper
+          amount: 4

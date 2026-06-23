@@ -1,0 +1,22 @@
+- type: seed
+  id: everyspice
+  name: seeds-everyspice-name
+  noun: seeds-noun-seeds
+  displayName: seeds-everyspice-display-name
+  plantRsi: _NF/Objects/Specific/Hydroponics/everyspice.rsi
+  packetPrototype: EveryspiceSeeds
+  productPrototypes:
+    - FoodEveryspice
+  harvestRepeat: Repeat
+  lifespan: 25
+  maturation: 6
+  production: 6
+  yield: 2
+  potency: 20
+  idealLight: 9 # tropical-ish
+  idealHeat: 303
+  chemicals:
+    Everyspice:
+      Min: 1
+      Max: 10
+      PotencyDivisor: 10

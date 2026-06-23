@@ -1,0 +1,4 @@
+- type: shader
+  id: Desaturated
+  kind: source
+  path: "/Textures/_DEN/Shaders/desaturated.swsl"

@@ -1,0 +1,19 @@
+- type: cargoProduct
+  id: FunSprayPaintBundle
+  icon:
+    sprite: _DEN/Objects/Tools/spray-paint.rsi
+    state: icon
+  product: CrateFunSprayPaintVariety
+  cost: 2000
+  category: cargoproduct-category-name-fun
+  group: market
+
+- type: cargoProduct
+  id: FunSprayPaintMagic
+  icon:
+    sprite: _DEN/Objects/Tools/spray-paint.rsi
+    state: icon-rainbow
+  product: CrateFunSprayPaintMagic
+  cost: 2000
+  category: cargoproduct-category-name-fun
+  group: market

@@ -1,0 +1,25 @@
+- type: entity
+  parent: CratePlastic
+  id: CrateFunSprayPaintVariety
+  name: bulk spray paint crate
+  description: A crate filled with a variety of spray paints!
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      entity_storage: !type:AllSelector
+        children:
+        - id: BoxSprayPaintColors
+        - id: BoxSprayPaintShades
+        - id: BoxSprayPaintMetals
+
+- type: entity
+  parent: CratePlastic
+  id: CrateFunSprayPaintMagic
+  name: magic spray paint crate
+  description: A crate filled with.. A singular can of magic spray paint!
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      entity_storage: !type:AllSelector
+        children:
+        - id: SprayPaintCanMagic

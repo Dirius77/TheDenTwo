@@ -1,0 +1,26 @@
+- type: constructionGraph
+  id: NFDonut
+  start: start
+  graph:
+  - node: start
+    entity: FoodDoughPastryBaseRaw
+    edges:
+    - to: uncooked donut # DEN: donut -> uncooked donut
+      steps:
+      - tool: Rolling
+        doAfter: 1
+
+  - node: uncooked donut # DEN: donut -> uncooked donut
+    entity: FoodDonutUncooked
+# begin DEN: add donut cooking in place of deep fryer
+    edges:
+    - to: donut
+      completed:
+      - !type:PlaySound
+        sound: /Audio/Effects/sizzle.ogg
+      steps:
+      - minTemperature: 360 # ~85C - based on internal temperature
+
+  - node: donut
+    entity: FoodDonutPlain
+# end DEN

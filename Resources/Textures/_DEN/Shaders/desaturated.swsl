@@ -1,0 +1,5 @@
+﻿void fragment() {
+    highp vec4 color = zTexture(UV);
+    COLOR.rgb = mix(vec3(dot(color.rgb, vec3(0.399, 0.687, 0.214))), color.rgb, 0);
+    COLOR.a = color.a;
+}

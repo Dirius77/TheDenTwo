@@ -1,0 +1,66 @@
+- type: entity # DEN - moved all of this to a shared parent for organization
+  abstract: true
+  parent: FoodDonutBase
+  id: FoodDonutUncookedBase
+  components:
+  - type: FlavorProfile
+    flavors:
+    - dough
+    - sweet
+  - type: Sprite
+    sprite: _NF/Objects/Consumable/Food/Baked/donut.rsi
+  - type: Solution # DEN: Updated solution
+    solution:
+      reagents:
+      - ReagentId: Nutriment
+        Quantity: 10
+      - ReagentId: Butter
+        Quantity: 2.5
+  # - type: DeepFrySpawn # DEN comment - we don't have this
+  #   cycles: 2
+  #   output: FoodDonutPlain
+  - type: Construction
+    node: uncooked donut # DEN: donut -> uncooked donut
+    defaultTarget: donut # DEN - construction in place of deep frying for now
+  - type: AtmosExposed # DEN
+  - type: Temperature # DEN
+    currentTemperature: 290
+  - type: TemperatureDamage # DEN
+  - type: InternalTemperature # DEN - i decree These values are arbitrary <3
+    conductivity: 0.43
+    thickness: 0.02
+    area: 0.02
+  - type: Fixtures # DEN - less mass for better cooking
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.25,0.25,0.25"
+        # less mass so it can cook faster, a single strip of bacon isnt 5kg
+        density: 1
+        mask:
+        - ItemMask
+        restitution: 0.3  # fite me
+        friction: 0.2
+
+- type: entity
+  name: uncooked donut
+  parent: FoodDonutUncookedBase # DEN: FoodDonutBase -> FoodDonutUncookedBase
+  id: FoodDonutUncooked
+  description: Needs a moment in the deep fryer, then it'll be good to eat.
+  components: # DEN: most components moved into FoodDonutUncookedBase
+  - type: Sprite
+    state: uncooked
+  - type: Construction
+    graph: NFDonut
+
+- type: entity
+  name: uncooked jelly donut
+  parent: FoodDonutUncookedBase # DEN: FoodDonutBase -> FoodDonutUncookedBase
+  id: FoodDonutUncookedJelly
+  components: # DEN: most components moved into FoodDonutUncookedBase
+  - type: Sprite
+    state: jelly-uncooked
+  - type: Construction # DEN - construction in place of deep frying for now
+    graph: JellyDonut
+    node: start

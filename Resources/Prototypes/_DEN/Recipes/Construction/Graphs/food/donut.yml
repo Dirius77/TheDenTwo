@@ -1,0 +1,17 @@
+- type: constructionGraph
+  id: JellyDonut
+  start: start
+  graph:
+
+  - node: start
+    entity: FoodDonutUncookedJelly
+    edges:
+    - to: donut
+      completed:
+      - !type:PlaySound
+        sound: /Audio/Effects/sizzle.ogg
+      steps:
+      - minTemperature: 360 # ~85C - based on internal temperature
+
+  - node: donut
+    entity: FoodDonutJellyPlain

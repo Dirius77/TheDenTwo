@@ -1,0 +1,528 @@
+- type: entity
+  parent: BaseItem
+  id: SprayPaintCan
+  abstract: true
+  description: A can of high quality spray paint with patented anti-skin technology.
+  components:
+  - type: Appearance
+  - type: Sprite
+    sprite: _DEN/Objects/Tools/spray-paint.rsi
+    state: spray-can-base
+  - type: Openable
+    closeable: true
+    sound:
+      path: /Audio/Effects/pop_high.ogg
+    closeSound:
+      path: /Audio/Effects/pop_high.ogg
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 100
+  - type: RecolorApplier # The important one\
+    recolorData:
+      color: white
+      paintType: &paintType spray paint
+      shaderBlacklist: &blacklist
+      - unshaded
+      - DisplacedDraw
+    entityBlacklist:
+      components:
+      - HumanoidProfile # Prevent spraying on humans
+      - Puddle # It's a liquid lol
+      - Cable # For accessibility reasons.
+      - CableVisualizer # See above
+      - AtmosPipeColor # It doesn't work currently, unsure why? Possibly because gaspipecolor visualizer runs first.
+      - PipeColorVisuals # See above
+      - AttachedClothing # So you can't spray paint just the hood of a hoodie / hardsuit helmet. because I HATE YOU.
+    maxUses: 64 # Might be too much? Unsure.
+
+# Rainbow colors
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanRed
+  name: red spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: red
+      colorName: red
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: red
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: red}
+          False: {state: "spray-can-color-closed" , color: red}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanOrange
+  name: orange spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: orange
+      colorName: orange
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: orange
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: orange}
+          False: {state: "spray-can-color-closed" , color: orange}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanYellow
+  name: yellow spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: yellow
+      colorName: yellow
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: yellow
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: yellow}
+          False: {state: "spray-can-color-closed" , color: yellow}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanLimeGreen
+  name: lime green spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: greenyellow
+      colorName: lime green
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: greenyellow
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: greenyellow}
+          False: {state: "spray-can-color-closed" , color: greenyellow}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanGreen
+  name: green spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: green
+      colorName: green
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: green
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: green}
+          False: {state: "spray-can-color-closed" , color: green}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanCyan
+  name: cyan spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: cyan
+      colorName: cyan
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: cyan
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: cyan}
+          False: {state: "spray-can-color-closed" , color: cyan}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanBlue
+  name: blue spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: blue
+      colorName: blue
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: blue
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: blue}
+          False: {state: "spray-can-color-closed" , color: blue}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanPurple
+  name: purple spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: purple
+      colorName: purple
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: purple
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: purple}
+          False: {state: "spray-can-color-closed" , color: purple}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanPink
+  name: pink spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: hotpink
+      colorName: pink
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: hotpink
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: hotpink}
+          False: {state: "spray-can-color-closed" , color: hotpink}
+
+# Metallics
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanGold
+  name: gold spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: gold
+      colorName: gold
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: gold
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: gold}
+          False: {state: "spray-can-color-closed" , color: gold}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanSilver
+  name: silver spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: silver
+      colorName: silver
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: silver
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: silver}
+          False: {state: "spray-can-color-closed" , color: silver}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanCopper
+  name: copper spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: chocolate
+      colorName: copper
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: chocolate
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: chocolate}
+          False: {state: "spray-can-color-closed" , color: chocolate}
+
+# Shades and Neutrals
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanWhite
+  name: white spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: white
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: white
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: white}
+          False: {state: "spray-can-color-closed" , color: white}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanGray
+  name: gray spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: gray
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: gray
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: gray}
+          False: {state: "spray-can-color-closed" , color: gray}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanBlack
+  name: black spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: &black "#333333"
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+      colorName: black
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: *black
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: *black}
+          False: {state: "spray-can-color-closed" , color: *black}
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanBrown
+  name: brown spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: saddlebrown
+      colorName: brown
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: saddlebrown
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: saddlebrown}
+          False: {state: "spray-can-color-closed" , color: saddlebrown}
+
+# Magic spray paints
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanMagic
+  name: magic spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: white
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: RecolorApplierColorSelector
+  - type: ActivatableUI
+    blockSpectators: true
+    inHandsOnly: true
+    singleUser: true
+    verbText: verb-recolor-applier-color-selector-openui #fuck you i can make it as long as i want
+    key: enum.RecolorApplierColorSelectorKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.RecolorApplierColorSelectorKey.Key:
+        type: RecolorApplierColorSelectorBui
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-rainbow-closed
+      map: ["enum.OpenableVisuals.Layer"]
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-rainbow-open"}
+          False: {state: "spray-can-rainbow-closed"}
+
+- type: entity
+  parent: SprayPaintCanMagic
+  id: SprayPaintCanMagicInfinite
+  suffix: DO NOT MAP
+  name: infinite magic spray paint
+  components:
+  - type: RecolorApplier
+    maxUses:
+
+- type: entity
+  parent: SprayPaintCanMagic
+  id: SprayPaintCanMagicMapping
+  suffix: DEBUG
+  name: mapping magic spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: white
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+      removable: false
+      examineText: ""
+    maxUses:
+    doAfterSound:
+    doAfterDuration: 0
+
+- type: entity
+  parent: SprayPaintCan
+  id: SprayPaintCanInvisible
+  suffix: do not map
+  name: invisible spray paint
+  components:
+  - type: RecolorApplier
+    recolorData:
+      color: "#FFFFFF00"
+      colorName: invisible
+      paintType: *paintType
+      shaderBlacklist: *blacklist
+  - type: Sprite
+    layers:
+    - state: spray-can-base
+      map: ["Base"]
+    - state: spray-can-color-closed
+      map: ["enum.OpenableVisuals.Layer"]
+      color: white
+  - type: GenericVisualizer
+    visuals:
+      enum.OpenableVisuals.Opened:
+        enum.OpenableVisuals.Layer:
+          True: {state: "spray-can-color-open" , color: white}
+          False: {state: "spray-can-color-closed" , color: white}

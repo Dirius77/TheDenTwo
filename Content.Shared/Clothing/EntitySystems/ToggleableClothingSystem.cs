@@ -13,6 +13,7 @@ using Robust.Shared.Network;
 using Robust.Shared.Serialization;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
+using Content.Shared._DEN.Recolor; // DEN (do i need to comment imports here. whatever)
 
 namespace Content.Shared.Clothing.EntitySystems;
 
@@ -38,6 +39,8 @@ public sealed partial class ToggleableClothingSystem : EntitySystem
         SubscribeLocalEvent<ToggleableClothingComponent, GetItemActionsEvent>(OnGetActions);
         SubscribeLocalEvent<ToggleableClothingComponent, ComponentRemove>(OnRemoveToggleable);
         SubscribeLocalEvent<ToggleableClothingComponent, GotUnequippedEvent>(OnToggleableUnequip);
+        SubscribeLocalEvent<ToggleableClothingComponent, OnRecoloredEvent>(OnToggleableRecolored); // DEN, recolor system
+        SubscribeLocalEvent<ToggleableClothingComponent, OnRecolorRemovedEvent>(OnToggleableRecolorRemoved); // DEN, recolor system
 
         SubscribeLocalEvent<AttachedClothingComponent, InteractHandEvent>(OnInteractHand);
         SubscribeLocalEvent<AttachedClothingComponent, GotUnequippedEvent>(OnAttachedUnequip);

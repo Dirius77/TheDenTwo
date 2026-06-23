@@ -1,0 +1,29 @@
+- type: entity
+  name: cinnamon roll
+  parent: [SolutionTiny, FoodBakedBase] # DEN - Solutions refactor
+  id: FoodBakedCinnamonRoll
+  description: I wonder how much more icing you could put on this.
+  components:
+  - type: FlavorProfile
+    flavors:
+    - sweet
+    - cinnamon
+    - bun
+    ignoreReagents: # DEN - ignore everyspice, as "cinnamon" makes it redundant
+    - Nutriment
+    - Vitamin
+    - Protein
+    - Everyspice
+  - type: Sprite
+    sprite: _NF/Objects/Consumable/Food/Baked/misc.rsi
+    layers:
+    - state: cinnamonroll
+  - type: Solution  # DEN - Solutions refactor
+    solution:
+      reagents:
+      - ReagentId: Nutriment
+        Quantity: 15
+      - ReagentId: Everyspice
+        Quantity: 5
+      - ReagentId: Sugar
+        Quantity: 5

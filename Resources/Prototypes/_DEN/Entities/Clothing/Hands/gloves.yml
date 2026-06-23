@@ -9,7 +9,7 @@
     - MantisBeltStorable
 
 - type: entity
-  parent: [ClothingHandsGlovesMantisBase, BaseFoldable]
+  parent: [ClothingHandsGlovesMantisBase, BaseFoldable, BaseSlicingRefinable]
   id: ClothingHandsGlovesMantisAiry
   name: airy mantis sleeves
   description: "Wide-cuffed sleeves over finger-loop gloves. The left cuff can be fastened tighter, if it's in the way of your mantle. But...only the left cuff, for some reason... If you have a knife, you could probably tailor that button onto the other sleeve instead."
@@ -32,10 +32,9 @@
     unfoldVerbText: unfold-verb
   - type: FoldableClothing
     foldedEquippedPrefix: folded
-  - type: Butcherable # Butchering it makes the right sleeve foldable instead
-    butcherDelay: 0.5
-    butcheringType: Knife
-    spawned:
+  - type: ToolRefinable # Butchering it makes the right sleeve foldable instead
+    refineTime: 0.5
+    refineResult:
     - id: ClothingHandsGlovesMantisAiryTailored
       amount: 1
 
@@ -50,10 +49,8 @@
     sprite: _DEN/Clothing/Hands/Gloves/mantis_gloves_airy_tailored.rsi
   - type: Clothing
     sprite: _DEN/Clothing/Hands/Gloves/mantis_gloves_airy_tailored.rsi
-  - type: Butcherable # Butchering it makes the left sleeve foldable again
-    butcherDelay: 0.5
-    butcheringType: Knife
-    spawned:
+  - type: ToolRefinable # Butchering it makes the left sleeve foldable again
+    refineResult:
     - id: ClothingHandsGlovesMantisAiry
       amount: 1
   - type: Tag
