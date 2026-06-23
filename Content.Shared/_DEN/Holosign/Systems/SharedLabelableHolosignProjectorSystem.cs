@@ -21,9 +21,15 @@ using Robust.Shared.Utility;
 
 namespace Content.Shared._DEN.Holosign.Systems;
 
+/// <summary>
+/// Handles the LabelableHolosignProjectorComponent and LabeledHolosignComponent interactions for spawning sign prototypes
+/// as well as adding descriptions to them and handling configuration changes from the user to their projector such as
+/// setting the description or selecting a particular prototype. Also handles allowing the projector to pick back up
+/// entities which pass the holoprojector whitelist.
+/// </summary>
 public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySystem
 {
-    [Dependency] protected SharedUserInterfaceSystem _uiSystem = default!;
+    [Dependency] protected SharedUserInterfaceSystem UISystem = default!;
     [Dependency] private ISharedAdminLogManager _adminLogger = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedChargesSystem _charges = default!;
@@ -51,12 +57,14 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
 
     private void OnSignExamine(EntityUid uid, LabeledHolosignComponent component, ExaminedEvent args)
     {
+        // If the label is marked as NSFW, then check consent, otherwise just add the description.
         if (component.IsNSFW)
         {
             if (_consent.HasConsent(args.Examiner, _nsfwDescriptionsConsent))
                 args.PushMarkup(component.Description);
             else
             {
+                // User is missing the consent, add a fallback message explaining this.
                 args.PushMarkup(Loc.GetString("labelable-holoprojector-consent-not-available"));
             }
         }
@@ -94,18 +102,18 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
     {
         if (ent.Comp.SelectedSignProto == null)
         {
-            if (!_uiSystem.HasUi(ent, LabelableHolosignUIKey.Signs))
+            if (!UISystem.HasUi(ent, LabelableHolosignUIKey.Signs))
                 return false;
-            _uiSystem.OpenUi(ent.Owner, LabelableHolosignUIKey.Signs, user);
+            UISystem.OpenUi(ent.Owner, LabelableHolosignUIKey.Signs, user);
             UpdateUI(ent);
             return true;
         }
 
         if (ent.Comp.BarrierDescription.Length == 0)
         {
-            if (!_uiSystem.HasUi(ent, LabelableHolosignUIKey.Description))
+            if (!UISystem.HasUi(ent, LabelableHolosignUIKey.Description))
                 return false;
-            _uiSystem.OpenUi(ent.Owner, LabelableHolosignUIKey.Description, user);
+            UISystem.OpenUi(ent.Owner, LabelableHolosignUIKey.Description, user);
             UpdateUI(ent);
             return true;
         }
@@ -133,8 +141,8 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
         if (!xform.Anchored)
             _transform.AnchorEntity(holoUid, xform);
 
-        var nsfwStr = labelComp.IsNSFW ? "nsfw" : "";
-        _adminLogger.Add(LogType.Action, LogImpact.Low, $"{ToPrettyString(user):user} placed a {ToPrettyString(holoUid):holosign} with {nsfwStr} description {labelComp.Description}");
+        var nsfwStr = labelComp.IsNSFW ? "nsfw " : "";
+        _adminLogger.Add(LogType.Action, LogImpact.Low, $"{ToPrettyString(user):user} placed a {ToPrettyString(holoUid):holosign} with {nsfwStr}description {labelComp.Description}");
 
         return true;
     }
@@ -195,9 +203,9 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
     {
         // Have to send this over here to open the BUI since I can't seem to do it from inside the UI.
         var user = args.Actor;
-        if (!_uiSystem.HasUi(entity, LabelableHolosignUIKey.Description))
+        if (!UISystem.HasUi(entity, LabelableHolosignUIKey.Description))
             return;
-        _uiSystem.OpenUi(entity.Owner, LabelableHolosignUIKey.Description, user);
+        UISystem.OpenUi(entity.Owner, LabelableHolosignUIKey.Description, user);
         UpdateUI(entity);
     }
 }
