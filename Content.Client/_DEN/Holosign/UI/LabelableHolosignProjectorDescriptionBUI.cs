@@ -9,10 +9,10 @@ namespace Content.Client._DEN.Holosign.UI;
 public sealed partial class LabelableHolosignProjectorDescriptionBUI : BoundUserInterface
 {
     [Dependency] private IEntityManager _entManager = default!;
-    
+
     [ViewVariables]
     private LabelableHolosignProjectorWindow? _window;
-    
+
     public LabelableHolosignProjectorDescriptionBUI(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
         IoCManager.InjectDependencies(this);
@@ -25,7 +25,7 @@ public sealed partial class LabelableHolosignProjectorDescriptionBUI : BoundUser
         _window.OnDescriptionChanged += OnDescriptionChanged;
         Reload();
     }
-    
+
     private void OnDescriptionChanged(string description, bool isNsfw)
     {
         if (_entManager.TryGetComponent(Owner, out LabelableHolosignProjectorComponent? projector) &&

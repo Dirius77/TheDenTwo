@@ -17,7 +17,7 @@ public sealed partial class LabelableHolosignProjectorSignBUI : BoundUserInterfa
     [Dependency] private IPrototypeManager _protoManager = default!;
 
     [ViewVariables] private SimpleRadialMenu? _menu;
-    
+
     public LabelableHolosignProjectorSignBUI(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
         IoCManager.InjectDependencies(this);
@@ -26,7 +26,7 @@ public sealed partial class LabelableHolosignProjectorSignBUI : BoundUserInterfa
     protected override void Open()
     {
         base.Open();
-        
+
         _menu = this.CreateWindow<SimpleRadialMenu>();
         _menu.Track(Owner);
 
@@ -36,7 +36,7 @@ public sealed partial class LabelableHolosignProjectorSignBUI : BoundUserInterfa
             IconSpecifier = RadialMenuIconSpecifier.With(new SpriteSpecifier.Texture(new("/Textures/Interface/examine-star.png"))),
             ToolTip = Loc.GetString("labelable-holoprojector-ui-set-description")
         });
-        
+
         if (_entManager.TryGetComponent(Owner, out LabelableHolosignProjectorComponent? projector))
         {
             foreach (var proto in projector.SignProtos)
@@ -59,7 +59,7 @@ public sealed partial class LabelableHolosignProjectorSignBUI : BoundUserInterfa
     {
         if (!_entManager.TryGetComponent(Owner, out LabelableHolosignProjectorComponent? projector))
             return;
-        
+
         var selected = projector.SignProtos.IndexOf(protoId);
         SendPredictedMessage(new LabelableHolosignSignChosen(selected));
     }

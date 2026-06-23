@@ -32,7 +32,7 @@ public sealed partial class LabelableHolosignProjectorComponent : Component
     [ViewVariables(VVAccess.ReadWrite)]
     [DataField, AutoNetworkedField]
     public int MaxDescriptionChars = 512;
-    
+
     [DataField, AutoNetworkedField]
     public bool IsNsfw;
 }

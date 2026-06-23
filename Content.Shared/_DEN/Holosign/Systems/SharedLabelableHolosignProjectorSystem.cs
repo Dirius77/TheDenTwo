@@ -38,7 +38,7 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
     public override void Initialize()
     {
         base.Initialize();
-        
+
         SubscribeLocalEvent<LabelableHolosignProjectorComponent, AfterAutoHandleStateEvent>(OnHandleState);
         SubscribeLocalEvent<LabelableHolosignProjectorComponent, BeforeRangedInteractEvent>(OnBeforeInteract);
         SubscribeLocalEvent<LabelableHolosignProjectorComponent, LabelableHolosignDescriptionMessage>(OnHolosignDescriptionChanged);
@@ -53,7 +53,7 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
     {
         if (component.IsNSFW)
         {
-            if(_consent.HasConsent(args.Examiner, _nsfwDescriptionsConsent))
+            if (_consent.HasConsent(args.Examiner, _nsfwDescriptionsConsent))
                 args.PushMarkup(component.Description);
             else
             {
@@ -100,7 +100,7 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
             UpdateUI(ent);
             return true;
         }
-        
+
         if (ent.Comp.BarrierDescription.Length == 0)
         {
             if (!_uiSystem.HasUi(ent, LabelableHolosignUIKey.Description))
@@ -135,7 +135,7 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
 
         var nsfwStr = labelComp.IsNSFW ? "nsfw" : "";
         _adminLogger.Add(LogType.Action, LogImpact.Low, $"{ToPrettyString(user):user} placed a {ToPrettyString(holoUid):holosign} with {nsfwStr} description {labelComp.Description}");
-        
+
         return true;
     }
 
@@ -190,7 +190,7 @@ public abstract partial class SharedLabelableHolosignProjectorSystem : EntitySys
         }
     }
 
-    private void OnOpenOtherUI(Entity<LabelableHolosignProjectorComponent> entity, 
+    private void OnOpenOtherUI(Entity<LabelableHolosignProjectorComponent> entity,
         ref LabelableHolosignOpenOtherUI args)
     {
         // Have to send this over here to open the BUI since I can't seem to do it from inside the UI.

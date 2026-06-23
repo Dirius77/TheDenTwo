@@ -21,7 +21,7 @@ namespace Content.Shared.PDA
         public ItemSlot PenSlot = new();
         [DataField("paiSlot")]
         public ItemSlot PaiSlot = new();
-        
+
         // DEN: Allow slotting civilian projectors into the PDA.
         [DataField("projectorSlot")]
         public ItemSlot ProjectorSlot = new();
