@@ -23,6 +23,8 @@ public sealed partial class MakeSentientEntityEffectSystem : EntityEffectSystem<
             RemComp<ReplacementAccentComponent>(entity);
             // TODO: Make MonkeyAccent a replacement accent and remove MonkeyAccent code-smell.
             RemComp<MonkeyAccentComponent>(entity);
+
+            MakeSentientLanguages(entity); // DEN: Languages
         }
 
         // Stops from adding a ghost role to things like people who already have a mind

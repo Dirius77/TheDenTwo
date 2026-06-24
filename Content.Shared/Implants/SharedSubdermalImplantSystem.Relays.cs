@@ -22,6 +22,8 @@ public abstract partial class SharedSubdermalImplantSystem
         // Ref relays, for when you need to write to the event!
         SubscribeLocalEvent<ImplantedComponent, CurrencyInsertAttemptEvent>(RefRelayToImplantEvent);
         SubscribeLocalEvent<ImplantedComponent, GetStoreEvent>(RefRelayToImplantEvent);
+
+        InitializeLanguage(); // DEN: Languages
     }
 
     /// <summary>

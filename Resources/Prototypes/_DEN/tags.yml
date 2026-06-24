@@ -7,6 +7,9 @@
 - type: Tag
   id: CivilianHoloprojector
 
+- type: Tag
+  id: XenoQueen # Xeno Queen tag for hivemind
+
 # Mantis tags start, alphabetized
 - type: Tag
   id: MantisBeltStorable

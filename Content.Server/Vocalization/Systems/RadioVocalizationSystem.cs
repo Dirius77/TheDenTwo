@@ -1,5 +1,6 @@
 using Content.Server.Chat.Systems;
 using Content.Server.Vocalization.Components;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Inventory;
 using Content.Shared.Radio;
@@ -35,7 +36,7 @@ public sealed partial class RadioVocalizationSystem : EntitySystem
             return;
 
         // set to handled if we succeed in speaking on the radio
-        args.Handled = TrySpeakRadio(entity.Owner, args.Message);
+        args.Handled = TrySpeakRadio(entity.Owner, args.Language, args.Message); // DEN: Languages
     }
 
     /// <summary>
@@ -71,8 +72,9 @@ public sealed partial class RadioVocalizationSystem : EntitySystem
     /// Attempts to speak on the radio. Returns false if there is no radio or talking on radio fails somehow
     /// </summary>
     /// <param name="entity">Entity to try and make speak on the radio</param>
+    /// <param name="language">The language to attempt to speak with</param>
     /// <param name="message">Message to speak</param>
-    private bool TrySpeakRadio(Entity<RadioVocalizerComponent?> entity, string message)
+    private bool TrySpeakRadio(Entity<RadioVocalizerComponent?> entity, Entity<LanguageComponent> language, string message) // DEN: Languages
     {
         if (!Resolve(entity, ref entity.Comp))
             return false;
@@ -83,15 +85,19 @@ public sealed partial class RadioVocalizationSystem : EntitySystem
         if (!TryPickRandomRadioChannel(entity, out var channel))
             return false;
 
-        var channelPrefix = _proto.Index<RadioChannelPrototype>(channel).KeyCode;
+        var radioChannel = _proto.Index(channel); // DEN: Languages
+        var cmplxMessage = _chat.ConvertMessageToComplex(message); // DEN: Languages
 
         // send a whisper using the radio channel prefix and whatever relevant radio channel character
         // along with the message. This is analogous to how radio messages are sent by players
-        _chat.TrySendInGameICMessage(
+        _chat.SendEntityComplexSpeech(
             entity,
-            $"{SharedChatSystem.RadioChannelPrefix}{channelPrefix} {message}",
-            InGameICChatType.Whisper,
-            ChatTransmitRange.Normal);
+            cmplxMessage,
+            ChatSystem.WhisperWrapper,
+            ChatChannel.Whisper,
+            ChatTransmitRange.Normal,
+            radioChannel,
+            languageOverride: language); // DEN: Languages and complex speech.
 
         return true;
     }

@@ -1,0 +1,30 @@
+- type: language
+  id: Telepathic
+  name: language-telepathic
+  fontColor: PaleVioletRed
+  fontId: BoxRound
+  wrapperOverrides:
+    Local: TelepathyWrapper
+  icon:
+    sprite: "/Textures/Effects/speech.rsi"
+    state: alien0
+  components:
+  - type: ReplaceSpeakerName
+    replaceName: TELEPATHIC
+  - type: ChatChannelWhitelist
+    blacklist: [ Whisper ]
+    failureMessages: [ language-telepathic-dont-whisper ]
+  - type: Gestalt
+  - type: MinimumFluency
+    minimum: Fluent
+  - type: LanguageFollowsMind
+
+- type: languageWrapper
+  id: TelepathyWrapper
+  dialog: chat-language-entity-speak-wrap-dialog
+  emote: chat-language-entity-speak-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-telepathy-wrap-prefix
+  message: chat-language-entity-telepathy-wrap-message
+  singularMessage: chat-language-entity-telepathy-wrap-message-singular
+  boldType: chat-language-entity-speak-bold

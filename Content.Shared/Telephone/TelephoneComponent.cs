@@ -1,3 +1,4 @@
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
@@ -181,13 +182,20 @@ public record struct TelephoneCallEndedEvent();
 /// Raised when a chat message is sent by a telephone to another
 /// </summary>
 [ByRefEvent]
-public readonly record struct TelephoneMessageSentEvent(string Message, MsgChatMessage ChatMsg, EntityUid MessageSource);
+public readonly record struct TelephoneMessageSentEvent(ComplexChatMessage Message,
+    Entity<LanguageComponent> LanguageEnt,
+    EntityUid MessageSource); // DEN: Use Languages and ComplexChatMessage.
 
 /// <summary>
 /// Raised when a chat message is received by a telephone from another
 /// </summary>
 [ByRefEvent]
-public readonly record struct TelephoneMessageReceivedEvent(string Message, MsgChatMessage ChatMsg, EntityUid MessageSource, Entity<TelephoneComponent> TelephoneSource);
+public readonly record struct TelephoneMessageReceivedEvent(ComplexChatMessage Message,
+    Entity<LanguageComponent> LanguageEnt,
+    string Verb,
+    string Name,
+    EntityUid MessageSource,
+    Entity<TelephoneComponent> TelephoneSource); // DEN: Use languages and ComplexChatMessages
 
 #endregion
 

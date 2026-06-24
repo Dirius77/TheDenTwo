@@ -15,6 +15,7 @@ using Content.Shared.Examine;
 using Content.Shared.Ghost;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Players.RateLimiting;
+using Content.Shared.Radio;
 using Robust.Server.Player;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Configuration;
@@ -188,39 +189,56 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool shouldCapitalizeTheWordI = (!CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Parent.Name == "en")
             || (CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Name == "en");
 
-        message = SanitizeInGameICMessage(source, message, out var emoteStr, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
-
-        // Was there an emote in the message? If so, send it.
-        if (player != null && emoteStr != message && emoteStr != null)
-        {
-            SendEntityEmote(source, emoteStr, range, nameOverride, ignoreActionBlocker);
-        }
-
-        // This can happen if the entire string is sanitized out.
-        if (string.IsNullOrEmpty(message))
-            return;
-
-        // This message may have a radio prefix, and should then be whispered to the resolved radio channel
+        // DEN: Detailed message system.
+        bool needsRadio = false;
+        RadioChannelPrototype? channel = null;
+        // We want to do this processing before we try to parse it into a complex message.
         if (checkRadioPrefix)
         {
-            if (TryProcessRadioMessage(source, message, out var modMessage, out var channel))
+            if (TryProcessRadioMessage(source, message, out var modMessage, out channel))
             {
-                SendEntityWhisper(source, modMessage, range, channel, nameOverride, hideLog, ignoreActionBlocker);
-                return;
+                needsRadio = true;
+                message = modMessage;
             }
+        }
+        var complexMessage = ConvertMessageToComplex(message);
+        complexMessage = SanitizeComplexMessage(source, complexMessage, out var emoteStrs, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
+
+        // DEN: Send emote strings extracted from the complex message.
+        // Multiple emotes in multiple dialogs works. I hope no one ever actually does this.
+        if (player != null && emoteStrs.Count != 0)
+        {
+            foreach (var emoteStr in emoteStrs)
+            {
+                SendEntityEmote(source, emoteStr, range, nameOverride, ignoreActionBlocker);
+            }
+        }
+
+        // DEN: Complex message will be empty, rather than a null string.
+        if (complexMessage.Parts.Count == 0)
+            return;
+
+        // DEN: Complex message parsing.
+        if (needsRadio)
+        {
+            SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, ChatChannel.Whisper, range, channel, nameOverride, hideLog, ignoreActionBlocker);
+            return;
         }
 
         // Otherwise, send whatever type.
         switch (desiredType)
         {
             case InGameICChatType.Speak:
-                SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
+                // DEN: Complex Speech and language
+                SendEntityComplexSpeech(source, complexMessage, SpeakWrapper, ChatChannel.Local, range, null, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Whisper:
-                SendEntityWhisper(source, message, range, null, nameOverride, hideLog, ignoreActionBlocker);
+                // DEN: Complex Speech and language
+                SendEntityComplexSpeech(source, complexMessage, WhisperWrapper, ChatChannel.Whisper, range, null, nameOverride, hideLog, ignoreActionBlocker);
                 break;
             case InGameICChatType.Emote:
-                SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
+                // DEN: Complex Speech.
+                SendEntityComplexEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
                 break;
             // DEN Start: add subtle
             case InGameICChatType.Subtle:

@@ -1,3 +1,5 @@
+using System.Linq;
+using Content.Server._DEN.Language.EntitySystems;
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Administration.Systems;
@@ -6,14 +8,18 @@ using Content.Server.Mind;
 using Content.Server.Popups;
 using Content.Server.Radio;
 using Content.Server.Vocalization.Systems;
+using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Animals.Components;
 using Content.Shared.Animals.Systems;
+using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
 using Content.Shared.Whitelist;
 using Robust.Shared.Network;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
@@ -31,8 +37,11 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
     [Dependency] private IAdminLogManager _adminLogger = default!;
     [Dependency] private IGameTiming _gameTiming = default!;
     [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private LanguageSystem _language = default!; // DEN: languages
     [Dependency] private MindSystem _mind = default!;
     [Dependency] private MobStateSystem _mobState = default!;
+    [Dependency] private IPrototypeManager _proto = default!; // DEN: languages
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!; // DEN: Audible languages query
 
     public override void Initialize()
     {
@@ -59,19 +68,21 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         if (!HasComp<ActiveListenerComponent>(entity))
             Log.Warning($"Entity {ToPrettyString(entity)} has a ParrotListenerComponent but was not given an ActiveListenerComponent");
     }
-
+    
     private void OnListen(Entity<ParrotListenerComponent> entity, ref ListenEvent args)
     {
-
-        TryLearn(entity.Owner, args.Message, args.Source);
+        if (args.Channel != ChatChannel.Local) // DEN: Don't learn whispered or subtled messages.
+            return;
+        TryLearn(entity.Owner, args.LanguageEnt, args.Message, args.Source); // DEN: Languages
     }
-
+    
     private void OnHeadsetReceive(Entity<ParrotListenerComponent> entity, ref HeadsetRadioReceiveRelayEvent args)
     {
         var message = args.RelayedEvent.Message;
+        var languageEnt = args.RelayedEvent.LanguageEnt; // DEN: languages
         var source = args.RelayedEvent.MessageSource;
 
-        TryLearn(entity.Owner, message, source);
+        TryLearn(entity.Owner, languageEnt, message, source); // DEN: languages
     }
 
     /// <summary>
@@ -92,6 +103,13 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         var memory = _random.Pick(entity.Comp.SpeechMemories);
 
         args.Message = memory.Message;
+        
+        // DEN Start Languages
+        var language = GetEntity(memory.Language);
+        if (TryComp<LanguageComponent>(language, out var langComp))
+            args.Language = (language, langComp);
+        // DEN End
+        
         args.Handled = true;
     }
 
@@ -100,13 +118,21 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
     /// the message doesn't pass certain checks, or the chance for learning a new message fails
     /// </summary>
     /// <param name="entity">Entity learning a new word</param>
+    /// <param name="languageEnt">Language entity being used.</param>
     /// <param name="incomingMessage">Message to learn</param>
     /// <param name="source">Source EntityUid of the message</param>
-    public void TryLearn(Entity<ParrotMemoryComponent?, ParrotListenerComponent?> entity, string incomingMessage, EntityUid source)
+    public void TryLearn(Entity<ParrotMemoryComponent?, ParrotListenerComponent?> entity, 
+        Entity<LanguageComponent> languageEnt, 
+        ComplexChatMessage incomingMessage,
+        EntityUid source) // DEN: Languages
     {
         if (!Resolve(entity, ref entity.Comp1, ref entity.Comp2))
             return;
 
+        // DEN: Parrots only hear audible languages.
+        if (!_audibleQuery.HasComponent(languageEnt))
+            return;
+        
         if (!_whitelist.CheckBoth(source, entity.Comp2.Blacklist, entity.Comp2.Whitelist))
             return;
 
@@ -117,13 +143,17 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         if (_gameTiming.CurTime < entity.Comp1.NextLearnInterval)
             return;
 
-        // remove whitespace around message, if any
-        var message = incomingMessage.Trim();
+        // DEN Start: Use complex message system and only select dialog.
+        // The message actually has to have dialog, not just actions.
+        var dialogParts = incomingMessage.Parts.Where(part => part.Item1 == ChatPart.Dialog)
+            .Select(part => part.Item2)
+            .ToList();
 
-        // ignore messages containing tildes. This is a crude way to ignore whispers that are too far away
-        // TODO: this isn't great. This should be replaced with a const or we should have a better way to check faraway messages
-        if (message.Contains('~'))
+        if (dialogParts.Count == 0)
             return;
+
+        var message = _random.Pick(dialogParts).Trim();
+        // DEN End
 
         // ignore empty messages. These probably aren't sent anyway but just in case
         if (string.IsNullOrWhiteSpace(message))
@@ -141,29 +171,54 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         if (!_random.Prob(entity.Comp1.LearnChance))
             return;
 
+        var language = _proto.Index(languageEnt.Comp.Language); // DEN: Get the spoken language to learn.
+        
         // actually commit this message to memory
-        Learn((entity, entity.Comp1), message, source);
+        Learn((entity, entity.Comp1), message, language, source); // DEN: Languages
     }
-
+    
     /// <summary>
     /// Actually learn a message and commit it to memory
     /// </summary>
     /// <param name="entity">Entity learning a new word</param>
     /// <param name="message">Message to learn</param>
+    /// <param name="language">Language to use or learn.</param>
     /// <param name="source">Source EntityUid of the message</param>
-    private void Learn(Entity<ParrotMemoryComponent> entity, string message, EntityUid source)
+    private void Learn(Entity<ParrotMemoryComponent> entity, string message, LanguagePrototype language, EntityUid source) // DEN: Languages
     {
+        var languageName = Loc.GetString(language.Name); // DEN: Language
+        
         // log a low-priority chat type log to the admin logger
         // specifies what message was learnt by what entity, and who taught the message to that entity
-        _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Parroting entity {ToPrettyString(entity):entity} learned the phrase \"{message}\" from {ToPrettyString(source):speaker}");
+        _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Parroting entity {ToPrettyString(entity):entity} learned the phrase \"{message}\" in {languageName} from {ToPrettyString(source):speaker}"); // DEN: Log Language
 
         NetUserId? sourceNetUserId = null;
         if (_mind.TryGetMind(source, out _, out var mind))
         {
             sourceNetUserId = mind.UserId;
         }
+        
+        // DEN Start: Add languages handling
+        EntityUid spokenLanguage;
+        if (_language.SpeaksLanguage(entity, language.ID, out var spokenEnt))
+        {
+            spokenLanguage = spokenEnt.Value;
+        }
+        else
+        {
+            // The parrot doesn't already know the language, it tries to learn it to be able to repeat in the right
+            // language.
+            if (!_language.TryAddLanguage(entity, language.ID, out var addedLangs))
+            {
+                Log.Warning("Failed to teach " + Name(entity) + " language: " + language.Name);
+                return;
+            }
+            // If TryAddLanguage returned true this will have at least one language.
+            spokenLanguage = addedLangs.First();
+        }
 
-        var newMemory = new SpeechMemory(sourceNetUserId, message);
+        var newMemory = new SpeechMemory(sourceNetUserId, message, GetNetEntity(spokenLanguage));
+        // DEN End
 
         // add a new message if there is space in the memory
         if (entity.Comp.SpeechMemories.Count < entity.Comp.MaxSpeechMemory)

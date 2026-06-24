@@ -6,6 +6,9 @@
         <ScrollContainer VerticalExpand="True" HorizontalExpand="True">
             <BoxContainer Orientation="Vertical" Margin="8 8 8 8" VerticalExpand="True">
                 <CheckBox Name="IgnoreCryoMessages" Text="{Loc 'ui-options-ignore-cryo-message'}"/>
+                <Label Text="{Loc 'ui-options-language-related'}"
+                       StyleClasses="LabelKeyText"/>
+                <ui:OptionDropDown Name="HideLanguageFonts" Title="{Loc 'ui-options-language-hide-fonts'}"/>
             </BoxContainer>
         </ScrollContainer>
         <ui:OptionsTabControlRow Name="Control" Access="Public" />

@@ -1,14 +1,22 @@
+using System.Linq;
+using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.Components;
+using Content.Shared.Chat;
 using Content.Shared.Trigger.Components.Triggers;
 using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
 using Content.Shared.Database;
 using Content.Shared.Examine;
 using Content.Shared.Verbs;
+using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Trigger.Systems;
 
 public sealed partial class TriggerSystem
 {
+    [Dependency] private IPrototypeManager _proto = default!; // DEN Language
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!; // DEN Language
+    
     private void InitializeVoice()
     {
         SubscribeLocalEvent<TriggerOnVoiceComponent, MapInitEvent>(OnMapInit);
@@ -40,24 +48,39 @@ public sealed partial class TriggerSystem
         else if (component.InspectInitializedLoc != null && !string.IsNullOrWhiteSpace(component.KeyPhrase))
         {
             args.PushText(Loc.GetString(component.InspectInitializedLoc.Value, ("keyphrase", component.KeyPhrase)));
+            // DEN: Display what language was recorded.
+            if (component.KeyLanguage is { } keyLangId)
+            {
+                var keyLang = _proto.Index(keyLangId);
+                args.PushText(Loc.GetString("language-trigger-on-voice-examine", ("language", keyLang.Abbreviation)));
+            }
         }
     }
 
     private void OnListen(Entity<TriggerOnVoiceComponent> ent, ref ListenEvent args)
     {
+        // DEN Start: Languages
+        var languageEnt = args.LanguageEnt;
+
+        if (!_audibleQuery.HasComponent(languageEnt))
+            return;
+
+        var language = _proto.Index(languageEnt.Comp.Language);
+        
         var component = ent.Comp;
-        var message = args.Message.Trim();
+        var message = string.Join(' ', args.Message.Parts.Where(part => part.Item1 == ChatPart.Dialog).Select(part => part.Item2)).Trim();
+        // DEN End
 
         if (component.IsRecording)
         {
-            var ev = new ListenAttemptEvent(args.Source);
+            var ev = new ListenAttemptEvent(args.Source, languageEnt); // DEN: Languages
             RaiseLocalEvent(ent, ev);
 
             if (ev.Cancelled)
                 return;
 
             if (message.Length >= component.MinLength && message.Length <= component.MaxLength)
-                FinishRecording(ent, args.Source, args.Message);
+                FinishRecording(ent, args.Source, message, language.ID); // DEN: Languages
             else if (message.Length > component.MaxLength)
                 _popup.PopupEntity(Loc.GetString("trigger-on-voice-record-failed-too-long"), ent);
             else if (message.Length < component.MinLength)
@@ -168,9 +191,10 @@ public sealed partial class TriggerSystem
     /// <summary>
     /// Stop recording and set the current keyphrase message.
     /// </summary>
-    public void FinishRecording(Entity<TriggerOnVoiceComponent> ent, EntityUid source, string message)
+    public void FinishRecording(Entity<TriggerOnVoiceComponent> ent, EntityUid source, string message, ProtoId<LanguagePrototype> language) // DEN: Languages
     {
         ent.Comp.KeyPhrase = message;
+        ent.Comp.KeyLanguage = language; // DEN: Languages
         ent.Comp.IsRecording = false;
         Dirty(ent);
 
@@ -186,6 +210,7 @@ public sealed partial class TriggerSystem
     public void ClearRecording(Entity<TriggerOnVoiceComponent> ent)
     {
         ent.Comp.KeyPhrase = null;
+        ent.Comp.KeyLanguage = null; // DEN: Languages
         ent.Comp.IsRecording = false;
         Dirty(ent);
         RemComp<ActiveListenerComponent>(ent);
@@ -200,6 +225,7 @@ public sealed partial class TriggerSystem
             return;
 
         ent.Comp.KeyPhrase = Loc.GetString(ent.Comp.DefaultKeyPhrase);
+        ent.Comp.KeyLanguage = ent.Comp.DefaultKeyLanguage; // DEN: Languages
         ent.Comp.IsRecording = false;
         Dirty(ent);
         UpdateListening(ent);

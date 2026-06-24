@@ -53,3 +53,10 @@
         - id: OrganAnimalStomach
         - id: OrganAnimalLiver
         - id: OrganAnimalKidneys
+  # DEN: Languages
+  - type: ContainerContainer
+    containers:
+      languages: !type:Container
+  - type: LanguageCommunicator
+    languages:
+      Animal: [ true, Fluent ]

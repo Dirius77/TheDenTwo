@@ -1,3 +1,4 @@
+using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Clothing;
 using Content.Shared.Inventory;
@@ -15,6 +16,7 @@ public abstract partial class SharedTypingIndicatorSystem : EntitySystem
     [Dependency] private ActionBlockerSystem _actionBlocker = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private SharedLanguageSystem _language = default!; // DEN: Languages
 
     /// <summary>
     ///     Default ID of <see cref="TypingIndicatorPrototype"/>
@@ -72,8 +74,12 @@ public abstract partial class SharedTypingIndicatorSystem : EntitySystem
             return;
         }
 
+        var languageEnt = _language.GetCurrentLanguageEntity(uid.Value); // DEN: languages
+
         // check if this entity can speak or emote
-        if (!_actionBlocker.CanEmote(uid.Value) && !_actionBlocker.CanSpeak(uid.Value))
+        // Entities need a language to have an indicator.
+        // See DenCCVars.FallbackDefaultLanguage if you need some weird entity to have an indicator. Or just add language speaker to the prototype.
+        if (languageEnt == null || !_actionBlocker.CanEmote(uid.Value) && !_actionBlocker.CanSpeak(uid.Value, languageEnt.Value)) // DEN: languages
         {
             // nah, make sure that typing indicator is disabled
             SetTypingIndicatorState(uid.Value, TypingIndicatorState.None);

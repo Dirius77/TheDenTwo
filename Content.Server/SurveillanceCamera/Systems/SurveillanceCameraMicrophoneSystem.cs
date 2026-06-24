@@ -1,4 +1,6 @@
 using Content.Server.Chat.Systems;
+using Content.Shared._DEN.Language.Components;
+using Content.Shared.Chat;
 using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
 using Content.Shared.SurveillanceCamera.Components;
@@ -12,6 +14,8 @@ public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _xforms = default!;
     [Dependency] private EntityWhitelistSystem _whitelistSystem = default!;
+    [Dependency] private EntityQuery<AudibleComponent> _audibleQuery = default!; // DEN: language
+    [Dependency] private EntityQuery<LineOfSightLanguageComponent> _losQuery = default!; // DEN: language
     public override void Initialize()
     {
         base.Initialize();
@@ -61,16 +65,18 @@ public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem
     public void CanListen(EntityUid uid, SurveillanceCameraMicrophoneComponent microphone, ListenAttemptEvent args)
     {
         // TODO maybe just make this a part of ActiveListenerComponent?
-        if (_whitelistSystem.IsWhitelistPass(microphone.Blacklist, args.Source))
+        if (_whitelistSystem.IsWhitelistPass(microphone.Blacklist, args.Source)
+            || !_audibleQuery.HasComponent(args.LanguageEnt)
+            || !_losQuery.HasComponent(args.LanguageEnt)) // DEN: Only audible or visual languages can be transferred over a camera.
             args.Cancel();
     }
-
+    
     public void RelayEntityMessage(EntityUid uid, SurveillanceCameraMicrophoneComponent component, ListenEvent args)
     {
         if (!TryComp(uid, out SurveillanceCameraComponent? camera))
             return;
 
-        var ev = new SurveillanceCameraSpeechSendEvent(args.Source, args.Message);
+        var ev = new SurveillanceCameraSpeechSendEvent(args.Source, args.LanguageEnt, args.Message, args.Verb); // DEN: Languages
 
         foreach (var monitor in camera.ActiveMonitors)
         {
@@ -98,12 +104,19 @@ public sealed partial class SurveillanceCameraMicrophoneSystem : EntitySystem
 public sealed class SurveillanceCameraSpeechSendEvent : EntityEventArgs
 {
     public EntityUid Speaker { get; }
-    public string Message { get; }
+    public ComplexChatMessage Message { get; } // DEN: Complex Chat Messages
+    public Entity<LanguageComponent> LanguageEnt { get; } // DEN: language
+    public string Verb { get; } // DEN: Language
 
-    public SurveillanceCameraSpeechSendEvent(EntityUid speaker, string message)
+    public SurveillanceCameraSpeechSendEvent(EntityUid speaker, 
+        Entity<LanguageComponent> languageEnt,
+        ComplexChatMessage message,
+        string verb) // DEN: Convert to Complex Chat and languages.
     {
         Speaker = speaker;
         Message = message;
+        LanguageEnt = languageEnt; // DEN: Languages
+        Verb = verb; // DEN: Languages
     }
 }
 

@@ -1,0 +1,22 @@
+<Control
+    xmlns="https://spacestation14.io">
+    <PanelContainer Margin="10 2" StyleClasses="PdaBorderRect">
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+            <BoxContainer Name="Header" Orientation="Horizontal" HorizontalExpand="True">
+                <Label Name="LanguageName" HorizontalExpand="True" />
+                <Button Name="LanguageButton" Text="{Loc 'language-ui-speak-language'}" Visible="True"/>
+            </BoxContainer>
+            <Collapsible Margin="4">
+                <CollapsibleHeading Title="{Loc 'language-ui-language-description'}" />
+                <CollapsibleBody HorizontalExpand="False">
+                    <Control VerticalExpand="True" HorizontalExpand="True">
+                        <PanelContainer StyleClasses="BackgroundPanelDark" />
+                    </Control>
+                    <BoxContainer HorizontalExpand="True" Orientation="Vertical" Margin="10">
+                        <RichTextLabel Name="Description" />
+                    </BoxContainer>
+                </CollapsibleBody>
+            </Collapsible>
+        </BoxContainer>
+    </PanelContainer>
+</Control>

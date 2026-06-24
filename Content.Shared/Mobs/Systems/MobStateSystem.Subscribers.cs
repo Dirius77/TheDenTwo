@@ -167,6 +167,8 @@ public partial class MobStateSystem
 
     private void OnSpeakAttempt(EntityUid uid, MobStateComponent component, SpeakAttemptEvent args)
     {
+        // TODO: DEN: Decide if UnconsciousLanguages should be able to be spoken while critical.
+        
         if (HasComp<AllowNextCritSpeechComponent>(uid))
         {
             RemCompDeferred<AllowNextCritSpeechComponent>(uid);

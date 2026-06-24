@@ -120,6 +120,10 @@
     molsPerSecondPerUnitMass: 0.0005
   - type: Speech
     speechVerb: LargeMob
+  # DEN: Languages
+  - type: LanguageCommunicator
+    languages:
+      XenoHivemind: [ true, Fluent ]
 
 - type: entity
   name: praetorian
@@ -229,6 +233,8 @@
   - type: Tag
     tags:
     - CannotSuicide
+    - XenoQueen # Den, Xeno hivemind language.
+  - type: GestaltHost
 
 - type: entity
   name: ravager

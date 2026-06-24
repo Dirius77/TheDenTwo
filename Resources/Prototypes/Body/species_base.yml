@@ -157,6 +157,10 @@
     - FootstepSound
     - DoorBumpOpener
     - AnomalyHost
+  # DEN: Languages
+  - type: LanguageCommunicator
+    languages:
+      Basic: [ true, Fluent ]
 
 - type: entity
   abstract: true

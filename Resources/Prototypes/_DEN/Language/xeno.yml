@@ -1,0 +1,31 @@
+- type: language
+  id: XenoHivemind
+  name: language-xeno-hivemind
+  fontColor: Purple
+  fontId: BoxRound
+  displayInChat: true
+  wrapperOverrides:
+    Local: XenoHivemindWrapper
+  components:
+  - type: Gestalt
+    requiresHost: true
+    hostWhitelist:
+      tags:
+      - XenoQueen
+    missingHostPopups:
+    - language-xeno-hivemind-missing-host
+  - type: MinimumFluency
+    minimum: Fluent
+  - type: ChatChannelWhitelist
+    blacklist: [ Whisper ]
+    failureMessages: [ language-xeno-hivemind-dont-whisper ]
+
+- type: languageWrapper
+  id: XenoHivemindWrapper
+  dialog: chat-language-entity-speak-wrap-dialog
+  emote: chat-language-entity-speak-wrap-emote
+  language: chat-language-entity-speak-wrap-language
+  prefix: chat-language-entity-speak-wrap-prefix
+  message: chat-language-entity-xeno-hivemind-wrap-message
+  singularMessage: chat-language-entity-xeno-hivemind-wrap-message-singular
+  boldType: chat-language-entity-speak-bold

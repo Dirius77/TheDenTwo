@@ -1,4 +1,6 @@
+using Content.Shared._DEN.Language.Components;
 using Content.Shared.Body.Events;
+using Content.Shared.Chat;
 using Content.Shared.Emoting;
 using Content.Shared.Hands;
 using Content.Shared.Interaction;
@@ -141,10 +143,10 @@ namespace Content.Shared.ActionBlocker
             return !itemEv.Cancelled;
         }
 
-        public bool CanSpeak(EntityUid uid)
+        public bool CanSpeak(EntityUid uid, Entity<LanguageComponent> language, ChatChannel? channel = null) // DEN: Languages
         {
             // This one is used as broadcast
-            var ev = new SpeakAttemptEvent(uid);
+            var ev = new SpeakAttemptEvent(uid, language, channel); // DEN: Languages
             RaiseLocalEvent(uid, ev, true);
 
             return !ev.Cancelled;
