@@ -53,6 +53,8 @@
           amount: 2
         - id: FoodContainerEgg
           amount: 2
+        - id: FoodContainerGelCube # DEN - gel cube box
+          amount: 1
 
 - type: entity
   parent: CratePlastic

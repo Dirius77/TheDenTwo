@@ -54,6 +54,16 @@
         - id: FoodBakedChevreChaud
         - id: FoodBakedNugget
         - id: FoodTacoShell
+        # Begin DEN
+        - id: FoodJellyColorful
+        - id: FoodJellyApple
+        - id: FoodJellyBerry
+        - id: FoodJellyGrape
+        - id: FoodJellyLemon
+        - id: FoodJellyOrange
+        - id: FoodJellyPineapple
+        - id: FoodJellyWatermelon
+        # End DEN
       - !type:GroupSelector #rare
         weight: 0.05
         children:

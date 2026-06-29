@@ -263,7 +263,7 @@
   group: Savory
   solids:
     FoodBreadBun: 1
-    FoodJellyAmanita: 1
+    FoodJellyColorful: 1 # DEN: FoodJellyAmanita -> FoodJellyColorful
 
 - type: microwaveMealRecipe
   id: RecipeBurgerMcguffin
@@ -591,7 +591,7 @@
   group: Breads
   solids:
     FoodBreadPlainSlice: 1
-    FoodJellyAmanita: 1 #replace with jelly
+    FoodJellyColorful: 1 # DEN: FoodJellyAmanita -> FoodJellyColorful
 
 - type: microwaveMealRecipe
   id: RecipeMoldyBreadSlice
@@ -938,7 +938,7 @@
   time: 10
   group: Savory
   reagents:
-    Water: 5
+    GellingAgent: 5 # DEN: 5u water -> 5u gelling agent
     Vodka: 5
   solids:
     FoodFlyAmanita: 3

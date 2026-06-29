@@ -1,0 +1,60 @@
+- type: entity
+  parent: [ BoxCardboard, BaseBagOpenClose ]
+  id: FoodContainerGelCube
+  name: gel cube box
+  description: A box of gel cubes - the starting point for your jelly salad empire.
+  components:
+  - type: Sprite
+    sprite: _DEN/Objects/Consumable/Food/gel_cube_box.rsi
+    state: box-closed
+    layers:
+    - state: box-closed
+      map: ["closeLayer"]
+    - state: box-open
+      map: ["openLayer"]
+      visible: false
+    - state: cube1
+      map: ["cube1"]
+      visible: false
+    - state: cube2
+      map: ["cube2"]
+      visible: false
+    - state: cube3
+      map: ["cube3"]
+      visible: false
+    - state: cube4
+      map: ["cube4"]
+      visible: false
+    - state: cube5
+      map: ["cube5"]
+      visible: false
+    - state: cube6
+      map: ["cube6"]
+      visible: false
+  - type: Storage
+    grid:
+    - 0, 0, 2, 1
+    whitelist:
+      tags:
+      - GelCube
+  - type: Item
+    size: Small
+    shape:
+    - 0, 0, 1, 1
+  - type: EntityTableContainerFill
+    containers:
+      storagebase:
+        id: FoodGelCube
+        amount: 6 # 30u total
+  - type: ItemCounter
+    count:
+      tags: [GelCube]
+    composite: true
+    layerStates:
+    - cube1
+    - cube2
+    - cube3
+    - cube4
+    - cube5
+    - cube6
+  - type: Appearance

@@ -838,12 +838,14 @@
   - type: Sprite
     layers:
     - state: jelly-toast
-  - type: Solution
+  - type: Solution # DEN: Update solution
     solution:
       reagents:
       - ReagentId: Nutriment
         Quantity: 15
-      - ReagentId: Vitamin
+      - ReagentId: Sugar
+        Quantity: 10
+      - ReagentId: GellingAgent
         Quantity: 5
 # Tastes like garlic, Italy.
 

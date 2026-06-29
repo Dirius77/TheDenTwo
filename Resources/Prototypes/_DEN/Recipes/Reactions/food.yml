@@ -1,0 +1,39 @@
+# Solids
+
+- type: reaction
+  id: GelCube
+  impact: Low
+  quantized: true
+  conserveEnergy: false
+  requiredMixerCategories:
+  - Stir
+  reactants:
+    GellingAgent:
+      amount: 5
+  effects:
+  - !type:SpawnEntity
+    entity: FoodGelCube
+
+# Chemicals
+
+- type: reaction
+  id: GellingAgentFromFat
+  reactants:
+    Fat:
+      amount: 10
+    Enzyme:
+      amount: 5
+      catalyst: true
+  products:
+    GellingAgent: 5
+
+- type: reaction
+  id: GellingAgentFromSlime
+  reactants:
+    Slime:
+      amount: 5
+    Enzyme:
+      amount: 5
+      catalyst: true
+  products:
+    GellingAgent: 5

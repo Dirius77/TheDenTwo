@@ -1,0 +1,246 @@
+- type: entity
+  abstract: true
+  parent: FoodInjectableBase
+  id: FoodJellyBase
+  name: jelly
+  description: A dessert made of jiggly, sweet jelly.
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+  - type: Sprite
+    sprite: _DEN/Objects/Consumable/Food/jelly.rsi
+    state: jelly
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: Sugar
+        Quantity: 10
+  - type: Edible
+    utensil:
+    - Fork
+    - Spoon
+  - type: Tag
+    tags:
+    - Jelly
+
+- type: entity
+  abstract: true
+  parent: FoodJellyBase
+  id: FoodFruitJellyBase
+  components:
+  - type: Tag
+    tags:
+    - Jelly
+    - Fruit
+
+- type: entity
+  parent: FoodJellyBase
+  id: FoodJellyColorful
+  suffix: Random Color
+  components:
+  - type: Sprite
+    layers:
+    - state: jelly_color_red
+      map: [ "enum.DamageStateVisualLayers.Base" ]
+  - type: RandomSprite
+    available:
+    - enum.DamageStateVisualLayers.Base:
+        jelly_color_red: ""
+        jelly_color_orange: ""
+        jelly_color_yellow: ""
+        jelly_color_green: ""
+        jelly_color_blue: ""
+        jelly_color_purple: ""
+
+- type: entity
+  parent: FoodFruitJellyBase
+  id: FoodJellyApple
+  name: apple jelly
+  description: Apple cider-flavored jelly, with a sprinkle of cinnamon spice.
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+    - apple
+    - cinnamon
+  - type: Sprite
+    state: jelly_apple
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: JuiceApple
+        Quantity: 15
+      - ReagentId: Nutriment
+        Quantity: 5
+      - ReagentId: Vitamin
+        Quantity: 5
+      - ReagentId: Sugar
+        Quantity: 5
+
+- type: entity
+  parent: FoodFruitJellyBase
+  id: FoodJellyBerry
+  name: berry jelly
+  description: A berry-flavored jelly, complete with fresh berries inside.
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+    - berry
+  - type: Sprite
+    state: jelly_berry
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: JuiceBerry
+        Quantity: 15
+      - ReagentId: Nutriment
+        Quantity: 5
+      - ReagentId: Vitamin
+        Quantity: 5
+      - ReagentId: Sugar
+        Quantity: 5
+
+- type: entity
+  parent: FoodFruitJellyBase
+  id: FoodJellyGrape
+  name: grape jelly
+  description: Grape-flavored jelly, dusted with sour candy sugar.
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+    - grape
+    - sour
+  - type: Sprite
+    state: jelly_grape
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: JuiceGrape
+        Quantity: 15
+      - ReagentId: Nutriment
+        Quantity: 5
+      - ReagentId: Vitamin
+        Quantity: 5
+      - ReagentId: Sugar
+        Quantity: 5
+
+- type: entity
+  parent: FoodFruitJellyBase
+  id: FoodJellyLemon
+  name: lemon jelly
+  description: Lemon-flavored jelly... or is it lemonade-flavored?
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+    - sour
+  - type: Sprite
+    state: jelly_lemon
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: JuiceLemon
+        Quantity: 15
+      - ReagentId: Nutriment
+        Quantity: 5
+      - ReagentId: Vitamin
+        Quantity: 5
+      - ReagentId: Sugar
+        Quantity: 5
+
+- type: entity
+  parent: FoodFruitJellyBase
+  id: FoodJellyOrange
+  name: orange jelly
+  description: Orange jelly set on top of cream - tastes like an orange creamsicle.
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+    - orange
+    - creamy
+  - type: Sprite
+    state: jelly_orange
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: Cream
+        Quantity: 10
+      - ReagentId: JuiceOrange
+        Quantity: 15
+      - ReagentId: Nutriment
+        Quantity: 5
+      - ReagentId: Vitamin
+        Quantity: 5
+      - ReagentId: Sugar
+        Quantity: 5
+
+- type: entity
+  parent: FoodFruitJellyBase
+  id: FoodJellyPineapple
+  name: pineapple jelly
+  description: Pineapple jelly topped with whipped cream and a cherry. Delicious!
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+    - pineapple
+    - creamy
+  - type: Sprite
+    state: jelly_pineapple
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: Cream
+        Quantity: 5
+      - ReagentId: JuicePineapple
+        Quantity: 15
+      - ReagentId: Nutriment
+        Quantity: 8
+      - ReagentId: Vitamin
+        Quantity: 2
+      - ReagentId: Sugar
+        Quantity: 5
+
+- type: entity
+  parent: FoodFruitJellyBase
+  id: FoodJellyWatermelon
+  name: watermelon jelly
+  description: Layered watermelon-flavored jelly, fitting for a bright summer day.
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+    - watermelon
+  - type: Sprite
+    state: jelly_watermelon
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+      - ReagentId: JuiceWatermelon
+        Quantity: 14
+      - ReagentId: Nutriment
+        Quantity: 2
+      - ReagentId: Vitamin
+        Quantity: 2
+      - ReagentId: Sugar
+        Quantity: 7

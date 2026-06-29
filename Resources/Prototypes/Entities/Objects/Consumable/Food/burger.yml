@@ -129,6 +129,15 @@
         color: "#f70000"
       - state: alpha-filling-inhand-right
         color: "#f70000"
+  - type: Solution # DEN: Update solution
+    solution:
+      reagents:
+      - ReagentId: Nutriment
+        Quantity: 15
+      - ReagentId: Sugar
+        Quantity: 10
+      - ReagentId: GellingAgent
+        Quantity: 5
 
 # Burger
 

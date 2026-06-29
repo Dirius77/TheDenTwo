@@ -1,0 +1,22 @@
+- type: entity
+  parent: [SolutionVeryTiny, FoodBakingMixableBase]
+  id: FoodGelCube
+  name: gel cube
+  description: A wobbly jelly cube. Dissolve it in a beaker!
+  components:
+  - type: FlavorProfile
+    flavors:
+    - jelly
+  - type: Sprite
+    sprite: _DEN/Objects/Consumable/Food/gel_cube.rsi
+    state: cube
+  - type: Item
+    size: Tiny
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: GellingAgent
+        Quantity: 5
+  - type: Tag
+    tags:
+    - GelCube

@@ -592,6 +592,8 @@
         Quantity: 30
       - ReagentId: Nutriment
         Quantity: 15
+      - ReagentId: GellingAgent # DEN: Add gelling agent
+        Quantity: 5
       - ReagentId: Vodka
         Quantity: 5
 

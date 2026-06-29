@@ -1,0 +1,103 @@
+- type: microwaveMealRecipe
+  id: RecipeJellyColorful
+  name: microwave-meal-recipe-jelly-colorful-name
+  result: FoodJellyColorful
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    Sugar: 10
+    Water: 5
+
+- type: microwaveMealRecipe
+  id: RecipeJellyApple
+  name: microwave-meal-recipe-jelly-apple-name
+  result: FoodJellyApple
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    JuiceApple: 10
+    Sugar: 5
+  solids:
+    FoodApple: 1
+
+- type: microwaveMealRecipe
+  id: RecipeJellyBerry
+  name: microwave-meal-recipe-jelly-berry-name
+  result: FoodJellyBerry
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    JuiceBerry: 10
+    Sugar: 5
+  solids:
+    FoodBerries: 1
+
+- type: microwaveMealRecipe
+  id: RecipeJellyGrape
+  name: microwave-meal-recipe-jelly-grape-name
+  result: FoodJellyGrape
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    JuiceGrape: 10
+    Sugar: 5
+  solids:
+    FoodGrape: 1
+
+- type: microwaveMealRecipe
+  id: RecipeJellyLemon
+  name: microwave-meal-recipe-jelly-lemon-name
+  result: FoodJellyLemon
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    JuiceLemon: 10
+    Sugar: 5
+  solids:
+    FoodLemon: 1
+
+- type: microwaveMealRecipe
+  id: RecipeJellyOrange
+  name: microwave-meal-recipe-jelly-orange-name
+  result: FoodJellyOrange
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    JuiceOrange: 10
+    Cream: 10
+    Sugar: 5
+  solids:
+    FoodOrange: 1
+
+- type: microwaveMealRecipe
+  id: RecipeJellyPineapple
+  name: microwave-meal-recipe-jelly-pineapple-name
+  result: FoodJellyPineapple
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    JuicePineapple: 10
+    Cream: 5
+    Sugar: 5
+  solids:
+    FoodPineappleSlice: 2
+
+- type: microwaveMealRecipe
+  id: RecipeJellyWatermelon
+  name: microwave-meal-recipe-jelly-watermelon-name
+  result: FoodJellyWatermelon
+  time: 10
+  group: Dessert
+  reagents:
+    GellingAgent: 5
+    JuiceWatermelon: 10
+    Sugar: 5
+  solids:
+    FoodWatermelonSlice: 2

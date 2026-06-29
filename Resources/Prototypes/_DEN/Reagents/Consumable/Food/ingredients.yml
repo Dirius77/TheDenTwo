@@ -1,0 +1,11 @@
+# Gelling agent is an ingredient used to make jelly dishes, made by combining slime or fat with enzyme.
+# Stirring 10u gelling agent with a spoon produces a gel cube, which can be mixed back into gelling agent in a beaker.
+# Tastes like jelly.
+- type: reagent
+  id: GellingAgent
+  name: reagent-name-gelling-agent
+  desc: reagent-desc-gelling-agent
+  group: Foods
+  physicalDesc: reagent-physical-desc-jiggly
+  flavor: jelly
+  color: "#a5a5a5"

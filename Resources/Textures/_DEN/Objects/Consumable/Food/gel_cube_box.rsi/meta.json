@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "license": "CC0-1.0",
+  "copyright": "Sprites by portfiend (GitHub)",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "box-closed"
+    },
+    {
+      "name": "box-open"
+    },
+    {
+      "name": "cube1"
+    },
+    {
+      "name": "cube2"
+    },
+    {
+      "name": "cube3"
+    },
+    {
+      "name": "cube4"
+    },
+    {
+      "name": "cube5"
+    },
+    {
+      "name": "cube6"
+    }
+  ]
+}

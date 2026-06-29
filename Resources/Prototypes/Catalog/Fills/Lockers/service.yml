@@ -55,6 +55,7 @@
     - id: ReagentContainerSugar
     - id: FoodCondimentBottleEnzyme
     - id: DrinkSoyMilkCarton
+    - id: FoodContainerGelCube # DEN - gel cube box
     - !type:AllSelector
       rolls: 2
       children:

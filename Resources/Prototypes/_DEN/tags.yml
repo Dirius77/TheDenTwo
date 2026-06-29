@@ -1,14 +1,21 @@
 # alphabetical order PLEASE
 # also document their purpose
 
-- type: Tag
-  id: TeddyRibbon # Ribbon slot for teddy bears
-
+# Roleplay holoprojectors. Used as a storage whitelist in PDAs.
 - type: Tag
   id: CivilianHoloprojector
 
 - type: Tag
-  id: XenoQueen # Xeno Queen tag for hivemind
+  id: Flash
+
+# Gel cubes. Used in gel cube box storage whitelist.
+- type: Tag
+  id: GelCube
+
+# For jelly food items
+# TODO: Add bounty.
+- type: Tag
+  id: Jelly
 
 # Mantis tags start, alphabetized
 - type: Tag
@@ -61,4 +68,7 @@
   id: ScienceTool
 
 - type: Tag
-  id: Flash
+  id: TeddyRibbon # Ribbon slot for teddy bears
+
+- type: Tag
+  id: XenoQueen # Xeno Queen tag for hivemind

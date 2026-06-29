@@ -14,6 +14,7 @@
     ReagentContainerOliveoil: 2
     ReagentContainerMayo: 1
     VariantCubeBox: 1
+    FoodContainerGelCube: 1 # DEN - gel cube box
     FoodContainerEgg: 1
     DrinkMilkCarton: 2
     DrinkSoyMilkCarton: 1
@@ -25,4 +26,4 @@
     FoodBoxDonkpocket: 1
     FoodFrozenSandwich: 2
     FoodFrozenSandwichStrawberry: 2
-    
+
