@@ -5,7 +5,7 @@ namespace Content.Shared.Wires;
 
 public abstract partial class SharedWiresSystem
 {
-    [Dependency] private readonly ItemSlotsSystem _itemSlots = default!;
+    [Dependency] private ItemSlotsSystem _itemSlots = default!;
     
     private void InitializeLock()
     {

@@ -5,15 +5,14 @@ using Robust.Shared.Containers;
 
 namespace Content.Shared._DEN.Examine.EntitySystems;
 
-public sealed class ContainerExamineRelaySystem : EntitySystem
+public sealed partial class ContainerExamineRelaySystem : EntitySystem
 {
-    [Dependency] private readonly SharedContainerSystem _containerSystem = default!;
-    [Dependency] private readonly SharedSolutionContainerSystem _solutionSystem = default!;
+    [Dependency] private SharedContainerSystem _containerSystem = default!;
+    [Dependency] private SharedSolutionContainerSystem _solutionSystem = default!;
     
     public override void Initialize()
     {
         SubscribeLocalEvent<ContainerExamineRelayComponent, ExaminedEvent>(OnExamined);
-        
         SubscribeLocalEvent<RelayedSolutionExamineComponent, ContainedRelayEvent<ExaminedEvent>>(OnSolutionExamineRelay);
     }
 

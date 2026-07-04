@@ -12,7 +12,7 @@ public abstract partial class SharedAtmosphereSystem
 
     private void OnBreathToolInit(Entity<BreathToolComponent> entity, ref ComponentInit evt)
     {
-        // The comment in the mask system is so right there needs to be a better way to get somethings wearer.
+        // The comment in the mask system is so right there needs to be a better way to get something's wearer.
         if (TryComp<ClothingComponent>(entity, out var clothing)
             && clothing.InSlotFlag is { } slotFlag
             && entity.Comp.AllowedSlots.HasFlag(slotFlag))

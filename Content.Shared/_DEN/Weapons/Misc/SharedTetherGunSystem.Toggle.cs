@@ -1,6 +1,5 @@
 using Content.Shared.Item.ItemToggle.Components;
 
-// ReSharper disable once CheckNamespace
 namespace Content.Shared.Weapons.Misc;
 
 public abstract partial class SharedTetherGunSystem

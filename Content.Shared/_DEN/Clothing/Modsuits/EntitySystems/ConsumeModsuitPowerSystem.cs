@@ -8,10 +8,10 @@ using Content.Shared.Weapons.Melee.Events;
 
 namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 
-public sealed class ConsumeModsuitPowerSystem : EntitySystem
+public sealed partial class ConsumeModsuitPowerSystem : EntitySystem
 {
-    [Dependency] private readonly InventorySystem _inventory = default!;
-    [Dependency] private readonly ModulePowerSystem _powerSystem = default!;
+    [Dependency] private InventorySystem _inventory = default!;
+    [Dependency] private ModulePowerSystem _powerSystem = default!;
 
     public override void Initialize()
     {

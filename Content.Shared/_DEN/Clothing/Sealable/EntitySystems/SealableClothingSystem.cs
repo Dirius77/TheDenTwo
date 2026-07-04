@@ -14,11 +14,11 @@ namespace Content.Shared._DEN.Clothing.Sealable.EntitySystems;
 
 public sealed partial class SealableClothingSystem : EntitySystem
 {
-    [Dependency] private readonly SharedAppearanceSystem _appearanceSystem = default!;
-    [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
-    [Dependency] private readonly SharedItemSystem _item = default!;
-    [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
-    [Dependency] private readonly InventorySystem _inventorySystem = default!;
+    [Dependency] private SharedAppearanceSystem _appearanceSystem = default!;
+    [Dependency] private SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private SharedItemSystem _item = default!;
+    [Dependency] private SharedPopupSystem _popupSystem = default!;
+    [Dependency] private InventorySystem _inventorySystem = default!;
 
     private readonly LocId _cantToggleReason = "sealable-clothing-cant-toggle-sealed";
     

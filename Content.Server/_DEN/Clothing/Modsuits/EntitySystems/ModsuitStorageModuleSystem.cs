@@ -7,8 +7,8 @@ namespace Content.Server._DEN.Clothing.Modsuits.EntitySystems;
 
 public sealed partial class ModsuitStorageModuleSystem : EntitySystem
 {
-    [Dependency] private readonly SharedContainerSystem _container = default!;
-    [Dependency] private readonly SharedUserInterfaceSystem _interfaceSystem = default!;
+    [Dependency] private SharedContainerSystem _container = default!;
+    [Dependency] private SharedUserInterfaceSystem _interfaceSystem = default!;
     
     private const string StorageBoundUserInterface = "StorageBoundUserInterface";
     

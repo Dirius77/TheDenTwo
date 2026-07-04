@@ -7,7 +7,7 @@ namespace Content.Client._DEN.Clothing.Modsuits.EntitySystems;
 
 public sealed partial class ModsuitSystem : SharedModsuitSystem
 {
-    [Dependency] private readonly SharedUserInterfaceSystem _uiSystem = default!;
+    [Dependency] private SharedUserInterfaceSystem _uiSystem = default!;
     
     protected override void UpdateUI(Entity<ModsuitControllerComponent> entity)
     {

@@ -11,8 +11,8 @@ namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 
 public sealed partial class ModsuitToggleSystem : EntitySystem
 {
-    [Dependency] private readonly SharedModsuitSystem _modsuitSystem = default!;
-    [Dependency] private readonly ItemToggleSystem _toggleSystem = default!;
+    [Dependency] private SharedModsuitSystem _modsuitSystem = default!;
+    [Dependency] private ItemToggleSystem _toggleSystem = default!;
     
     public override void Initialize()
     {

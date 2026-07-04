@@ -9,10 +9,10 @@ namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 
 public sealed partial class ModsuitHolsterModuleSystem : EntitySystem
 {
-    [Dependency] private readonly SharedContainerSystem _containerSystem = default!;
-    [Dependency] private readonly SharedModsuitSystem _modsuitSystem = default!;
-    [Dependency] private readonly InventorySystem _inventorySystem = default!;
-    [Dependency] private readonly ModulePowerSystem _powerSystem = default!;
+    [Dependency] private SharedContainerSystem _containerSystem = default!;
+    [Dependency] private SharedModsuitSystem _modsuitSystem = default!;
+    [Dependency] private InventorySystem _inventorySystem = default!;
+    [Dependency] private ModulePowerSystem _powerSystem = default!;
     
     public override void Initialize()
     {

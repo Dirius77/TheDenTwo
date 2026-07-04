@@ -9,9 +9,9 @@ namespace Content.Shared._DEN.Modules.EntitySystems;
 
 public sealed partial class ModulePowerSystem : EntitySystem
 {
-    [Dependency] private readonly SharedBatterySystem _battery = default!;
-    [Dependency] private readonly ItemToggleSystem _toggle = default!;
-    [Dependency] private readonly PowerCellSystem _cell = default!;
+    [Dependency] private SharedBatterySystem _battery = default!;
+    [Dependency] private ItemToggleSystem _toggle = default!;
+    [Dependency] private PowerCellSystem _cell = default!;
     
     public override void Initialize()
     {

@@ -3,9 +3,9 @@ using Content.Shared.Interaction;
 
 namespace Content.Shared._DEN.Actions.EntitySystems;
 
-public sealed class UsingActionSystem : EntitySystem
+public sealed partial class UsingActionSystem : EntitySystem
 {
-    [Dependency] private readonly SharedInteractionSystem _interactionSystem = default!;
+    [Dependency] private SharedInteractionSystem _interactionSystem = default!;
     
     public override void Initialize()
     {

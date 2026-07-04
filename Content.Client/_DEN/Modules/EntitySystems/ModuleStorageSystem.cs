@@ -6,7 +6,7 @@ namespace Content.Client._DEN.Modules.EntitySystems;
 
 public sealed partial class ModuleStorageSystem : SharedModuleStorageSystem
 {
-    [Dependency] private readonly UserInterfaceSystem _uiSystem = default!;
+    [Dependency] private UserInterfaceSystem _uiSystem = default!;
     
     public override void Initialize()
     {

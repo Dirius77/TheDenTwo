@@ -16,20 +16,17 @@ namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 
 public abstract partial class SharedModsuitSystem : EntitySystem
 {
-    [Dependency] private readonly SharedModuleStorageSystem _moduleSystem = default!;
-    [Dependency] private readonly SealableClothingSystem _sealableSystem = default!;
-    [Dependency] private readonly SharedUserInterfaceSystem _uiSystem = default!;
-    [Dependency] private readonly ItemToggleSystem _toggleSystem = default!;
-    [Dependency] private readonly SpringlockSystem _springlockSystem = default!;
-    
-    private EntityQuery<ModsuitControllerComponent> _modsuitControllerQuery;
-    private EntityQuery<ClothingComponent> _clothingQuery;
+    [Dependency] private SharedModuleStorageSystem _moduleSystem = default!;
+    [Dependency] private SealableClothingSystem _sealableSystem = default!;
+    [Dependency] private SharedUserInterfaceSystem _uiSystem = default!;
+    [Dependency] private ItemToggleSystem _toggleSystem = default!;
+    [Dependency] private SpringlockSystem _springlockSystem = default!;
+    [Dependency] private EntityQuery<ModsuitControllerComponent> _modsuitControllerQuery = default!;
+    [Dependency] private EntityQuery<ModsuitPartComponent> _modsuitPartQuery = default!;
+    [Dependency] private EntityQuery<ClothingComponent> _clothingQuery = default!;
     
     public override void Initialize()
     {
-        _modsuitControllerQuery = GetEntityQuery<ModsuitControllerComponent>();
-        _clothingQuery = GetEntityQuery<ClothingComponent>();
-
         InitializeRelay();
         
         SubscribeLocalEvent<ModsuitModuleComponent, ModuleInsertedEvent>(OnModsuitModuleInserted);
@@ -132,7 +129,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         if (entity.Comp.ModController is not { } controlEnt)
             return false;
 
-        if (!TryComp<ModsuitControllerComponent>(controlEnt, out var controllerComp))
+        if (!_modsuitControllerQuery.TryComp(controlEnt, out var controllerComp))
             return false;
         
         controller = (controlEnt, controllerComp);
@@ -249,13 +246,13 @@ public abstract partial class SharedModsuitSystem : EntitySystem
             entity.Comp.SlotToPart[part.Value] = part.Key;
             entity.Comp.PartToSlot[part.Key] = part.Value;
 
-            if (TryComp<ModsuitPartComponent>(part.Key, out var partComp))
+            if (_modsuitPartQuery.TryComp(part.Key, out var partComp))
             {
                 partComp.Controller = entity.Owner;
                 Dirty(part.Key, partComp);
             }
         }
-        if (TryComp<ModsuitPartComponent>(entity, out var controllerPartComp))
+        if (_modsuitPartQuery.TryComp(entity, out var controllerPartComp))
             controllerPartComp.Controller = entity;
         Dirty(entity);
     }
@@ -308,7 +305,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     private void OnModsuitModuleInserted(Entity<ModsuitModuleComponent> entity, ref ModuleInsertedEvent args)
     {
-        if (!HasComp<ModsuitControllerComponent>(args.Storage)) 
+        if (!_modsuitControllerQuery.HasComp(args.Storage)) 
             return;
         
         entity.Comp.ModController = args.Storage;
@@ -329,7 +326,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
             var target = part.Key;
             // Doesn't make sense to seal it if it's not this, also if this somehow happened something has gone really
             // really wrong.
-            if (!HasComp<ModsuitPartComponent>(target)) 
+            if (!_modsuitPartQuery.HasComp(target)) 
                 continue;
             
             _springlockSystem.SetSpringlocked(target, locked);
@@ -354,7 +351,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
         if (entity.Comp.ModController == null)
             return;
 
-        if (!TryComp<ModsuitControllerComponent>(entity.Comp.ModController, out var modsuitController))
+        if (!_modsuitControllerQuery.TryComp(entity.Comp.ModController, out var modsuitController))
             return;
         
         UpdateUI((entity.Comp.ModController.Value, modsuitController));

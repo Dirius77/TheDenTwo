@@ -10,10 +10,10 @@ namespace Content.Shared._DEN.Clothing.Sealable.EntitySystems;
 
 public sealed partial class SpringlockSystem : EntitySystem
 {
-    [Dependency] private readonly SharedToolSystem _toolSystem = default!;
-    [Dependency] private readonly SealableClothingSystem _sealableSystem = default!;
-    [Dependency] private readonly SharedAudioSystem _audioSystem = default!;
-    [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
+    [Dependency] private SharedToolSystem _toolSystem = default!;
+    [Dependency] private SealableClothingSystem _sealableSystem = default!;
+    [Dependency] private SharedAudioSystem _audioSystem = default!;
+    [Dependency] private SharedPopupSystem _popupSystem = default!;
     
     public override void Initialize()
     {

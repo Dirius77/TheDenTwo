@@ -18,7 +18,7 @@ namespace Content.Client._DEN.Clothing.Modsuits.UI.Controls;
 [GenerateTypedNameReferences]
 public sealed partial class ModsuitControllerWindow : FancyWindow
 {
-    [Dependency] private readonly IEntityManager _entity = default!;
+    [Dependency] private IEntityManager _entity = default!;
     
     private Entity<ModsuitControllerComponent, ModuleStorageComponent>? _modControlEntity;
 

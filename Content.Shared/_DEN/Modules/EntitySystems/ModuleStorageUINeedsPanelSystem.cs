@@ -6,7 +6,7 @@ namespace Content.Shared._DEN.Modules.EntitySystems;
 // This is its own system so that I can enforce ordering between this and the worn clothing check.
 public sealed partial class ModuleStorageUINeedsPanelSystem : EntitySystem
 {
-    [Dependency] private readonly SharedUserInterfaceSystem _uiSystem = default!;
+    [Dependency] private SharedUserInterfaceSystem _uiSystem = default!;
     
     public override void Initialize()
     {

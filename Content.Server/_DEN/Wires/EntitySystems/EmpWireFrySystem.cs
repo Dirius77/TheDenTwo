@@ -6,10 +6,10 @@ using Robust.Shared.Random;
 
 namespace Content.Server._DEN.Wires.EntitySystems;
 
-public sealed class EmpWireFrySystem : EntitySystem
+public sealed partial class EmpWireFrySystem : EntitySystem
 {
-    [Dependency] private readonly IRobustRandom _random = default!;
-    [Dependency] private readonly WiresSystem _wiresSystem = default!;
+    [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private WiresSystem _wiresSystem = default!;
     
     public override void Initialize()
     {

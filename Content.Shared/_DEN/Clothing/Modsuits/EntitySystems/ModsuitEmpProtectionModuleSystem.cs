@@ -9,10 +9,10 @@ namespace Content.Shared._DEN.Clothing.Modsuits.EntitySystems;
 
 public sealed partial class ModsuitEmpProtectionModuleSystem : EntitySystem
 {
-    [Dependency] private readonly SharedModuleStorageSystem _moduleStorage = default!;
-    [Dependency] private readonly SharedModsuitSystem _modsuitSystem = default!;
-    [Dependency] private readonly INetManager _netManager = default!;
-    [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
+    [Dependency] private SharedModuleStorageSystem _moduleStorage = default!;
+    [Dependency] private SharedModsuitSystem _modsuitSystem = default!;
+    [Dependency] private INetManager _netManager = default!;
+    [Dependency] private SharedPopupSystem _popupSystem = default!;
 
     public override void Initialize()
     {

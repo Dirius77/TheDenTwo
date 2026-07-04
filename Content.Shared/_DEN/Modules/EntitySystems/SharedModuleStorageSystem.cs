@@ -20,24 +20,21 @@ namespace Content.Shared._DEN.Modules.EntitySystems;
 
 public abstract partial class SharedModuleStorageSystem : EntitySystem
 {
-    [Dependency] private readonly SharedAudioSystem _audioSystem = default!;
-    [Dependency] private readonly SharedUserInterfaceSystem _uiSystem = default!;
-    [Dependency] private readonly SharedContainerSystem _containerSystem = default!;
-    [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
-    [Dependency] private readonly SharedInteractionSystem _interactionSystem = default!;
-    [Dependency] private readonly SharedHandsSystem _handsSystem = default!;
-    [Dependency] private readonly SharedToolSystem _toolSystem = default!;
-    [Dependency] private readonly InventorySystem _inventorySystem = default!;
-    [Dependency] private readonly EntityWhitelistSystem _whitelistSystem = default!;
-    [Dependency] private readonly IPrototypeManager _protoManager = default!;
-
-    private EntityQuery<ModuleComponent> _moduleQuery;
+    [Dependency] private SharedAudioSystem _audioSystem = default!;
+    [Dependency] private SharedUserInterfaceSystem _uiSystem = default!;
+    [Dependency] private SharedContainerSystem _containerSystem = default!;
+    [Dependency] private SharedPopupSystem _popupSystem = default!;
+    [Dependency] private SharedInteractionSystem _interactionSystem = default!;
+    [Dependency] private SharedHandsSystem _handsSystem = default!;
+    [Dependency] private SharedToolSystem _toolSystem = default!;
+    [Dependency] private InventorySystem _inventorySystem = default!;
+    [Dependency] private EntityWhitelistSystem _whitelistSystem = default!;
+    [Dependency] private IPrototypeManager _protoManager = default!;
+    [Dependency] private EntityQuery<ModuleComponent> _moduleQuery = default!;
     
     public override void Initialize()
     {
         base.Initialize();
-
-        _moduleQuery = GetEntityQuery<ModuleComponent>();
         
         SubscribeLocalEvent<ModuleStorageComponent, ComponentInit>(OnModultStorageInit);
         SubscribeLocalEvent<ModuleStorageComponent, ActivateInWorldEvent>(OnActivateInWorld, before: [typeof(SharedStorageSystem)]);

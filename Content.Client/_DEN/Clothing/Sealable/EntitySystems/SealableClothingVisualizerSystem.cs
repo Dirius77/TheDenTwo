@@ -9,7 +9,7 @@ namespace Content.Client._DEN.Clothing.Sealable.EntitySystems;
 
 public sealed partial class SealableClothingVisualizerSystem : EntitySystem
 {
-    [Dependency] private readonly SharedAppearanceSystem _appearanceSystem = default!;
+    [Dependency] private SharedAppearanceSystem _appearanceSystem = default!;
     
     public override void Initialize()
     {

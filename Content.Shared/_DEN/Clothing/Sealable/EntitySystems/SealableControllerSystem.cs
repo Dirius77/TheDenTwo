@@ -9,11 +9,11 @@ namespace Content.Shared._DEN.Clothing.Sealable.EntitySystems;
 
 public sealed partial class SealableControllerSystem : EntitySystem
 {
-    [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;
-    [Dependency] private readonly ActionContainerSystem _actionContainer = default!;
-    [Dependency] private readonly InventorySystem _inventory = default!;
-    [Dependency] private readonly SealableClothingSystem _sealableClothing = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private SharedActionsSystem _actionsSystem = default!;
+    [Dependency] private ActionContainerSystem _actionContainer = default!;
+    [Dependency] private InventorySystem _inventory = default!;
+    [Dependency] private SealableClothingSystem _sealableClothing = default!;
+    [Dependency] private IGameTiming _timing = default!;
     
     public override void Initialize()
     {

@@ -11,7 +11,7 @@ namespace Content.Client._DEN.Clothing.Modsuits.UI.Controls;
 [GenerateTypedNameReferences]
 public sealed partial class ModuleInfoControl : BoxContainer, IEntityControl
 {
-    [Dependency] private readonly IRobustRandom _random = default!;
+    [Dependency] private IRobustRandom _random = default!;
     private readonly IEntityManager _entityManager;
     
     private readonly EntityUid _entity;

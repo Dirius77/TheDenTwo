@@ -20,8 +20,8 @@ namespace Content.Client._DEN.Modules.UI.Controls;
 [GenerateTypedNameReferences]
 public sealed partial class ModuleStorageWindow : FancyWindow
 {
-    [Dependency] private readonly IResourceCache _resourceCache = default!;
-    [Dependency] private readonly IEntityManager _entity = default!;
+    [Dependency] private IResourceCache _resourceCache = default!;
+    [Dependency] private IEntityManager _entity = default!;
 
     private Entity<ModuleStorageComponent>? _modControlEntity;
 
