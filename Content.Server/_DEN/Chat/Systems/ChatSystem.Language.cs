@@ -387,7 +387,6 @@ public sealed partial class ChatSystem
             // Combine tags back into emotes and dialog so they can be formatted.
             List<(ChatPart, string)> mergedParts = [];
             var workingSet = message.Parts;
-            Log.Debug("What: " + workingSet);
             var lastSeen = workingSet[0];
             for (int i = 0; i < workingSet.Count; i++)
             {
@@ -405,15 +404,14 @@ public sealed partial class ChatSystem
                         && current.Item1 is ChatPart.Emote or ChatPart.EmoteTag))
                 {
                     lastSeen.Item2 += current.Item2;
-                    
-                    if (lastSeen.Item1 is ChatPart.DialogTag)
-                        lastSeen.Item1 = ChatPart.Dialog;
-                    if (lastSeen.Item1 is ChatPart.EmoteTag)
-                        lastSeen.Item1 = ChatPart.Emote;
                 }
                 // This means that they are different.
                 else
                 {
+                    if (lastSeen.Item1 == ChatPart.DialogTag)
+                        lastSeen.Item1 = ChatPart.Dialog;
+                    else if (lastSeen.Item1 == ChatPart.EmoteTag)
+                        lastSeen.Item1 = ChatPart.Emote;
                     mergedParts.Add(lastSeen);
                     lastSeen = current;
                 }

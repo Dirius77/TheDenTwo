@@ -183,8 +183,16 @@ public readonly record struct ComplexChatMessage()
                 parts.Add((outside ? ChatPart.DialogTag : ChatPart.EmoteTag, hunk.ToString()));
                 continue;
             }
+
+            // Don't swap output between tags.
+            var pieces = hunk.ToString().Split(Delimiter);
+            if (pieces.Length == 1 && !string.IsNullOrEmpty(pieces[0]))
+            {
+                parts.Add((outside ? ChatPart.Dialog : ChatPart.Emote, pieces[0]));
+                continue;
+            }
             
-            foreach (var msgChunk in hunk.ToString().Split(Delimiter))
+            foreach (var msgChunk in pieces)
             {
                 if (!string.IsNullOrEmpty(msgChunk))
                     parts.Add((outside ? ChatPart.Dialog : ChatPart.Emote, msgChunk));
