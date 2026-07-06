@@ -28,7 +28,7 @@ public sealed partial class ModulePowerSystem : EntitySystem
 
     private void OnChargeChanged(Entity<ModulePowerProviderComponent> entity, ref ChargeChangedEvent args)
     {
-        if (!TryComp<ModuleStorageComponent>(entity, out var storage))
+        if (!TryComp<ModuleStorageComponent>(entity, out var storage) || storage.ModuleContainer is null)
             return;
         
         if (args.CurrentCharge > 0 || args.CurrentChargeRate > 0)
@@ -43,7 +43,7 @@ public sealed partial class ModulePowerSystem : EntitySystem
 
     private void OnRefreshChargeRate(Entity<ModulePowerProviderComponent> entity, ref RefreshChargeRateEvent args)
     {
-        if (!TryComp<ModuleStorageComponent>(entity, out var storage))
+        if (!TryComp<ModuleStorageComponent>(entity, out var storage) || storage.ModuleContainer is null)
             return;
         
         var refreshModuleChargeEvt = new RefreshModuleChargeRateEvent();
@@ -56,7 +56,7 @@ public sealed partial class ModulePowerSystem : EntitySystem
 
     private void OnPowerSlotEmpty(Entity<ModulePowerProviderComponent> entity, ref PowerCellSlotEmptyEvent args)
     {
-        if (!TryComp<ModuleStorageComponent>(entity, out var storage))
+        if (!TryComp<ModuleStorageComponent>(entity, out var storage) || storage.ModuleContainer is null)
             return;
 
         var powerDrainedEvt = new ModulePowerDrainedEvent();

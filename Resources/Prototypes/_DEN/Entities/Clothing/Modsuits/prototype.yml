@@ -1,0 +1,97 @@
+- type: entity
+  parent: ClothingModsuitBase
+  id: ClothingModsuitPrototype
+  name: prototype modsuit control
+  description: The controller for a prototype model MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Back/prototype.rsi
+    layers:
+    - state: control
+    - state: control-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: ToggleableClothing
+    requiredSlot:
+    - back
+    clothingPrototypes:
+      head: ClothingModsuitHelmetPrototype
+      gloves: ClothingModsuitGauntletsPrototype
+      outerClothing: ClothingModsuitChestplatePrototype
+      shoes: ClothingModsuitBootsPrototype
+  - type: ModuleStorage
+    maxBusWidth: 25
+
+- type: entity
+  parent: ClothingModsuitGauntletsBase
+  id: ClothingModsuitGauntletsPrototype
+  categories: [ HideSpawnMenu ]
+  name: prototype modsuit gauntlets
+  description: A pair of gauntlets from a prototype MODsuit. TODO
+  components:
+  - type: FingerprintMask
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Hands/prototype.rsi
+    layers:
+    - state: gauntlets
+    - state: gauntlets-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Hands/prototype.rsi
+
+- type: entity
+  parent: ClothingModsuitHelmetBaseExo
+  id: ClothingModsuitHelmetPrototype
+  categories: [ HideSpawnMenu ]
+  name: prototype modsuit helmet
+  description: A helmet from a prototype MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Head/prototype.rsi
+    layers:
+    - state: helmet
+    - state: helmet-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Head/prototype.rsi
+
+- type: entity
+  parent: ClothingModsuitChestplateBaseExo
+  id: ClothingModsuitChestplatePrototype
+  categories: [ HideSpawnMenu ]
+  name: prototype modsuit chestplate
+  description: A chestplate from a prototype MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/OuterClothing/prototype.rsi
+    layers:
+    - state: chestplate
+    - state: chestplate-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/OuterClothing/prototype.rsi
+
+- type: entity
+  parent: ClothingModsuitBootsBase
+  id: ClothingModsuitBootsPrototype
+  categories: [ HideSpawnMenu ]
+  name: prototype modsuit boots
+  description: A pair of boots from a prototype MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Shoes/prototype.rsi
+    layers:
+    - state: boots
+    - state: boots-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Shoes/prototype.rsi

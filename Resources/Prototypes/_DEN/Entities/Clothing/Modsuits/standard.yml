@@ -2,7 +2,7 @@
   parent: ClothingModsuitBase
   id: ClothingModsuitStandard
   name: standard modsuit control
-  description: The controller for a standard model MODsuit.
+  description: The controller for a standard model MODsuit. TODO
   components:
   - type: Sprite
     sprite: _DEN/Clothing/Modsuits/Back/standard.rsi
@@ -24,27 +24,11 @@
     maxBusWidth: 15
 
 - type: entity
-  parent: ClothingModsuitStandard
-  id: ClothingModsuitStandardDebug
-  suffix: DEBUG; Filled
-  components:
-  - type: EntityTableContainerFill
-    containers: 
-      modules: !type:AllSelector
-        children:
-        - id: ModsuitStorageModuleBluespace
-        - id: ModsuitModuleCloak
-        - id: ModsuitModuleMagneticStabilizer
-        - id: ModsuitModuleFlashlight
-      cell_slot: 
-        id: PowerCellSmall
-
-- type: entity
   parent: ClothingModsuitGauntletsBase
   id: ClothingModsuitGauntletsStandard
   categories: [ HideSpawnMenu ]
   name: standard modsuit gauntlets
-  description: A pair of gauntlets from a standard MODsuit.
+  description: A pair of gauntlets from a standard MODsuit. TODO
   components:
   - type: FingerprintMask
   - type: Sprite
@@ -63,7 +47,7 @@
   id: ClothingModsuitHelmetStandard
   categories: [ HideSpawnMenu ]
   name: standard modsuit helmet
-  description: A helmet from a standard MODsuit.
+  description: A helmet from a standard MODsuit. TODO
   components:
   - type: Sprite
     sprite: _DEN/Clothing/Modsuits/Head/standard.rsi
@@ -81,7 +65,7 @@
   id: ClothingModsuitChestplateStandard
   categories: [ HideSpawnMenu ]
   name: standard modsuit chestplate
-  description: A chestplate from a standard MODsuit.
+  description: A chestplate from a standard MODsuit. TODO
   components:
   - type: Sprite
     sprite: _DEN/Clothing/Modsuits/OuterClothing/standard.rsi
@@ -99,7 +83,7 @@
   id: ClothingModsuitBootsStandard
   categories: [ HideSpawnMenu ]
   name: standard modsuit boots
-  description: A pair of boots from a standard MODsuit.
+  description: A pair of boots from a standard MODsuit. TODO
   components:
   - type: Sprite
     sprite: _DEN/Clothing/Modsuits/Shoes/standard.rsi

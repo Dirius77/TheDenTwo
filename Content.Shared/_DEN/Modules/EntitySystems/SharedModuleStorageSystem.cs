@@ -126,6 +126,11 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
     {
         if (!_whitelistSystem.IsWhitelistPassOrNull(storage.Comp.Whitelist, module))
             return false;
+
+        // Can't have any siblings if this is null, let it fail somewhere else to indicate a problem instead of silently
+        // failing the whitelist check.
+        if (storage.Comp.ModuleContainer is null)
+            return true;
         
         var passes = true;
         var siblingWhitelist = module.Comp.SiblingWhitelist;
@@ -241,6 +246,12 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
 
     private void OnModuleInserted(Entity<ModuleStorageComponent> entity, Entity<ModuleComponent> module)
     {
+        if (entity.Comp.ModuleContainer is null)
+        {
+            Log.Warning($"OnModuleInserted occurred while Container was null in: {ToPrettyString(entity)}");
+            return;
+        }
+        
         if (!entity.Comp.ModuleSlots.Values.Contains(module.AsNullable()))
         {
             if (!TryFindAvailableSlot(entity, module, out var slot))
@@ -336,7 +347,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
         int slot, [NotNullWhen(true)] out EntityUid? removedModule, bool ignoreTools = false)
     {
         removedModule = null;
-        if (!Resolve(entity, ref entity.Comp))
+        if (!Resolve(entity, ref entity.Comp) || entity.Comp.ModuleContainer is null)
             return false;
         
         // There's nothing in this slot, so nothing to do.
@@ -395,7 +406,7 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
     public bool TryInsertModule(Entity<ModuleStorageComponent?> entity,
         Entity<ModuleComponent?> module, EntityUid? player, int slot)
     {
-        if (!Resolve(entity, ref entity.Comp) || !Resolve(module, ref module.Comp))
+        if (!Resolve(entity, ref entity.Comp) || !Resolve(module, ref module.Comp) || entity.Comp.ModuleContainer is null)
             return false;
         
         if (!ModuleFitsInStorage((entity, entity.Comp), module.AsNullable(), slot))
@@ -455,8 +466,8 @@ public abstract partial class SharedModuleStorageSystem : EntitySystem
     public IReadOnlyList<EntityUid> GetContainedModules(Entity<ModuleStorageComponent?> storage)
     {
         // I'm expecting this to get passed invalid entities during shutdown, it's fine.
-        if (!Resolve(storage, ref storage.Comp, false))
-            return [];
+        if (!Resolve(storage, ref storage.Comp, false) || storage.Comp.ModuleContainer is null)
+            return new List<EntityUid>();
         
         return storage.Comp.ModuleContainer.ContainedEntities;
     }

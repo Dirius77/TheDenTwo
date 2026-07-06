@@ -1,0 +1,97 @@
+- type: entity
+  parent: ClothingModsuitBase
+  id: ClothingModsuitMining
+  name: mining modsuit control
+  description: The controller for a mining model MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Back/mining.rsi
+    layers:
+    - state: control
+    - state: control-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: ToggleableClothing
+    requiredSlot:
+    - back
+    clothingPrototypes:
+      head: ClothingModsuitHelmetMining
+      gloves: ClothingModsuitGauntletsMining
+      outerClothing: ClothingModsuitChestplateMining
+      shoes: ClothingModsuitBootsMining
+  - type: ModuleStorage
+    maxBusWidth: 13
+
+- type: entity
+  parent: ClothingModsuitGauntletsBase
+  id: ClothingModsuitGauntletsMining
+  categories: [ HideSpawnMenu ]
+  name: mining modsuit gauntlets
+  description: A pair of gauntlets from a mining MODsuit. TODO
+  components:
+  - type: FingerprintMask
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Hands/mining.rsi
+    layers:
+    - state: gauntlets
+    - state: gauntlets-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Hands/mining.rsi
+
+- type: entity
+  parent: ClothingModsuitHelmetBaseExo
+  id: ClothingModsuitHelmetMining
+  categories: [ HideSpawnMenu ]
+  name: mining modsuit helmet
+  description: A helmet from a mining MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Head/mining.rsi
+    layers:
+    - state: helmet
+    - state: helmet-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Head/mining.rsi
+
+- type: entity
+  parent: ClothingModsuitChestplateBaseExo
+  id: ClothingModsuitChestplateMining
+  categories: [ HideSpawnMenu ]
+  name: mining modsuit chestplate
+  description: A chestplate from a mining MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/OuterClothing/mining.rsi
+    layers:
+    - state: chestplate
+    - state: chestplate-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/OuterClothing/mining.rsi
+
+- type: entity
+  parent: ClothingModsuitBootsBase
+  id: ClothingModsuitBootsMining
+  categories: [ HideSpawnMenu ]
+  name: mining modsuit boots
+  description: A pair of boots from a mining MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Shoes/mining.rsi
+    layers:
+    - state: boots
+    - state: boots-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Shoes/mining.rsi

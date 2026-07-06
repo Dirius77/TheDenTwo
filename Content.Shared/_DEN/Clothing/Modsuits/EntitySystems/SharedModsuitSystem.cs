@@ -75,7 +75,7 @@ public abstract partial class SharedModsuitSystem : EntitySystem
 
     private void OnModsuitModuleToggle(Entity<ModsuitControllerComponent> entity, ref ModsuitToggleModuleMessage msg)
     {
-        if (!TryComp<ModuleStorageComponent>(entity, out var storage))
+        if (!TryComp<ModuleStorageComponent>(entity, out var storage) || storage.ModuleContainer is null)
             return;
 
         var target = GetEntity(msg.Target);

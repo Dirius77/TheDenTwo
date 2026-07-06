@@ -1,0 +1,97 @@
+- type: entity
+  parent: ClothingModsuitBase
+  id: ClothingModsuitChrono
+  name: chrono modsuit control
+  description: The controller for a chrono model MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Back/chrono.rsi
+    layers:
+    - state: control
+    - state: control-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: ToggleableClothing
+    requiredSlot:
+    - back
+    clothingPrototypes:
+      head: ClothingModsuitHelmetChrono
+      gloves: ClothingModsuitGauntletsChrono
+      outerClothing: ClothingModsuitChestplateChrono
+      shoes: ClothingModsuitBootsChrono
+  - type: ModuleStorage
+    maxBusWidth: 18
+
+- type: entity
+  parent: ClothingModsuitGauntletsBase
+  id: ClothingModsuitGauntletsChrono
+  categories: [ HideSpawnMenu ]
+  name: chrono modsuit gauntlets
+  description: A pair of gauntlets from a chrono MODsuit. TODO
+  components:
+  - type: FingerprintMask
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Hands/chrono.rsi
+    layers:
+    - state: gauntlets
+    - state: gauntlets-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Hands/chrono.rsi
+
+- type: entity
+  parent: ClothingModsuitHelmetBaseExo
+  id: ClothingModsuitHelmetChrono
+  categories: [ HideSpawnMenu ]
+  name: chrono modsuit helmet
+  description: A helmet from a chrono MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Head/chrono.rsi
+    layers:
+    - state: helmet
+    - state: helmet-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Head/chrono.rsi
+
+- type: entity
+  parent: ClothingModsuitChestplateBaseExo
+  id: ClothingModsuitChestplateChrono
+  categories: [ HideSpawnMenu ]
+  name: chrono modsuit chestplate
+  description: A chestplate from a chrono MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/OuterClothing/chrono.rsi
+    layers:
+    - state: chestplate
+    - state: chestplate-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/OuterClothing/chrono.rsi
+
+- type: entity
+  parent: ClothingModsuitBootsBase
+  id: ClothingModsuitBootsChrono
+  categories: [ HideSpawnMenu ]
+  name: chrono modsuit boots
+  description: A pair of boots from a chrono MODsuit. TODO
+  components:
+  - type: Sprite
+    sprite: _DEN/Clothing/Modsuits/Shoes/chrono.rsi
+    layers:
+    - state: boots
+    - state: boots-sealed
+      visible: false
+      shader: unshaded
+      map: [ "sealedLayer" ]
+  - type: Clothing
+    sprite: _DEN/Clothing/Modsuits/Shoes/chrono.rsi

@@ -13,7 +13,7 @@ public sealed partial class ModuleStorageComponent : Component
 {
     private const string DefaultContainerId = "modules";
     
-    public Container ModuleContainer;
+    public Container? ModuleContainer;
     
     /// <summary>
     /// The maximum Bus Width that this storage can support. Modules consume this based on their complexity.
