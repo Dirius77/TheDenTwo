@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Text;
 using Content.Server._DEN.Language.EntitySystems;
+using Content.Server._DEN.Language.Events;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
@@ -164,6 +166,9 @@ public sealed partial class ChatSystem
 
         var ev = new EntitySpokeEvent(source, languageEnt, message, radioChannel, verb, chatChannel);
         RaiseLocalEvent(source, ev, true);
+
+        var evt = new LanguageSpokenWithEvent(source, message, radioChannel, chatChannel);
+        RaiseLocalEvent(languageEnt, evt);
 
         // The message wasn't sent by a player, so don't log it. Prevents radios and cameras from causing a player's
         // message to be logged many times.
@@ -379,9 +384,45 @@ public sealed partial class ChatSystem
         }
         else
         {
+            // Combine tags back into emotes and dialog so they can be formatted.
+            List<(ChatPart, string)> mergedParts = [];
+            var workingSet = message.Parts;
+            Log.Debug("What: " + workingSet);
+            var lastSeen = workingSet[0];
+            for (int i = 0; i < workingSet.Count; i++)
+            {
+                if (i == 0)
+                {
+                    lastSeen = workingSet[0];
+                    continue;
+                }
+
+                var current = workingSet[i];
+                // Matching Dialog or Emote.
+                if ((lastSeen.Item1 is ChatPart.Dialog or ChatPart.DialogTag 
+                    && current.Item1 is ChatPart.Dialog or ChatPart.DialogTag) 
+                    || (lastSeen.Item1 is ChatPart.Emote or ChatPart.EmoteTag
+                        && current.Item1 is ChatPart.Emote or ChatPart.EmoteTag))
+                {
+                    lastSeen.Item2 += current.Item2;
+                    
+                    if (lastSeen.Item1 is ChatPart.DialogTag)
+                        lastSeen.Item1 = ChatPart.Dialog;
+                    if (lastSeen.Item1 is ChatPart.EmoteTag)
+                        lastSeen.Item1 = ChatPart.Emote;
+                }
+                // This means that they are different.
+                else
+                {
+                    mergedParts.Add(lastSeen);
+                    lastSeen = current;
+                }
+            }
+            mergedParts.Add(lastSeen);
+            
             // Loop over the parts of the complex speech.
             // Dialog gets a lot of special formatting where as emotes just get default action formatting.
-            foreach (var (kind, part) in message.Parts)
+            foreach (var (kind, part) in mergedParts)
             {
                 if (kind == ChatPart.Dialog)
                 {
@@ -497,39 +538,5 @@ public sealed partial class ChatSystem
         RaiseLocalEvent(sender, transformEvt, true);
 
         return transformEvt.Message;
-    }
-
-    // Runs sanitation but only on the dialog parts of the message.
-    private ComplexChatMessage SanitizeComplexMessage(EntityUid source,
-        ComplexChatMessage message,
-        out List<string> emoteStrs,
-        bool shouldCapitalize = true,
-        bool punctuate = false,
-        bool capitalizeTheWordI = true)
-    {
-        emoteStrs = [];
-        var newParts = new List<(ChatPart, string)>(message.Parts.Count);
-        foreach (var part in message.Parts)
-        {
-            if (part.Item1 == ChatPart.Dialog)
-            {
-                var sanitized = SanitizeInGameICMessage(source,
-                    part.Item2,
-                    out var emote,
-                    shouldCapitalize,
-                    punctuate,
-                    capitalizeTheWordI);
-                if (!string.IsNullOrEmpty(sanitized))
-                    newParts.Add((part.Item1, sanitized));
-                if (emote is not null)
-                    emoteStrs.Add(emote);
-            }
-            else
-            {
-                newParts.Add((part.Item1, part.Item2));
-            }
-        }
-
-        return new ComplexChatMessage(message, newParts);
     }
 }
