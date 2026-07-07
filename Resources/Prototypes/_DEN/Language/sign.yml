@@ -15,8 +15,6 @@
   components:
   - type: LineOfSightLanguage
   - type: VisualName
-  - type: WhisperMuffle
-    muffle: true
   - type: SyllableScrambling
     syllables:
     - "--"

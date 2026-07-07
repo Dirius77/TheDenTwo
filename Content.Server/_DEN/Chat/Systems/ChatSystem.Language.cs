@@ -112,7 +112,7 @@ public sealed partial class ChatSystem
         // TODO: It's still weird that this is hardcoded, but you can expand it anyway so it's not the end of the world.
         // Find all of the recipients in our provided range and send the message to them.
         foreach (var (session, data) in GetRecipients(source,
-                     chatChannel == ChatChannel.Whisper ? WhisperMuffledRange : VoiceRange))
+                     chatChannel == ChatChannel.Whisper ? WhisperClearRange : VoiceRange))
         {
             var entRange = MessageRangeCheck(session, data, range);
             if (entRange == MessageRangeCheckResult.Disallowed)
@@ -125,9 +125,15 @@ public sealed partial class ChatSystem
 
             var entHideChat = entRange == MessageRangeCheckResult.HideChat;
 
-            // Don't bother checking the event if the player doesn't have an entity.
+            // Don't bother checking the event if the player doesn't have an entity.s
             if (session.AttachedEntity is { Valid: true } playerEntity)
             {
+                // Hide whispers based on LOS and from ghosts.
+                if (chatChannel == ChatChannel.Whisper &&
+                    (!_interaction.InRangeUnobstructed(source, playerEntity, WhisperClearRange)
+                    || data.Observer))
+                    continue;
+                
                 SendComplexMessageToEntity(source,
                     playerEntity,
                     languageEnt,
