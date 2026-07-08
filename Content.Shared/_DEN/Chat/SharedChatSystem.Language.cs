@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Shared._DEN.CCVar;
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Utility;
 using Content.Shared.Speech;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
@@ -12,6 +13,8 @@ public abstract partial class SharedChatSystem
 {
 
     [Dependency] private IConfigurationManager _cfg = default!;
+
+    public static readonly string[] ChatAllowedTags = ["bolditalic", "bold", "color", "italic", "mono"];
 
     // TODO: Kill the other spot where this is getting called from and move this into WhisperMuffle (if we even keep using it)
     /// <summary>
@@ -154,6 +157,8 @@ public readonly record struct ComplexChatMessage()
     /// <param name="escapeMarkup">Whether to run markup escaping on this message.</param>
     public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing, bool needsSeparation, bool escapeMarkup = false) : this()
     {
+        message = StringUtil.FilterStringTags(message, SharedChatSystem.ChatAllowedTags);
+        
         OriginalMessage = message;
         Delimiter = delimiter;
         IsDetailed = isDetailed;

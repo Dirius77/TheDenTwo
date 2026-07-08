@@ -189,6 +189,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         // Capitalizing the word I only happens in English, so we check language here
         bool shouldCapitalizeTheWordI = (!CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Parent.Name == "en")
             || (CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Name == "en");
+        
         message = SanitizeInGameICMessage(source, message, out var emoteStr, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
 
         // DEN: Detailed message system.
