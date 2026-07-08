@@ -8,6 +8,7 @@ using Content.Server.Ghost;
 using Content.Server.Interaction; // DEN - Use interaction system's range checks
 using Content.Server.Speech.EntitySystems;
 using Content.Server.Station.Systems;
+using Content.Shared._DEN.Utility;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Administration;
 using Content.Shared.CCVar;
@@ -192,7 +193,10 @@ public sealed partial class ChatSystem : SharedChatSystem
         
         message = SanitizeInGameICMessage(source, message, out var emoteStr, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
 
-        // DEN: Detailed message system.
+        // DEN: Detailed message system start.
+
+        message = StringUtil.FilterStringTags(message, ChatAllowedTags);
+        
         bool needsRadio = false;
         RadioChannelPrototype? channel = null;
         // We want to do this processing before we try to parse it into a complex message.
@@ -242,12 +246,11 @@ public sealed partial class ChatSystem : SharedChatSystem
                 // DEN: Complex Speech.
                 SendEntityComplexEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
                 break;
-            // DEN Start: add subtle
             case InGameICChatType.Subtle:
                 SendEntitySubtle(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
                 break;
-            // DEN End
         }
+        // DEN End
     }
 
     /// <inheritdoc />

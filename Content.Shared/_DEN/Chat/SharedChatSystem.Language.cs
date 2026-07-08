@@ -157,8 +157,6 @@ public readonly record struct ComplexChatMessage()
     /// <param name="escapeMarkup">Whether to run markup escaping on this message.</param>
     public ComplexChatMessage(string message, string delimiter, bool isDetailed, bool needsSpacing, bool needsSeparation, bool escapeMarkup = false) : this()
     {
-        message = StringUtil.FilterStringTags(message, SharedChatSystem.ChatAllowedTags);
-        
         OriginalMessage = message;
         Delimiter = delimiter;
         IsDetailed = isDetailed;
