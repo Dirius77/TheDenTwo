@@ -72,7 +72,7 @@ public sealed partial class TraitCategoryBox : BoxContainer
 
             var tooManySelected = TotalCost > category.MaxTraitPoints;
             foreach (var selector in _selectors)
-                selector.SetInvalid(tooManySelected);
+                selector.UpdateAppearance(tooManySelected);
         }
         else
             CategoryMaxTraitLabel.Visible = false;

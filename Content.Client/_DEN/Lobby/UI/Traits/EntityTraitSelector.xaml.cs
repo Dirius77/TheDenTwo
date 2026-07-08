@@ -137,8 +137,18 @@ public sealed partial class EntityTraitSelector : BoxContainer
         return tooltipString;
     }
 
-    public void SetInvalid(bool invalid)
+    public void UpdateAppearance(bool invalid)
     {
-        SelectorCheckbox.Label.FontColorOverride = invalid ? Color.Red : null;
+        if (_trait is null)
+            return;
+        var valid = SharedPlayerRequirementManager.CheckRequirements(GetContext(), _trait.Requirements);
+        SelectorCheckbox.Disabled = !valid && !Preference;
+        Color? fontColor = null;
+        if (invalid)
+            fontColor = Color.Red;
+        else if (!valid)
+            fontColor = Color.Gray;
+        
+        SelectorCheckbox.Label.FontColorOverride = fontColor;
     }
 }

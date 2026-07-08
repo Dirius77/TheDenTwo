@@ -63,9 +63,9 @@ public abstract partial class SharedPlayerRequirementManager : IPlayerRequiremen
 
         // Check the actual requirement, now.
         if (!requirement.CheckRequirement(context))
-            return false;
+            return requirement.Inverted;
 
-        return true;
+        return !requirement.Inverted;
     }
 
     /// <summary>
