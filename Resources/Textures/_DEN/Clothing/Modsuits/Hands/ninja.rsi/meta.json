@@ -19,7 +19,7 @@
     },
     {
       "name": "equipped-HAND-sealed",
-      "direction": 4
+      "directions": 4
     }
   ]
 }

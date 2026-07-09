@@ -43,7 +43,7 @@
     sprite: _DEN/Clothing/Modsuits/Hands/loader.rsi
 
 - type: entity
-  parent: ClothingModsuitHelmetBaseExo
+  parent: ClothingModsuitHelmetBase
   id: ClothingModsuitHelmetLoader
   categories: [ HideSpawnMenu ]
   name: loader modsuit helmet
@@ -57,11 +57,18 @@
       visible: false
       shader: unshaded
       map: [ "sealedLayer" ]
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      head:
+      - state: equipped-HELMET-sealed
+      - state: equipped-HELMET-visor
+        shader: unshaded
+        color: "Cyan"
   - type: Clothing
     sprite: _DEN/Clothing/Modsuits/Head/loader.rsi
 
 - type: entity
-  parent: ClothingModsuitChestplateBaseExo
+  parent: ClothingModsuitChestplateBase
   id: ClothingModsuitChestplateLoader
   categories: [ HideSpawnMenu ]
   name: loader modsuit chestplate

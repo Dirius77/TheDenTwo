@@ -57,6 +57,10 @@
       visible: false
       shader: unshaded
       map: [ "sealedLayer" ]
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      head:
+      - state: equipped-HELMET-sealed
   - type: Clothing
     sprite: _DEN/Clothing/Modsuits/Head/corpsman.rsi
 

@@ -57,6 +57,13 @@
       visible: false
       shader: unshaded
       map: [ "sealedLayer" ]
+  - type: SealableClothingVisuals
+    clothingVisuals:
+      head:
+      - state: equipped-HELMET-sealed
+      - state: equipped-HELMET-visor
+        shader: unshaded
+        color: "Orange"
   - type: Clothing
     sprite: _DEN/Clothing/Modsuits/Head/infiltrator.rsi
 

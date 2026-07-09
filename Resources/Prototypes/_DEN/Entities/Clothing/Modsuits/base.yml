@@ -26,7 +26,6 @@
     clothingVisuals:
       back:
       - state: equipped-BACKPACK-sealed
-        shader: unshaded
   - type: SealableController
     controlledSlots: [ back, head, outerClothing, shoes, gloves ]
   - type: Appearance
@@ -78,7 +77,6 @@
     clothingVisuals:
       gloves:
       - state: equipped-HAND-sealed
-        shader: unshaded
   - type: Appearance
   - type: GenericVisualizer
     visuals:
@@ -109,6 +107,7 @@
     clothingVisuals:
       head:
       - state: equipped-HELMET-sealed
+      - state: equipped-HELMET-visor
         shader: unshaded
   - type: Appearance
   - type: GenericVisualizer
@@ -156,7 +155,6 @@
     clothingVisuals:
       outerClothing:
       - state: equipped-OUTERCLOTHING-sealed
-        shader: unshaded
   - type: Appearance
   - type: GenericVisualizer
     visuals:
@@ -200,7 +198,6 @@
     clothingVisuals:
       shoes:
       - state: equipped-FEET-sealed
-        shader: unshaded
   - type: Appearance
   - type: GenericVisualizer
     visuals:
