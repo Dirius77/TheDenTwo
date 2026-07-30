@@ -166,7 +166,7 @@ public sealed class ChatFormatterDenuModule : DenuExclusiveModule<FormatterSetti
             {
                 new("***", "[bolditalic]", "[/bolditalic]", false, false),
                 new("**", "[bold]", "[/bold]", false, false),
-                new("\"", "[color={DialogueColor}]\"", "\"[/color]", false, true),
+                new("\"", "\"[color={DialogueColor}]", "[/color]\"", false, true),
                 new("*", "[italic]", "[/italic]", true, false),
                 new("*", "[italic][color={EmoteColor}]*", "*[/color][/italic]", false, false),
             },

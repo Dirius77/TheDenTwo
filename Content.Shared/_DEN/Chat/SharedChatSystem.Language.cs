@@ -1,7 +1,6 @@
 using System.Linq;
 using Content.Shared._DEN.CCVar;
 using Content.Shared._DEN.Language;
-using Content.Shared._DEN.Utility;
 using Content.Shared.Speech;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
@@ -53,7 +52,7 @@ public abstract partial class SharedChatSystem
     /// <returns>The correct speech verb prototype to use.</returns>
     public SpeechVerbPrototype GetComplexSpeechVerb(EntityUid source, ComplexChatMessage message, LanguagePrototype language, ChatChannel channel)
     {
-        var lastDialog = message.Parts.LastOrDefault(p => p.Item1 == ChatPart.Dialog).Item2;
+        var lastDialog = message.Parts.LastOrDefault(p => p.Item1 == ChatPart.Dialog).Item2 ?? "";
 
         SpeechVerbPrototype? current = null;
         Dictionary<LocId, ProtoId<SpeechVerbPrototype>>? currentSuffixVerbs = null;
@@ -178,12 +177,12 @@ public readonly record struct ComplexChatMessage()
             return;
         }
 
-        var outside = false;
+        var outside = true;
         foreach (var hunk in parsedMsg.Nodes)
         {
             if (!hunk.IsPlainText)
             {
-                parts.Add((outside ? ChatPart.DialogTag : ChatPart.EmoteTag, hunk.ToString()));
+                parts.Add((outside ? ChatPart.EmoteTag : ChatPart.DialogTag, hunk.ToString()));
                 continue;
             }
 
@@ -191,15 +190,17 @@ public readonly record struct ComplexChatMessage()
             var pieces = hunk.ToString().Split(Delimiter);
             if (pieces.Length == 1 && !string.IsNullOrEmpty(pieces[0]))
             {
-                parts.Add((outside ? ChatPart.Dialog : ChatPart.Emote, pieces[0]));
+                parts.Add((outside ? ChatPart.Emote : ChatPart.Dialog, pieces[0]));
                 continue;
             }
             
             foreach (var msgChunk in pieces)
             {
                 if (!string.IsNullOrEmpty(msgChunk))
-                    parts.Add((outside ? ChatPart.Dialog : ChatPart.Emote, msgChunk));
-                outside = !outside;
+                {
+                    parts.Add((outside ? ChatPart.Emote : ChatPart.Dialog, msgChunk));
+                    outside = !outside;
+                }
             }
         }
 

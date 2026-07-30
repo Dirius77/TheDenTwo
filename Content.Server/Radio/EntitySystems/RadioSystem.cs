@@ -179,6 +179,8 @@ public sealed partial class RadioSystem : EntitySystem
             channel.LocalizedName,
             channel.Color);
         
+        Log.Debug("Radio: " + wrappedMessage);
+        
         if (name != Name(messageSource))
             _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Radio message from {ToPrettyString(messageSource):user} as {name} on {channel.LocalizedName}: {unwrappedMessage}");
         else

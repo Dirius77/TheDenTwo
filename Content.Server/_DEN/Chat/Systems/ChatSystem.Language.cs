@@ -393,19 +393,18 @@ public sealed partial class ChatSystem
             // Combine tags back into emotes and dialog so they can be formatted.
             List<(ChatPart, string)> mergedParts = [];
             var workingSet = message.Parts;
-            var lastSeen = workingSet[0];
-            for (int i = 0; i < workingSet.Count; i++)
+            Log.Debug("====== BEFORE ======");
+            foreach (var (kind, part) in workingSet)
             {
-                if (i == 0)
-                {
-                    lastSeen = workingSet[0];
-                    continue;
-                }
-
+                Log.Debug("Got " + kind + ": [" + part + "]");
+            }
+            var lastSeen = workingSet[0];
+            for (int i = 1; i < workingSet.Count; i++)
+            {
                 var current = workingSet[i];
                 // Matching Dialog or Emote.
                 if ((lastSeen.Item1 is ChatPart.Dialog or ChatPart.DialogTag 
-                    && current.Item1 is ChatPart.Dialog or ChatPart.DialogTag) 
+                    && current.Item1 is ChatPart.Dialog or ChatPart.DialogTag)
                     || (lastSeen.Item1 is ChatPart.Emote or ChatPart.EmoteTag
                         && current.Item1 is ChatPart.Emote or ChatPart.EmoteTag))
                 {
@@ -424,11 +423,18 @@ public sealed partial class ChatSystem
             }
             mergedParts.Add(lastSeen);
             
+            Log.Debug("------ AFTER ------");
+            foreach (var (kind, part) in mergedParts)
+            {
+                Log.Debug("Got " + kind + ": [" + part + "]");
+            }
+            Log.Debug("-------------------");
+            
             // Loop over the parts of the complex speech.
             // Dialog gets a lot of special formatting where as emotes just get default action formatting.
             foreach (var (kind, part) in mergedParts)
             {
-                if (kind == ChatPart.Dialog)
+                if (kind == ChatPart.Dialog || kind == ChatPart.DialogTag)
                 {
                     unwrappedBuilder.Append(message.Delimiter + part + message.Delimiter);
                     wrappedBuilder.Append(message.Delimiter);
