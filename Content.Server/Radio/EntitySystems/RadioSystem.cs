@@ -93,7 +93,7 @@ public sealed partial class RadioSystem : EntitySystem
         }
         // DEN End
         
-        SendRadioMessage(messageSource, message, _prototype.Index(channel), radioSource, escapeMarkup: escapeMarkup); // DEN: Pass Languages and complex
+        SendRadioMessage(messageSource, languageEnt.Value, complex, _prototype.Index(channel), radioSource); // DEN: Pass Languages and complex
     }
 
     /// <summary>
