@@ -422,14 +422,7 @@ public sealed partial class ChatSystem
                 }
             }
             mergedParts.Add(lastSeen);
-            
-            Log.Debug("------ AFTER ------");
-            foreach (var (kind, part) in mergedParts)
-            {
-                Log.Debug("Got " + kind + ": [" + part + "]");
-            }
-            Log.Debug("-------------------");
-            
+  
             // Loop over the parts of the complex speech.
             // Dialog gets a lot of special formatting where as emotes just get default action formatting.
             foreach (var (kind, part) in mergedParts)
