@@ -9,17 +9,21 @@ public sealed partial class ToggleableClothingSystem
 
     private void OnToggleableRecolored(Entity<ToggleableClothingComponent> ent, ref OnRecoloredEvent args)
     {
-        var toggled = ent.Comp.ClothingUid;
+        var toggled = ent.Comp.ClothingUids.Keys;
 
-        if (toggled != null)
-            _recolor.Recolor(toggled.Value, args.RecolorData, args.Recolorer);
+        foreach (var piece in toggled)
+        {
+            _recolor.Recolor(piece, args.RecolorData, args.Recolorer);   
+        }
     }
 
     private void OnToggleableRecolorRemoved(Entity<ToggleableClothingComponent> ent, ref OnRecolorRemovedEvent args)
     {
-        var toggled = ent.Comp.ClothingUid;
+        var toggled = ent.Comp.ClothingUids.Keys;
 
-        if (toggled != null)
-            _recolor.RemoveRecolor(toggled.Value);
+        foreach (var piece in toggled)
+        {
+            _recolor.RemoveRecolor(piece);   
+        }
     }
 }

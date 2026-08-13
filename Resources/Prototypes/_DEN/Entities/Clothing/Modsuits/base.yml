@@ -15,6 +15,7 @@
       modules: !type:Container { }
       cell_slot: !type:ContainerSlot { }
   - type: ToggleableClothing
+    action: ActionToggleSuitPiece
     requiredSlot:
     - back
   - type: SealableClothing
