@@ -1,0 +1,30 @@
+<BoxContainer xmlns="https://spacestation14.io"
+    Orientation="Vertical"
+    HorizontalExpand="True"
+    Margin="10">
+
+    <BoxContainer Name="LinearSliderBox"
+        HorizontalExpand="True"
+        Orientation="Vertical"
+        Visible="True">
+        <Slider Name="LinearSlider"
+            HorizontalExpand="True"
+            MinValue="0"
+            MaxValue="100"
+            Value="20" />
+    </BoxContainer>
+
+    <BoxContainer Name="ColorSliderBox"
+        HorizontalExpand="True"
+        Orientation="Vertical"
+        Visible="False">
+        <ColorSelectorSliders Name="ColorSliders"
+            HorizontalExpand="True" />
+    </BoxContainer>
+
+    <Button Name="ToggleAltStrategyButton"
+        ToggleMode="True"
+        Text="{Loc 'humanoid-profile-editor-skin-alt-strategy-toggle-button'}"
+        HorizontalAlignment="Right" />
+
+</BoxContainer>
