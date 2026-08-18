@@ -27,15 +27,15 @@ public sealed partial class SkinColorSliders : BoxContainer
         ToggleAltStrategyButton.OnToggled += args => { OnAltStrategyToggled?.Invoke(args.Pressed); };
     }
 
-    public void SetStrategyFromSpecies(ProtoId<SpeciesPrototype> protoId)
+    public void SetSkinColoration(ProtoId<SpeciesPrototype> protoId)
     {
         if (!_protoMan.Resolve(protoId, out var species))
             return;
 
-        SetStrategy(species.SkinColoration);
+        SetSkinColoration(species.SkinColoration);
     }
 
-    public void SetStrategy(ProtoId<SkinColorationPrototype> protoId)
+    public void SetSkinColoration(ProtoId<SkinColorationPrototype> protoId)
     {
         if (!_protoMan.Resolve(protoId, out var skinColor))
             return;
