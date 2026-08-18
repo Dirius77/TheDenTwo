@@ -1,6 +1,7 @@
 <BoxContainer xmlns="https://spacestation14.io"
     Orientation="Vertical"
     HorizontalExpand="True"
+    SeparationOverride="2"
     Margin="10">
 
     <BoxContainer Name="LinearSliderBox"
