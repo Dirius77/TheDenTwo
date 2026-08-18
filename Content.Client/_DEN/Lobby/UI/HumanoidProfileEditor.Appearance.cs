@@ -15,6 +15,10 @@ public sealed partial class HumanoidProfileEditor
 
         var protoId = (ProtoId<SpeciesPrototype>)speciesId;
         SkinColorSelector.SetSkinColoration(protoId);
+
+        // The skin color might change upon setting the species,
+        // so we are making sure that the appearance and markings reflect this.
+        DenOnSkinColorOnValueChanged();
     }
 
     private void DenUpdateSkinColor()
@@ -26,11 +30,12 @@ public sealed partial class HumanoidProfileEditor
         SkinColorSelector.SetSkinColor(skinColor);
     }
 
-    private void DenOnSkinColorOnValueChanged(Color color)
+    private void DenOnSkinColorOnValueChanged()
     {
         if (Profile is null)
             return;
 
+        var color = SkinColorSelector.Color;
         _markingsModel.SetOrganSkinColor(color);
         Profile = Profile.WithCharacterAppearance(Profile.Appearance.WithSkinColor(color));
         ReloadProfilePreview();

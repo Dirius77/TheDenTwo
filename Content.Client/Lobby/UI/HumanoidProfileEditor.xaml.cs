@@ -224,7 +224,7 @@ namespace Content.Client.Lobby.UI
             //     OnSkinColorOnValueChanged();
             // };
 
-            SkinColorSelector.OnColorChanged += DenOnSkinColorOnValueChanged;
+            SkinColorSelector.OnColorChanged += _ => { DenOnSkinColorOnValueChanged(); };
             // End DEN
 
             #endregion
@@ -385,6 +385,7 @@ namespace Content.Client.Lobby.UI
             UpdateVoiceControls();
             UpdateGenderControls();
             // UpdateSkinColor(); // DEN: Obsolete
+            DenUpdateSkinColor(); // DEN: Refactor skin color sliders
             UpdateSpawnPriorityControls();
             UpdateAgeEdit();
             UpdateEyePickers();
@@ -395,7 +396,6 @@ namespace Content.Client.Lobby.UI
             RefreshJobs();
             RefreshLoadouts();
             RefreshSpecies();
-            DenUpdateSkinColor(); // DEN: Refactor skin color sliders
             RefreshTraits();
             RefreshFlavorText();
             ReloadPreview();
