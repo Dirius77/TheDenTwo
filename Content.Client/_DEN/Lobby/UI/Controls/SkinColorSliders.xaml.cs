@@ -44,6 +44,8 @@ public sealed partial class SkinColorSliders : BoxContainer
         ColorSliders.OnColorChanged += _ => { OnSliderValueChanged(); };
         LinearSlider.OnValueChanged += _ => { OnSliderValueChanged(); };
         ToggleAltStrategyButton.OnToggled += args => { OnAltStrategyToggled(); };
+
+        ColorSliders.SelectorType = ColorSelectorSliders.ColorSelectorType.Hsv;
     }
 
     /// <summary>
