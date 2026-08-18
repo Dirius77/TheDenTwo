@@ -22,6 +22,11 @@ public sealed partial class SkinColorSliders : BoxContainer
     public event Action<Color>? OnColorChanged;
 
     /// <summary>
+    ///     The current color associated with these sliders.
+    /// </summary>
+    public Color Color => GetCurrentColor();
+
+    /// <summary>
     ///     The skin coloration prototype associated with these sliders.
     /// </summary>
     private SkinColorationPrototype? _skinColor = null;
