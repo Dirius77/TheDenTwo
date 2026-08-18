@@ -168,6 +168,7 @@ public sealed partial class SkinColorSliders : BoxContainer
             _currentStrategy = _skinColor.Strategy;
             SetAltStrategyActive(false);
             SetSliderColor(currentColor);
+            OnSliderValueChanged();
             return;
         }
 
@@ -175,6 +176,7 @@ public sealed partial class SkinColorSliders : BoxContainer
         var enabled = ToggleAltStrategyButton.Pressed;
         SetAltStrategyActive(enabled);
         SetSliderColor(currentColor);
+        OnSliderValueChanged();
     }
 
     /// <summary>
