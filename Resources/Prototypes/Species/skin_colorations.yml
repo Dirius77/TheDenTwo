@@ -32,6 +32,8 @@
 - type: skinColoration
   id: HumanToned
   strategy: !type:HumanTonedSkinColoration {}
+  altStrategy: !type:ClampedHsvColoration # DEN: Allow humanoid species to pick RGB skin tones
+    value: [0, 1]
 
 - type: skinColoration
   id: VulpkaninColors
