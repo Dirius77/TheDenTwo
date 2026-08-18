@@ -224,7 +224,7 @@ namespace Content.Client.Lobby.UI
             //     OnSkinColorOnValueChanged();
             // };
 
-            SkinColorSelector.OnColorChanged += _ => { DenOnSkinColorOnValueChanged(); };
+            SkinColorSelector.OnColorChanged += _ => { DenOnSkinColorValueChanged(); };
             // End DEN
 
             #endregion

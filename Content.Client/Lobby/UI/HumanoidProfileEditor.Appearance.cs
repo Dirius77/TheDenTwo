@@ -218,7 +218,7 @@ public sealed partial class HumanoidProfileEditor
         Profile = Profile?.WithSpecies(newSpecies);
         // DEN: Refactor color sliders
         // OnSkinColorOnValueChanged(); // Species may have special color prefs, make sure to update it.
-        SetSkinColoration(newSpecies);
+        DenSetSkinColoration(newSpecies);
         // End DEN
 
         _markingsModel.OrganData = _markingManager.GetMarkingData(newSpecies);
@@ -306,7 +306,7 @@ public sealed partial class HumanoidProfileEditor
     }
 
     // DEN: Obsolete
-    [Obsolete("Replaced with DenOnSkinColorOnValueChanged")]
+    [Obsolete("Replaced with DenOnSkinColorValueChanged")]
     private void OnSkinColorOnValueChanged()
     {
         if (Profile is null) return;

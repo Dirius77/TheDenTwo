@@ -5,7 +5,7 @@ namespace Content.Client.Lobby.UI;
 
 public sealed partial class HumanoidProfileEditor
 {
-    private void SetSkinColoration(string speciesId)
+    private void DenSetSkinColoration(string speciesId)
     {
         if (Profile == null)
             return;
@@ -18,7 +18,7 @@ public sealed partial class HumanoidProfileEditor
 
         // The skin color might change upon setting the species,
         // so we are making sure that the appearance and markings reflect this.
-        DenOnSkinColorOnValueChanged();
+        DenOnSkinColorValueChanged();
     }
 
     private void DenUpdateSkinColor()
@@ -30,7 +30,7 @@ public sealed partial class HumanoidProfileEditor
         SkinColorSelector.SetSkinColor(skinColor);
     }
 
-    private void DenOnSkinColorOnValueChanged()
+    private void DenOnSkinColorValueChanged()
     {
         if (Profile is null)
             return;
