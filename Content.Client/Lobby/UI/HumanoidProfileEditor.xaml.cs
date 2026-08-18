@@ -206,22 +206,26 @@ namespace Content.Client.Lobby.UI
             {
                 SpeciesButton.SelectId(args.Id);
                 SetSpecies(_species[args.Id].ID);
-                OnSkinColorOnValueChanged();
+                // OnSkinColorOnValueChanged(); // DEN: Refactor color sliders
             };
 
             #region Skin
 
-            Skin.OnValueChanged += _ =>
-            {
-                OnSkinColorOnValueChanged();
-            };
+            // DEN: Turn skin color selector into its own control
+            // Skin.OnValueChanged += _ =>
+            // {
+            //     OnSkinColorOnValueChanged();
+            // };
 
-            RgbSkinColorContainer.AddChild(_rgbSkinColorSelector = new ColorSelectorSliders());
-            _rgbSkinColorSelector.SelectorType = ColorSelectorSliders.ColorSelectorType.Hsv; // defaults color selector to HSV
-            _rgbSkinColorSelector.OnColorChanged += _ =>
-            {
-                OnSkinColorOnValueChanged();
-            };
+            // RgbSkinColorContainer.AddChild(_rgbSkinColorSelector = new ColorSelectorSliders());
+            // _rgbSkinColorSelector.SelectorType = ColorSelectorSliders.ColorSelectorType.Hsv; // defaults color selector to HSV
+            // _rgbSkinColorSelector.OnColorChanged += _ =>
+            // {
+            //     OnSkinColorOnValueChanged();
+            // };
+
+            SkinColorSelector.OnColorChanged += DenOnSkinColorOnValueChanged;
+            // End DEN
 
             #endregion
 
@@ -350,6 +354,7 @@ namespace Content.Client.Lobby.UI
                 return;
 
             SpriteView.LoadPreview(Profile, JobOverride, ShowClothes.Pressed);
+            SetSkinColoration(Profile.Species); // DEN - Multiple Skin Tones
 
             // Check and set the dirty flag to enable the save/reset buttons as appropriate.
             SetDirty();
@@ -380,7 +385,8 @@ namespace Content.Client.Lobby.UI
             UpdateSexControls();
             UpdateVoiceControls();
             UpdateGenderControls();
-            UpdateSkinColor();
+            // UpdateSkinColor(); // DEN: Obsolete
+            DenUpdateSkinColor(); // DEN: Refactor skin color sliders
             UpdateSpawnPriorityControls();
             UpdateAgeEdit();
             UpdateEyePickers();

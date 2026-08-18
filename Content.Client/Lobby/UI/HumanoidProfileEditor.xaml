@@ -4,7 +4,9 @@
          xmlns:cc="clr-namespace:Content.Client.Administration.UI.CustomControls"
          xmlns:ui="clr-namespace:Content.Client.Lobby.UI"
          xmlns:profile="clr-namespace:Content.Client.Lobby.UI.ProfileEditorControls"
+         xmlns:denUi="clr-namespace:Content.Client._DEN.Lobby.UI.Controls"
          HorizontalExpand="True">
+        <!-- DEN: Added denUi namespace -->
         <!-- Left side -->
         <BoxContainer Orientation="Vertical" Margin="10 10 10 10" HorizontalExpand="True">
             <!-- Middle container -->
@@ -115,8 +117,13 @@
                             <!-- Skin -->
                             <BoxContainer Margin="10" HorizontalExpand="True" Orientation="Vertical">
                                 <Label Text="{Loc 'humanoid-profile-editor-skin-color-label'}" />
+                                <!-- Begin DEN: Color slider changes -->
+                                <!--
                                 <Slider HorizontalExpand="True" Name="Skin" MinValue="0" MaxValue="100" Value="20" />
                                 <BoxContainer Name="RgbSkinColorContainer" Visible="False" Orientation="Vertical" HorizontalExpand="True"></BoxContainer>
+                                -->
+                                <denUi:SkinColorSliders Name="SkinColorSelector" />
+                                <!-- End DEN -->
                             </BoxContainer>
                             <!-- Eyes -->
                             <BoxContainer Margin="10" Orientation="Vertical">
