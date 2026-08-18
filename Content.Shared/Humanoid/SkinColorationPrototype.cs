@@ -42,7 +42,7 @@ public enum SkinColorationStrategyInput
 /// <summary>
 /// Takes in the given <see cref="SkinColorationStrategyInput" /> and returns an adjusted Color
 /// </summary>
-public interface ISkinColorationStrategy
+public partial interface ISkinColorationStrategy // DEN: Make partial
 {
     /// <summary>
     /// The type of input expected by the implementor; callers should consult InputType before calling the methods that require a given input
@@ -131,10 +131,11 @@ public sealed partial class HumanTonedSkinColoration : ISkinColorationStrategy
         return true;
     }
 
-    public Color ClosestSkinColor(Color color)
-    {
-        return ValidHumanSkinTone;
-    }
+    // DEN: Replace this fucking function
+    // public Color ClosestSkinColor(Color color)
+    // {
+    //     return ValidHumanSkinTone;
+    // }
 
     public Color FromUnary(float color)
     {
