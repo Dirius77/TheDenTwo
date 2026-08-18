@@ -12,12 +12,19 @@ public sealed partial class SkinColorSliders : BoxContainer
 {
     [Dependency] private IPrototypeManager _protoMan = default!;
 
+    public event Action<Color>? OnColorChanged;
+    public event Action<bool>? OnAltStrategyToggled;
+
     private SkinColorationPrototype? _skinColor = null;
 
     public SkinColorSliders()
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
+
+        ColorSliders.OnColorChanged += _ => { OnSliderValueChanged(); };
+        LinearSlider.OnValueChanged += _ => { OnSliderValueChanged(); };
+        ToggleAltStrategyButton.OnToggled += args => { OnAltStrategyToggled?.Invoke(args.Pressed); };
     }
 
     public void SetStrategyFromSpecies(ProtoId<SpeciesPrototype> protoId)
@@ -35,6 +42,50 @@ public sealed partial class SkinColorSliders : BoxContainer
 
         _skinColor = skinColor;
         UpdateSliderVisuals();
+    }
+
+    private void OnSliderValueChanged()
+    {
+        if (_skinColor is null)
+            return;
+
+        var useAlt = ShouldUseAltStrategy();
+        var strategy = useAlt ? _skinColor.AltStrategy! : _skinColor.Strategy;
+        switch (strategy.InputType)
+        {
+            case SkinColorationStrategyInput.Unary:
+                OnUnaryValueChanged(strategy);
+                break;
+
+            case SkinColorationStrategyInput.Color:
+                OnColorValueChanged(strategy);
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(strategy.InputType));
+        }
+    }
+
+    private void OnUnaryValueChanged(ISkinColorationStrategy strategy)
+    {
+        var sliderValue = LinearSlider.Value;
+        var color = strategy.FromUnary(sliderValue);
+
+        OnColorChanged?.Invoke(color);
+    }
+
+    private void OnColorValueChanged(ISkinColorationStrategy strategy)
+    {
+        var sliderValue = ColorSliders.Color;
+        var color = strategy.ClosestSkinColor(sliderValue);
+
+        OnColorChanged?.Invoke(color);
+    }
+
+    private bool ShouldUseAltStrategy()
+    {
+        return _skinColor?.AltStrategy is not null
+            && ToggleAltStrategyButton.Pressed;
     }
 
     private void UpdateSliderVisuals()
