@@ -121,6 +121,19 @@ public sealed partial class SkinColorSliders : BoxContainer
         }
     }
 
+    private void SetAltStrategyActive(bool active)
+    {
+        if (_skinColor is null)
+            return;
+
+        if (_skinColor.AltStrategy is null)
+            active = false;
+
+        _currentStrategy = active ? _skinColor.AltStrategy : _skinColor.Strategy;
+        ToggleAltStrategyButton.Pressed = active;
+        UpdateSliderVisibility();
+    }
+
     /// <summary>
     ///     Notify subscribers that the color has changed when the sliders are changed.
     /// </summary>
@@ -169,19 +182,6 @@ public sealed partial class SkinColorSliders : BoxContainer
 
         var useAlt = _skinColor.AltStrategy != null && PreferAltStrategyForColor(color);
         SetAltStrategyActive(useAlt);
-    }
-
-    private void SetAltStrategyActive(bool active)
-    {
-        if (_skinColor is null)
-            return;
-
-        if (_skinColor.AltStrategy is null)
-            active = false;
-
-        _currentStrategy = active ? _skinColor.AltStrategy : _skinColor.Strategy;
-        ToggleAltStrategyButton.Pressed = active;
-        UpdateSliderVisibility();
     }
 
     /// <summary>
