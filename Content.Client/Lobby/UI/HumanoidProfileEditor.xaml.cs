@@ -403,6 +403,7 @@ namespace Content.Client.Lobby.UI
             if (Profile != null)
             {
                 PreferenceUnavailableButton.SelectId((int)Profile.PreferenceUnavailable);
+                DenSetSkinColoration(Profile.Species); // DEN: Refactor skin color sliders
             }
         }
 
