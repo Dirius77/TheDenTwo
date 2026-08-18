@@ -42,7 +42,7 @@ public enum SkinColorationStrategyInput
 /// <summary>
 /// Takes in the given <see cref="SkinColorationStrategyInput" /> and returns an adjusted Color
 /// </summary>
-public partial interface ISkinColorationStrategy // DEN: Make partial
+public interface ISkinColorationStrategy
 {
     /// <summary>
     /// The type of input expected by the implementor; callers should consult InputType before calling the methods that require a given input
