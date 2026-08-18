@@ -8,14 +8,27 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client._DEN.Lobby.UI.Controls;
 
+/// <summary>
+///     A control that allows for selecting a skin color based on a given skin coloration strategy.
+/// </summary>
 [GenerateTypedNameReferences]
 public sealed partial class SkinColorSliders : BoxContainer
 {
     [Dependency] private IPrototypeManager _protoMan = default!;
 
+    /// <summary>
+    ///     Event fired when the current color of the sliders are changed.
+    /// </summary>
     public event Action<Color>? OnColorChanged;
 
+    /// <summary>
+    ///     The skin coloration prototype associated with these sliders.
+    /// </summary>
     private SkinColorationPrototype? _skinColor = null;
+
+    /// <summary>
+    ///     The currently-active color selection strategy.
+    /// </summary>
     private ISkinColorationStrategy? _currentStrategy = null;
 
     public SkinColorSliders()
@@ -28,6 +41,10 @@ public sealed partial class SkinColorSliders : BoxContainer
         ToggleAltStrategyButton.OnToggled += args => { OnAltStrategyToggled(); };
     }
 
+    /// <summary>
+    ///     Sets the skin color selection strategy from a species prototype.
+    /// </summary>
+    /// <param name="protoId">The species prototype to use.</param>
     public void SetSkinColoration(ProtoId<SpeciesPrototype> protoId)
     {
         if (!_protoMan.Resolve(protoId, out var species))
@@ -36,6 +53,10 @@ public sealed partial class SkinColorSliders : BoxContainer
         SetSkinColoration(species.SkinColoration);
     }
 
+    /// <summary>
+    ///     Sets the skin color selection strategy from a skin coloration prototype.
+    /// </summary>
+    /// <param name="protoId">The skin color prototype to use.</param>
     public void SetSkinColoration(ProtoId<SkinColorationPrototype> protoId)
     {
         if (!_protoMan.Resolve(protoId, out var skinColor))
@@ -43,28 +64,38 @@ public sealed partial class SkinColorSliders : BoxContainer
 
         _skinColor = skinColor;
 
+        // Set the visible strategy to match the new skin coloration prototype.
         var currentColor = GetCurrentColor();
-        var useAlt = _skinColor.AltStrategy != null && PreferAltStrategyForColor(currentColor);
-        var strategy = useAlt ? _skinColor.AltStrategy : _skinColor.Strategy;
-        _currentStrategy = strategy;
+        UpdateBestStrategyForColor(currentColor);
 
-        UpdateVisibleStrategy();
+        // Ensure the newly-visible strategy has the correct color.
         SetSliderColor(currentColor);
     }
 
+    /// <summary>
+    ///     Sets the current skin color of this slider.
+    /// </summary>
+    /// <remarks>
+    ///     This should be set when the profile is updated, such as switching or importing profiles.
+    ///     This updates the color selector to match the best applicable strategy.
+    /// </remarks>
+    /// <param name="color">The color to set the slider to.</param>
     public void SetSkinColor(Color color)
     {
         if (_skinColor is null)
             return;
 
-        var useAlt = _skinColor.AltStrategy != null && PreferAltStrategyForColor(color);
-        var strategy = useAlt ? _skinColor.AltStrategy : _skinColor.Strategy;
-        _currentStrategy = strategy;
+        // Update the visible strategy according to what best fits this new color.
+        UpdateBestStrategyForColor(color);
 
-        UpdateVisibleStrategy();
+        // Update the visible sliders with the color.
         SetSliderColor(color);
     }
 
+    /// <summary>
+    ///     Set the color value of the slider controls themselves based on the current strategy.
+    /// </summary>
+    /// <param name="color">The color to set the slider values to.</param>
     private void SetSliderColor(Color color)
     {
         if (_currentStrategy is null)
@@ -83,6 +114,9 @@ public sealed partial class SkinColorSliders : BoxContainer
         }
     }
 
+    /// <summary>
+    ///     Notify subscribers that the color has changed when the sliders are changed.
+    /// </summary>
     private void OnSliderValueChanged()
     {
         if (_skinColor is null)
@@ -92,6 +126,9 @@ public sealed partial class SkinColorSliders : BoxContainer
         OnColorChanged?.Invoke(color);
     }
 
+    /// <summary>
+    ///     Toggle the current strategy between primary and alternate when the toggle button is pressed.
+    /// </summary>
     private void OnAltStrategyToggled()
     {
         if (_skinColor is null)
@@ -102,50 +139,129 @@ public sealed partial class SkinColorSliders : BoxContainer
         // Can't enable alt strategies if this skin coloration doesn't have one.
         if (_skinColor.AltStrategy == null)
         {
-            ToggleAltStrategyButton.Pressed = false;
             _currentStrategy = _skinColor.Strategy;
-            UpdateVisibleStrategy();
+            SetAltStrategyActive(false);
             SetSliderColor(currentColor);
             return;
         }
 
         // Update the alt strategy.
         var enabled = ToggleAltStrategyButton.Pressed;
-        _currentStrategy = enabled ? _skinColor.AltStrategy : _skinColor.Strategy;
-
-        UpdateVisibleStrategy();
+        SetAltStrategyActive(enabled);
         SetSliderColor(currentColor);
     }
 
+    /// <summary>
+    ///     Sets the currently-active strategy based on the closest match to a given color.
+    /// </summary>
+    /// <param name="color">The color used to update the active strategy.</param>
+    private void UpdateBestStrategyForColor(Color color)
+    {
+        if (_skinColor is null)
+            return;
+
+        var useAlt = _skinColor.AltStrategy != null && PreferAltStrategyForColor(color);
+        SetAltStrategyActive(useAlt);
+    }
+
+    private void SetAltStrategyActive(bool active)
+    {
+        if (_skinColor is null)
+            return;
+
+        if (_skinColor.AltStrategy is null)
+            active = false;
+
+        _currentStrategy = active ? _skinColor.AltStrategy : _skinColor.Strategy;
+        ToggleAltStrategyButton.Pressed = active;
+        UpdateSliderVisibility();
+    }
+
+    /// <summary>
+    ///     Updates which slider elements are visible based on the current strategy.
+    /// </summary>
+    private void UpdateSliderVisibility()
+    {
+        if (_skinColor is null)
+            return;
+
+        ToggleAltStrategyButton.Visible = _skinColor.AltStrategy is not null;
+
+        if (_currentStrategy is null)
+            return;
+
+        switch (_currentStrategy.InputType)
+        {
+            case SkinColorationStrategyInput.Unary:
+                LinearSliderBox.Visible = true;
+                ColorSliderBox.Visible = false;
+                break;
+
+            case SkinColorationStrategyInput.Color:
+                LinearSliderBox.Visible = false;
+                ColorSliderBox.Visible = true;
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Clamps a color according to the valid color rules of a given strategy.
+    /// </summary>
+    /// <param name="strategy">The skin color strategy to use.</param>
+    /// <param name="color">The input color.</param>
+    /// <returns>The closest valid color according to this strategy.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the strategy's input type is not handled.</exception>
+    private static Color GetClosestColorForStrategy(ISkinColorationStrategy strategy, Color color)
+    {
+        var inputType = strategy.InputType;
+        // TODO: why doesnt ISkinColorationStrategy just have a method for this
+        return inputType switch
+        {
+            SkinColorationStrategyInput.Color => strategy.ClosestSkinColor(color),
+            SkinColorationStrategyInput.Unary => strategy.FromUnary(strategy.ToUnary(color)),
+            _ => throw new ArgumentOutOfRangeException(nameof(strategy)),
+        };
+    }
+
+    /// <summary>
+    ///     Gets the euclidean distance beteween two colors.
+    /// </summary>
+    private static float GetColorDistance(Color a, Color b)
+    {
+        // TODO: why isnt this a static color method also
+        var va = a.RGBA;
+        var vb = b.RGBA;
+        var diff = va - vb;
+        return Vector4.Dot(diff, diff);
+    }
+
+    /// <summary>
+    ///     Gets the currently-selected slider color for this control.
+    /// </summary>
+    /// <returns>The current color for the active sliders.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the current strategy's input type is not handled.</exception>
     private Color GetCurrentColor()
     {
         var color = Color.White;
 
-        if (_skinColor is null)
+        if (_skinColor is null || _currentStrategy is null)
             return color;
 
-        var useAlt = AltStrategyIsActive();
-        var strategy = useAlt && _skinColor.AltStrategy != null
-            ? _skinColor.AltStrategy
-            : _skinColor.Strategy;
-
-        switch (strategy.InputType)
+        color = _currentStrategy.InputType switch
         {
-            case SkinColorationStrategyInput.Unary:
-                color = GetUnaryColor(strategy);
-                break;
-
-            case SkinColorationStrategyInput.Color:
-                color = GetRgbColor(strategy);
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(strategy.InputType));
-        }
+            SkinColorationStrategyInput.Unary => GetUnaryColor(_currentStrategy),
+            SkinColorationStrategyInput.Color => GetRgbColor(_currentStrategy),
+            _ => throw new ArgumentOutOfRangeException(nameof(_currentStrategy.InputType)),
+        };
 
         return color;
     }
 
+    /// <summary>
+    ///     Get the current slider color for a unary color strategy.
+    /// </summary>
+    /// <param name="strategy">The skin color strategy.</param>
+    /// <returns>The current slider color.</returns>
     private Color GetUnaryColor(ISkinColorationStrategy strategy)
     {
         var sliderValue = LinearSlider.Value;
@@ -154,6 +270,11 @@ public sealed partial class SkinColorSliders : BoxContainer
         return color;
     }
 
+    /// <summary>
+    ///     Get the current slider color for an RGB color strategy.
+    /// </summary>
+    /// <param name="strategy">The skin color strategy.</param>
+    /// <returns>The current slider color.</returns>
     private Color GetRgbColor(ISkinColorationStrategy strategy)
     {
         var sliderValue = ColorSliders.Color;
@@ -162,6 +283,11 @@ public sealed partial class SkinColorSliders : BoxContainer
         return color;
     }
 
+    /// <summary>
+    ///     Get whether or not the alt skin color strategy fits a given color better than the primary strategy.
+    /// </summary>
+    /// <param name="color">The input color.</param>
+    /// <returns>Whether we should use the alt strategy instead of the primary one.</returns>
     private bool PreferAltStrategyForColor(Color color)
     {
         if (_skinColor is null || _skinColor.AltStrategy is null)
@@ -191,56 +317,5 @@ public sealed partial class SkinColorSliders : BoxContainer
 
         // If the alternate strategy is closer, then we're using it.
         return altDistance < primaryDistance;
-    }
-
-    private bool AltStrategyIsActive()
-    {
-        return _skinColor?.AltStrategy is not null
-            && ToggleAltStrategyButton.Pressed;
-    }
-
-    private void UpdateVisibleStrategy()
-    {
-        if (_skinColor is null)
-            return;
-
-        ToggleAltStrategyButton.Visible = _skinColor.AltStrategy is not null;
-
-        if (_currentStrategy is null)
-            return;
-
-        switch (_currentStrategy.InputType)
-        {
-            case SkinColorationStrategyInput.Unary:
-                LinearSliderBox.Visible = true;
-                ColorSliderBox.Visible = false;
-                break;
-
-            case SkinColorationStrategyInput.Color:
-                LinearSliderBox.Visible = false;
-                ColorSliderBox.Visible = true;
-                break;
-        }
-    }
-
-    private static Color GetClosestColorForStrategy(ISkinColorationStrategy strategy, Color color)
-    {
-        var inputType = strategy.InputType;
-        // TODO: why doesnt ISkinColorationStrategy just have a method for this
-        return inputType switch
-        {
-            SkinColorationStrategyInput.Color => strategy.ClosestSkinColor(color),
-            SkinColorationStrategyInput.Unary => strategy.FromUnary(strategy.ToUnary(color)),
-            _ => throw new ArgumentOutOfRangeException(nameof(strategy)),
-        };
-    }
-
-    private static float GetColorDistance(Color a, Color b)
-    {
-        // TODO: why isnt this a static color method also
-        var va = a.RGBA;
-        var vb = b.RGBA;
-        var diff = va - vb;
-        return Vector4.Dot(diff, diff);
     }
 }
