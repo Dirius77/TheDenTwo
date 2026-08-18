@@ -5,6 +5,12 @@ namespace Content.Shared.Humanoid;
 public sealed partial class SkinColorationPrototype
 {
     /// <summary>
+    ///     An optional label for the "alt strategy" toggle button in the UI.
+    /// </summary>
+    [DataField]
+    public LocId? ToggleButtonText = null;
+
+    /// <summary>
     ///     Gets the closest verified color, taking all strategies into account.
     /// </summary>
     /// <param name="color">The color to verify.</param>

@@ -35,6 +35,8 @@ public sealed partial class SkinColorSliders : BoxContainer
     /// </summary>
     private ISkinColorationStrategy? _currentStrategy = null;
 
+    private static readonly LocId DefaultToggleButtonText = "humanoid-profile-editor-skin-alt-strategy-toggle-button";
+
     public SkinColorSliders()
     {
         RobustXamlLoader.Load(this);
@@ -130,6 +132,11 @@ public sealed partial class SkinColorSliders : BoxContainer
 
         _currentStrategy = active ? _skinColor.AltStrategy : _skinColor.Strategy;
         ToggleAltStrategyButton.Pressed = active;
+
+        var buttonLocale = _skinColor.ToggleButtonText ?? DefaultToggleButtonText;
+        var buttonText = Loc.GetString(buttonLocale);
+        ToggleAltStrategyButton.Text = buttonText;
+
         UpdateSliderVisibility();
     }
 
