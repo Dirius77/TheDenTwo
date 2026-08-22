@@ -19,10 +19,12 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
     public static readonly ProtoId<LanguageFluencyPrototype> MaximumFluency = "Fluent";
     public static readonly ProtoId<LanguageFluencyPrototype> MinimumFluency = "Unfamiliar";
-
+    
     public static readonly ProtoId<LanguagePrototype> DisabledLanguage = "Default";
-
-    private static ProtoId<LanguagePrototype> _defaultLanguage = "Basic";
+    public static ProtoId<LanguagePrototype> DefaultLanguage = "Basic";
+    public static ProtoId<LanguageEntryPrototype> DefaultLanguageEntry = "Basic";
+    public static int LanguageSelectionPoints = 6;
+    
     private bool _fallbackDefaultLanguage;
 
     public override void Initialize()
@@ -42,7 +44,9 @@ public abstract partial class SharedLanguageSystem : EntitySystem
         SubscribeAllEvent<RequestSetSpokenLanguageEvent>(OnRequestSetSpokenLanguage);
 
         _cfg.OnValueChanged(DenCCVars.FallbackDefaultLanguage, fallback => _fallbackDefaultLanguage = fallback, true);
-        _cfg.OnValueChanged(DenCCVars.DefaultLanguage, lang => _defaultLanguage = lang, true);
+        _cfg.OnValueChanged(DenCCVars.DefaultLanguage, lang => DefaultLanguage = lang, true);
+        _cfg.OnValueChanged(DenCCVars.DefaultLanguageEntry, langEnt => DefaultLanguageEntry = langEnt, true);
+        _cfg.OnValueChanged(DenCCVars.LanguageSelectionPoints, points => LanguageSelectionPoints = points, true);
         _cfg.OnValueChanged(DenCCVars.LanguageEnabled, OnLanguageEnableChanged, true);
     }
 

@@ -295,6 +295,14 @@ namespace Content.Client.Lobby.UI
 
             #endregion Markings
 
+            // DEN: Languages
+            #region Languages
+
+            TabContainer.SetTabTitle(5, Loc.GetString("humanoid-profile-editor-languages-tab"));
+            RefreshLanguages();
+
+            #endregion
+            
             RefreshFlavorText();
 
             #region Dummy

@@ -13,6 +13,8 @@ public sealed partial class LanguageFluencyPrototype : IPrototype
     [DataField(required: true)]
     public int Understanding;
 
+    [DataField] public bool RoundStart = true;
+
     public Color Color => Color.InterpolateBetween(Color.Green, Color.Red, (float)(Understanding / 100.0));
 
     public int CompareTo(LanguageFluencyPrototype? other)

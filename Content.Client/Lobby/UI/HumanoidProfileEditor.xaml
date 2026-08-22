@@ -150,6 +150,13 @@
                     <!-- Markings -->
                     <humanoid:MarkingPicker Name="Markings" HorizontalExpand="True" VerticalExpand="True" />
                 </BoxContainer>
+                <!-- DEN: Languages -->
+                <BoxContainer Orientation="Vertical" Margin="10">
+                    <ScrollContainer VerticalExpand="True">
+                        <BoxContainer Name="LanguagesList" Orientation="Vertical" />
+                    </ScrollContainer>
+                </BoxContainer>
+                <!-- /DEN -->
             </TabContainer>
         </BoxContainer>
         <!-- Right side -->

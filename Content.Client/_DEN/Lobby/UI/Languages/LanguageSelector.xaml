@@ -1,0 +1,14 @@
+<BoxContainer xmlns="https://spacestation14.io"
+              Orientation="Vertical">
+
+    <Label Name="LanguageNameLabel"
+           Margin="0 10 0 0" />
+    
+    <BoxContainer Orientation="Horizontal">
+        <Label Name="LanguageFluencyLabel"
+               FontColorOverride="Gray" SetWidth="90"/>
+        
+        <Slider Name="FluencySlider" Rounded="True" SetWidth="250"/>
+    </BoxContainer>
+
+</BoxContainer>

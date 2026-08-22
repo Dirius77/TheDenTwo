@@ -39,14 +39,30 @@ public sealed partial class DenCCVars
     ///     Whether or not to give an entity that tries speaking without LanguageCommunicatorComponent a language.
     /// </summary>
     public static readonly CVarDef<bool> FallbackDefaultLanguage =
-        CVarDef.Create("languages.fallback_default_language", false, CVar.ARCHIVE | CVar.SERVER);
+        CVarDef.Create("languages.fallback_default_language", false, CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
 
     /// <summary>
     ///     The default spoken language. If fallback_default_language is set, entities without LanguageCommunicatorComponent
     ///     will use this. Systems that directly send messages will also use this language.
     /// </summary>
     public static readonly CVarDef<string> DefaultLanguage =
-        CVarDef.Create("languages.default_language", "Basic", CVar.ARCHIVE | CVar.SERVER);
+        CVarDef.Create("languages.default_language", "Basic", CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
+    
+    /// <summary>
+    ///     The language entry that is selected as the primary language when a new character is created.
+    /// </summary>
+    public static readonly CVarDef<string> DefaultLanguageEntry =
+        CVarDef.Create("languages.default_language_entry", "Basic", CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
+
+    /// <summary>
+    ///     How many points players have to spend on languages at character creation.
+    ///     Points work as follows:
+    ///     - 1 Point allows for any of Poor-Great Understanding of a language.
+    ///     - 2 Points allows for Fluent Understanding.
+    ///     - 3 Points allows for speaking.
+    /// </summary>
+    public static readonly CVarDef<int> LanguageSelectionPoints =
+        CVarDef.Create("languages.language_selection_points", 6, CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
 
     /// <summary>
     ///     Client's preference for how to display language fonts.

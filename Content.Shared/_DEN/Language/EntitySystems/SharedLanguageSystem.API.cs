@@ -194,7 +194,7 @@ public abstract partial class SharedLanguageSystem
     [PublicAPI]
     public ProtoId<LanguagePrototype> GetDefaultLanguage()
     {
-        return _defaultLanguage;
+        return DefaultLanguage;
     }
 
     /// <summary>
@@ -227,7 +227,7 @@ public abstract partial class SharedLanguageSystem
         {
             if (forceDefault)
             {
-                InsertLanguageAndChildren(target, _defaultLanguage, DefaultLanguageFluency, true, out _);
+                InsertLanguageAndChildren(target, DefaultLanguage, DefaultLanguageFluency, true, out _);
                 communicator = EnsureComp<LanguageCommunicatorComponent>(target); // Should already exist here.
             }
             else
@@ -244,7 +244,7 @@ public abstract partial class SharedLanguageSystem
                     return null;
 
                 InsertLanguageAndChildren(target,
-                    _defaultLanguage,
+                    DefaultLanguage,
                     DefaultLanguageFluency,
                     true,
                     out _);

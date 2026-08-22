@@ -1,3 +1,6 @@
+using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.EntitySystems;
+using Content.Shared._DEN.Requirements.Managers;
 using Content.Shared._DEN.Traits.Prototypes;
 using Content.Shared.Chat.Prototypes;
 using Content.Shared.Humanoid;
@@ -17,9 +20,27 @@ public sealed partial class HumanoidCharacterProfile
     private HashSet<ProtoId<EntityTraitPrototype>> _entityTraitPreferences = new();
 
     /// <summary>
+    /// Stores language preferences. Uses LanguageEntryPrototype so that entries can't accidentally be created for
+    /// non-roundstart languages.
+    /// </summary>
+    [DataField("_languagePreferences")]
+    private Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> _languagePreferences = new()
+    {
+        {
+            SharedLanguageSystem.DefaultLanguageEntry, new LanguagePreference(SharedLanguageSystem.MaximumFluency, true, true)
+        }
+    };
+
+    /// <summary>
     /// <see cref="_entityTraitPreferences"/>
     /// </summary>
     public IReadOnlySet<ProtoId<EntityTraitPrototype>> EntityTraitPreferences => _entityTraitPreferences;
+
+    /// <summary>
+    /// <see cref="_languagePreferences"/>
+    /// </summary>
+    public IReadOnlyDictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> LanguagePreferences =>
+        _languagePreferences;
 
     public HumanoidCharacterProfile(
         string name,
@@ -35,7 +56,8 @@ public sealed partial class HumanoidCharacterProfile
         PreferenceUnavailableMode preferenceUnavailable,
         HashSet<ProtoId<AntagPrototype>> antagPreferences,
         HashSet<ProtoId<EntityTraitPrototype>> entityTraitPreferences,
-        Dictionary<string, RoleLoadout> loadouts)
+        Dictionary<string, RoleLoadout> loadouts,
+        Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> languagePreferences)
     {
         Name = name;
         FlavorText = flavortext;
@@ -51,6 +73,7 @@ public sealed partial class HumanoidCharacterProfile
         _antagPreferences = antagPreferences;
         _entityTraitPreferences = entityTraitPreferences; // DEN
         _loadouts = loadouts;
+        _languagePreferences = languagePreferences;
 
         var hasHighPrority = false;
         foreach (var (key, value) in _jobPriorities)
@@ -122,6 +145,74 @@ public sealed partial class HumanoidCharacterProfile
         };
     }
 
+    [PublicAPI]
+    public HumanoidCharacterProfile WithLanguagePreference(ProtoId<LanguageEntryPrototype> languageEntry,
+        ProtoId<LanguageFluencyPrototype> fluency, bool speaks, bool primary)
+    {
+        var preferences = _languagePreferences;
+        if (fluency == SharedLanguageSystem.MinimumFluency)
+        {
+            preferences.Remove(languageEntry);
+            return new(this)
+            {
+                _languagePreferences = preferences
+            };
+        }
+        
+        if (primary)
+        {
+            // Primary must be maximum fluency, and spoken.
+            speaks = true;
+            
+            ProtoId<LanguageEntryPrototype>? oldPrimary = null;
+            foreach (var preference in preferences)
+            {
+                if (preference.Value.Primary)
+                {
+                    oldPrimary = preference.Key;
+                    break;
+                }
+            }
+
+            if (oldPrimary != null)
+            {
+                var oldPref = preferences[oldPrimary.Value];
+                preferences[oldPrimary.Value] = new LanguagePreference(oldPref.Fluency, oldPref.Speaks, false);
+            }
+        }
+        
+        // Spoken languages must be fluent.
+        if (speaks)
+        {
+            fluency = SharedLanguageSystem.MaximumFluency;
+        }
+        
+        preferences[languageEntry] = new LanguagePreference(fluency, speaks, primary);
+        
+        var totalPoints = 0;
+        foreach (var preference in preferences)
+        {
+            if (preference.Value.Fluency == SharedLanguageSystem.MaximumFluency)
+            {
+                if (preference.Value.Speaks)
+                    totalPoints += 1;
+                totalPoints += 2;
+            }
+            else if (preference.Value.Fluency != SharedLanguageSystem.MinimumFluency)
+            {
+                totalPoints += 1;
+            }
+        }
+
+        if (totalPoints > SharedLanguageSystem.LanguageSelectionPoints)
+            return new(this);
+
+        return new(this)
+        {
+            _languagePreferences = preferences
+        };
+    }
+
     /// <summary>
     /// Takes in an IEnumerable of traits and returns a List of the valid traits.
     /// </summary>
@@ -160,6 +251,62 @@ public sealed partial class HumanoidCharacterProfile
         }
 
         return result;
+    }
+
+    public Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> EnsureValidLanguages(
+        Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> languagePreferences,
+        PlayerRequirementContext context)
+    {
+        var totalPoints = 0;
+        ProtoId<LanguageEntryPrototype>? primary = null;
+        
+        foreach (var preference in languagePreferences)
+        {
+            if (preference.Value.Fluency == SharedLanguageSystem.MaximumFluency)
+            {
+                if (preference.Value.Primary)
+                {
+                    if (primary is null)
+                    {
+                        primary = preference.Key;
+                        totalPoints += 3;
+                        continue;
+                    }
+                    
+                    // More than one primary set, pick the first primary and bail.
+                    return new Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference>()
+                    {
+                        {
+                            primary.Value, new LanguagePreference(SharedLanguageSystem.MaximumFluency, true, true)
+                        } 
+                    };
+                }
+
+                if (preference.Value.Speaks)
+                    totalPoints += 1;
+
+                totalPoints += 2;
+            }
+            else if (preference.Value.Fluency != SharedLanguageSystem.MinimumFluency)
+            {
+                totalPoints += 1;
+            }
+        }
+
+        if (totalPoints <= SharedLanguageSystem.LanguageSelectionPoints)
+        {
+            return languagePreferences;
+        }
+
+        // I'm not writing some clever solver for trying to find the minimum valid set of languages from a larger set,
+        // just fall back to the default language.
+        return new Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference>()
+        {
+            {
+                SharedLanguageSystem.DefaultLanguageEntry,
+                new LanguagePreference(SharedLanguageSystem.MaximumFluency, true, true)
+            }
+        };
     }
 
 }

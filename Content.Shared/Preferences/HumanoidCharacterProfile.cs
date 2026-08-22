@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Content.Shared._DEN.Language;
 using Content.Shared.CCVar;
 using Content.Shared.Chat.Prototypes;
 using Content.Shared.EntityEffects.Effects;
@@ -197,7 +198,8 @@ namespace Content.Shared.Preferences
                 new HashSet<ProtoId<AntagPrototype>>(other.AntagPreferences),
                 // new HashSet<ProtoId<TraitPrototype>>(other.TraitPreferences), // DEN
                 new HashSet<ProtoId<EntityTraitPrototype>>(other.EntityTraitPreferences), // DEN
-                new Dictionary<string, RoleLoadout>(other.Loadouts))
+                new Dictionary<string, RoleLoadout>(other.Loadouts),
+                new Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference>(other.LanguagePreferences)) // DEN
         {
         }
 
@@ -803,6 +805,8 @@ namespace Content.Shared.Preferences
 
             _entityTraitPreferences.Clear(); // DEN
             _entityTraitPreferences.UnionWith(GetValidEntityTraits(traits, prototypeManager)); // DEN
+
+            _languagePreferences = EnsureValidLanguages(_languagePreferences, context); // DEN
 
             // Checks prototypes exist for all loadouts and dump / set to default if not.
             var toRemove = new ValueList<string>();

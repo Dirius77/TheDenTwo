@@ -263,6 +263,17 @@ namespace Content.Server.Database
                 humanoid.EntityTraitPreferences
                         .Select(t => new Trait { TraitName = t })
             ); // DEN
+            
+            profile.Languages.Clear(); // DEN
+            profile.Languages.AddRange(
+                humanoid.LanguagePreferences.Select(l => new Language
+                {
+                    LanguageEntryName = l.Key,
+                    FluencyName = l.Value.Fluency,
+                    Primary = l.Value.Primary,
+                    Speaks = l.Value.Speaks
+                })
+            ); // DEN
 
             profile.Loadouts.Clear();
 

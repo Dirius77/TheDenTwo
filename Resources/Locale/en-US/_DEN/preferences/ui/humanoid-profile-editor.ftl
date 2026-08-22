@@ -1,0 +1,1 @@
+humanoid-profile-editor-languages-tab = Languages

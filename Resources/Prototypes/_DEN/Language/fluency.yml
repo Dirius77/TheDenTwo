@@ -23,6 +23,7 @@
   id: Related
   name: fluency-related
   understanding: 20
+  roundStart: false
 
 - type: languageFluency
   id: Unfamiliar
