@@ -103,6 +103,10 @@
         type: SiliconLawBoundUserInterface
   - type: ShowJobIcons
   - type: ShowCrewIcons
+  - type: LanguageCommunicator # DEN Languages
+    languages:
+      Binary: [ true, Fluent ]
+      Basic: [ true, Fluent ]
 
 # Ai
 - type: entity

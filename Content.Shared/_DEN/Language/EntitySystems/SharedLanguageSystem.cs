@@ -121,6 +121,9 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
     private void OnLanguageCommunicatorShutdown(Entity<LanguageCommunicatorComponent> ent, ref ComponentShutdown evt)
     {
+        if (Terminating(ent))
+            return;
+        
         if (ent.Comp.Languages is { } container)
             _container.ShutdownContainer(container);
     }

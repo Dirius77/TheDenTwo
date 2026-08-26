@@ -233,6 +233,7 @@
   - type: LanguageCommunicator
     languages:
       Basic: [ true, Fluent ]
+      Binary: [ true, Fluent ]
 
 - type: entity
   abstract: true
