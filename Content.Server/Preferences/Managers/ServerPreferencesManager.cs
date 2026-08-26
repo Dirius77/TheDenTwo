@@ -101,7 +101,13 @@ namespace Content.Server.Preferences.Managers
             var traits = profile.Traits.Select(t => new ProtoId<EntityTraitPrototype>(t.TraitName)); // DEN
             var languages = profile.Languages.ToDictionary(
                 l => new ProtoId<LanguageEntryPrototype>(l.LanguageEntryName),
-                l => new LanguagePreference(new ProtoId<LanguageFluencyPrototype>(l.FluencyName), l.Speaks, l.Primary)); // DEN
+                l =>
+                {
+                    var speaks = SpokenState.None;
+                    if (Enum.TryParse<SpokenState>(l.Speaks, true, out var speaksVal))
+                        speaks = speaksVal;
+                    return new LanguagePreference(new ProtoId<LanguageFluencyPrototype>(l.FluencyName), speaks, l.Primary);
+                }); // DEN
 
             var sex = Sex.Male;
             if (Enum.TryParse<Sex>(profile.Sex, true, out var sexVal))

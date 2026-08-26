@@ -400,6 +400,7 @@ namespace Content.Client.Lobby.UI
             RefreshLoadouts();
             RefreshSpecies();
             RefreshTraits();
+            RefreshLanguages();  // DEN
             RefreshFlavorText();
             ReloadPreview();
 

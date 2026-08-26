@@ -24,8 +24,6 @@ public sealed partial class LanguageSystem : SharedLanguageSystem
 
         SubscribeLocalEvent<LanguageComponent, AfterAutoHandleStateEvent>(OnLanguageComponentHandleState);
         SubscribeLocalEvent<LanguageCommunicatorComponent, AfterAutoHandleStateEvent>(OnLanguageCommunicatorHandleState);
-
-        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
     }
 
     private void SetLanguageEnabledState(bool enabled)
@@ -33,8 +31,10 @@ public sealed partial class LanguageSystem : SharedLanguageSystem
         OnLanguagesEnabledUpdate?.Invoke(enabled);
     }
 
-    private void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent evt)
+    protected override void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent evt)
     {
+        base.OnPlayerSpawnComplete(evt);
+        
         RaiseNetworkEvent(new HideFontsMessage(_cfg.GetCVar(DenCCVars.HideLanguageFonts)));
     }
 

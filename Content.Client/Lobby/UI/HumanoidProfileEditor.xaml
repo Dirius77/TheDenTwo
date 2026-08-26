@@ -152,6 +152,7 @@
                 </BoxContainer>
                 <!-- DEN: Languages -->
                 <BoxContainer Orientation="Vertical" Margin="10">
+                    <Label Name="LanguagePoints" />
                     <ScrollContainer VerticalExpand="True">
                         <BoxContainer Name="LanguagesList" Orientation="Vertical" />
                     </ScrollContainer>

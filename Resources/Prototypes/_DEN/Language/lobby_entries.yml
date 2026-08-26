@@ -2,3 +2,12 @@
   id: Basic
   language: Basic
   priority: 5
+
+- type: languageEntry
+  id: Sign
+  language: Sign
+  priority: 1
+
+- type: languageEntry
+  id: Binary
+  language: Binary

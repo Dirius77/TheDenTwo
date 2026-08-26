@@ -1,3 +1,4 @@
+using System.Linq;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared._DEN.Requirements.Managers;
@@ -27,7 +28,7 @@ public sealed partial class HumanoidCharacterProfile
     private Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> _languagePreferences = new()
     {
         {
-            SharedLanguageSystem.DefaultLanguageEntry, new LanguagePreference(SharedLanguageSystem.MaximumFluency, true, true)
+            SharedLanguageSystem.DefaultLanguageEntry, new LanguagePreference(SharedLanguageSystem.MaximumFluency, SpokenState.Speaks, true)
         }
     };
 
@@ -144,13 +145,34 @@ public sealed partial class HumanoidCharacterProfile
             _entityTraitPreferences = list,
         };
     }
-
+    
     [PublicAPI]
-    public HumanoidCharacterProfile WithLanguagePreference(ProtoId<LanguageEntryPrototype> languageEntry,
-        ProtoId<LanguageFluencyPrototype> fluency, bool speaks, bool primary)
+    public HumanoidCharacterProfile WithLanguageFluency(ProtoId<LanguageEntryPrototype> languageEntry,
+        ProtoId<LanguageFluencyPrototype> fluency)
     {
-        var preferences = _languagePreferences;
-        if (fluency == SharedLanguageSystem.MinimumFluency)
+        var preferences = LanguagePreferences.ToDictionary();
+
+        var speaks = SpokenState.None;
+        var primary = false;
+        if (preferences.TryGetValue(languageEntry, out var currentPrefs))
+        {
+            primary = currentPrefs.Primary;
+            speaks = currentPrefs.Speaks;
+            
+            if (fluency != SharedLanguageSystem.MaximumFluency)
+            {
+                if (currentPrefs.Primary)
+                    return new(this);
+
+                if (currentPrefs.Speaks == SpokenState.Speaks || 
+                    (currentPrefs.Speaks == SpokenState.Translator && fluency == SharedLanguageSystem.MinimumFluency))
+                {
+                    speaks = SpokenState.None;
+                }
+            }
+        }
+        
+        if (fluency == SharedLanguageSystem.MinimumFluency && speaks != SpokenState.Translator)
         {
             preferences.Remove(languageEntry);
             return new(this)
@@ -159,58 +181,145 @@ public sealed partial class HumanoidCharacterProfile
             };
         }
         
-        if (primary)
-        {
-            // Primary must be maximum fluency, and spoken.
-            speaks = true;
-            
-            ProtoId<LanguageEntryPrototype>? oldPrimary = null;
-            foreach (var preference in preferences)
-            {
-                if (preference.Value.Primary)
-                {
-                    oldPrimary = preference.Key;
-                    break;
-                }
-            }
-
-            if (oldPrimary != null)
-            {
-                var oldPref = preferences[oldPrimary.Value];
-                preferences[oldPrimary.Value] = new LanguagePreference(oldPref.Fluency, oldPref.Speaks, false);
-            }
-        }
-        
-        // Spoken languages must be fluent.
-        if (speaks)
-        {
-            fluency = SharedLanguageSystem.MaximumFluency;
-        }
-        
         preferences[languageEntry] = new LanguagePreference(fluency, speaks, primary);
-        
-        var totalPoints = 0;
-        foreach (var preference in preferences)
-        {
-            if (preference.Value.Fluency == SharedLanguageSystem.MaximumFluency)
-            {
-                if (preference.Value.Speaks)
-                    totalPoints += 1;
-                totalPoints += 2;
-            }
-            else if (preference.Value.Fluency != SharedLanguageSystem.MinimumFluency)
-            {
-                totalPoints += 1;
-            }
-        }
 
-        if (totalPoints > SharedLanguageSystem.LanguageSelectionPoints)
+        var primaries = preferences.Where(p => p.Value.Primary).ToList();
+        var foundPrimary = primaries.Count > 0;
+        var totalPoints = CalculateUsedLanguagePoints(preferences);
+
+        if (!foundPrimary || totalPoints > SharedLanguageSystem.LanguageSelectionPoints)
             return new(this);
 
         return new(this)
         {
             _languagePreferences = preferences
         };
+    }
+    
+    [PublicAPI]
+    public HumanoidCharacterProfile WithLanguagePrimary(ProtoId<LanguageEntryPrototype> languageEntry, bool primary)
+    {
+        var preferences = LanguagePreferences.ToDictionary();
+
+        var speaks = SpokenState.None;
+        var fluency = SharedLanguageSystem.MinimumFluency;
+        if (preferences.TryGetValue(languageEntry, out var currentPrefs))
+        {
+            fluency = currentPrefs.Fluency;
+            speaks = currentPrefs.Speaks;
+        }
+
+        if (primary)
+        {
+            foreach (var key in LanguagePreferences.Keys)
+            {
+                if (preferences.TryGetValue(key, out var pref))
+                {
+                    if (pref.Primary)
+                    {
+                        preferences[key] = new LanguagePreference(pref.Fluency, pref.Speaks, false);
+                    }
+                }
+            }
+            
+            speaks = SpokenState.Speaks;
+            fluency = SharedLanguageSystem.MaximumFluency;
+        }
+        
+        if (fluency == SharedLanguageSystem.MinimumFluency && speaks != SpokenState.Translator)
+        {
+            preferences.Remove(languageEntry);
+            return new(this)
+            {
+                _languagePreferences = preferences
+            };
+        }
+        
+        preferences[languageEntry] = new LanguagePreference(fluency, speaks, primary);
+        var primaries = preferences.Where(p => p.Value.Primary).ToList();
+        var totalPoints = CalculateUsedLanguagePoints(preferences);
+
+        if (primaries.Count != 1 || totalPoints > SharedLanguageSystem.LanguageSelectionPoints)
+            return new(this);
+
+        return new(this)
+        {
+            _languagePreferences = preferences
+        };
+    }
+
+    [PublicAPI]
+    public HumanoidCharacterProfile WithLanguageSpeechPreference(ProtoId<LanguageEntryPrototype> languageEntry, SpokenState speaks)
+    {
+        var preferences = LanguagePreferences.ToDictionary();
+
+        var primary = false;
+        var fluency = SharedLanguageSystem.MinimumFluency;
+        if (preferences.TryGetValue(languageEntry, out var currentPrefs))
+        {
+            fluency = currentPrefs.Fluency;
+            primary = currentPrefs.Primary;
+        }
+        
+        // Spoken languages must be fluent.
+        if (speaks == SpokenState.Speaks)
+        {
+            fluency = SharedLanguageSystem.MaximumFluency;
+        }
+
+        if (speaks != SpokenState.Speaks)
+        {
+            primary = false;
+        }
+        
+        if (fluency == SharedLanguageSystem.MinimumFluency && speaks != SpokenState.Translator)
+        {
+            preferences.Remove(languageEntry);
+            return new(this)
+            {
+                _languagePreferences = preferences
+            };
+        }
+        
+        preferences[languageEntry] = new LanguagePreference(fluency, speaks, primary);
+
+        var primaries = preferences.Where(p => p.Value.Primary).ToList();
+        var foundPrimary = primaries.Count > 0;
+        var totalPoints = CalculateUsedLanguagePoints(preferences);
+
+        if (!foundPrimary || totalPoints > SharedLanguageSystem.LanguageSelectionPoints)
+            return new(this);
+
+        return new(this)
+        {
+            _languagePreferences = preferences
+        };
+    }
+
+    [PublicAPI]
+    public static int CalculateUsedLanguagePoints(
+        Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> preferences)
+    {
+        var totalPoints = 0;
+        foreach (var preference in preferences)
+        {
+            if (preference.Value.Speaks != SpokenState.None)
+                totalPoints += 1;
+
+            if (preference.Value.Fluency == SharedLanguageSystem.MaximumFluency)
+                totalPoints += 1;
+            
+            if (preference.Value.Fluency != SharedLanguageSystem.MinimumFluency)
+                totalPoints += 1;
+        }
+
+        return totalPoints;
+    }
+
+    [PublicAPI]
+    public int CalculateUsedLanguagePoints()
+    {
+        return CalculateUsedLanguagePoints(_languagePreferences);
     }
 
     /// <summary>
@@ -255,44 +364,35 @@ public sealed partial class HumanoidCharacterProfile
 
     public Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> EnsureValidLanguages(
         Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference> languagePreferences,
-        PlayerRequirementContext context)
+        PlayerRequirementContext context,
+        IPrototypeManager protoManager)
     {
-        var totalPoints = 0;
-        ProtoId<LanguageEntryPrototype>? primary = null;
-        
-        foreach (var preference in languagePreferences)
+        List<ProtoId<LanguageEntryPrototype>> invalidPrefs = [];
+        foreach (var langPref in languagePreferences)
         {
-            if (preference.Value.Fluency == SharedLanguageSystem.MaximumFluency)
-            {
-                if (preference.Value.Primary)
-                {
-                    if (primary is null)
-                    {
-                        primary = preference.Key;
-                        totalPoints += 3;
-                        continue;
-                    }
-                    
-                    // More than one primary set, pick the first primary and bail.
-                    return new Dictionary<ProtoId<LanguageEntryPrototype>, LanguagePreference>()
-                    {
-                        {
-                            primary.Value, new LanguagePreference(SharedLanguageSystem.MaximumFluency, true, true)
-                        } 
-                    };
-                }
-
-                if (preference.Value.Speaks)
-                    totalPoints += 1;
-
-                totalPoints += 2;
-            }
-            else if (preference.Value.Fluency != SharedLanguageSystem.MinimumFluency)
-            {
-                totalPoints += 1;
-            }
+            if (!protoManager.TryIndex(langPref.Key, out var langEntry) ||
+                !SharedPlayerRequirementManager.CheckRequirements(context, langEntry.Requirements) ||
+                (langPref.Value.Speaks == SpokenState.Speaks && !SharedPlayerRequirementManager.CheckRequirements(context, langEntry.SpeakingRequirements)))
+                invalidPrefs.Add(langPref.Key);
         }
 
+        foreach (var invalidPref in invalidPrefs)
+        {
+            languagePreferences.Remove(invalidPref);
+        }
+
+        var primaries = languagePreferences.Where(p => p.Value.Primary).ToList();
+        if (primaries.Count > 1)
+        {
+            foreach (var otherPrimary in primaries[1..])
+            {
+                languagePreferences[otherPrimary.Key] =
+                    new LanguagePreference(otherPrimary.Value.Fluency, otherPrimary.Value.Speaks, false);
+            }
+        }
+        
+        var totalPoints = CalculateUsedLanguagePoints(languagePreferences);
+        
         if (totalPoints <= SharedLanguageSystem.LanguageSelectionPoints)
         {
             return languagePreferences;
@@ -304,7 +404,7 @@ public sealed partial class HumanoidCharacterProfile
         {
             {
                 SharedLanguageSystem.DefaultLanguageEntry,
-                new LanguagePreference(SharedLanguageSystem.MaximumFluency, true, true)
+                new LanguagePreference(SharedLanguageSystem.MaximumFluency, SpokenState.Speaks, true)
             }
         };
     }

@@ -7,6 +7,7 @@ using Content.Shared.Item.ItemToggle;
 using Content.Shared.Item.ItemToggle.Components;
 using Content.Shared.Power;
 using Robust.Shared.Containers;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
@@ -20,6 +21,7 @@ public sealed partial class TranslatorSystem : EntitySystem
     [Dependency] private SharedLanguageSystem _language = default!;
     [Dependency] private ItemToggleSystem _itemToggle = default!;
     [Dependency] private SharedContainerSystem _containerSystem = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
 
     public override void Initialize()
     {
@@ -36,9 +38,32 @@ public sealed partial class TranslatorSystem : EntitySystem
         SubscribeLocalEvent<TranslatorComponent, InventoryRelayedEvent<LanguageRemovedFromCommunicatorEvent>>(
             OnLanguageRemovedInventory);
         SubscribeLocalEvent<TranslatorComponent, HeldRelayedEvent<LanguageRemovedFromCommunicatorEvent>>(OnLanguageRemovedHeld);
+        SubscribeLocalEvent<TranslatorComponent, ExaminedEvent>(OnTranslatorExamined);
 
         SubscribeLocalEvent<TranslatedLanguageComponent, ComponentStartup>(OnTranslatedLanguageStartup);
         SubscribeLocalEvent<TranslatedLanguageComponent, ExaminedEvent>(OnTranslatedLanguageExamined);
+    }
+
+    private void OnTranslatorExamined(Entity<TranslatorComponent> ent, ref ExaminedEvent args)
+    {
+        var translatingFromProto = _proto.Index(ent.Comp.RequiredLanguage);
+        if (translatingFromProto is null)
+            return;
+
+        using (args.PushGroup(nameof(TranslatorComponent)))
+        {
+            args.PushMarkup(Loc.GetString("translator-translating-from-message", 
+                ("language", translatingFromProto.LocalizedName)));
+
+            foreach (var translatedId in ent.Comp.GrantedLanguageProtos.Keys)
+            {
+                if (_proto.TryIndex(translatedId, out var translatedProto))
+                {
+                    args.PushMarkup(Loc.GetString("translator-translated-to-message"));
+                    args.PushMarkup(" - " + translatedProto.LocalizedName);
+                }
+            }
+        }
     }
 
     private void OnTranslatedLanguageStartup(Entity<TranslatedLanguageComponent> ent, ref ComponentStartup args)

@@ -75,6 +75,11 @@
   - type: DamagedSiliconAccent
     startPowerCorruptionAtCharIdx: 4
     maxPowerCorruptionAtCharIdx: 20
+  # DEN: Languages
+  - type: LanguageCommunicator
+    languages:
+      Binary: [ true, Fluent ]
+      Basic: [ true, Fluent ]
 
 - type: entity
   id: AiHeldIntellicard

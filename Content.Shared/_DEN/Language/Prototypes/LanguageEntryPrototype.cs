@@ -29,4 +29,10 @@ public sealed partial class LanguageEntryPrototype : IPrototype
     /// sorted alphabetically.
     /// </summary>
     [DataField] public int Priority;
+
+    /// <summary>
+    /// Determines if this language can be translated by a handheld translator. Prevents selecting the "Translator" option
+    /// at character creation if this is false.
+    /// </summary>
+    [DataField] public bool CanHaveTranslator = true;
 }

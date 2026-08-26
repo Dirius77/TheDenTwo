@@ -9,13 +9,20 @@ namespace Content.Shared.Preferences;
 public partial struct LanguagePreference
 {
     public ProtoId<LanguageFluencyPrototype> Fluency;
-    public bool Speaks;
+    public SpokenState Speaks;
     public bool Primary;
 
-    public LanguagePreference(ProtoId<LanguageFluencyPrototype> fluency, bool speaks, bool primary)
+    public LanguagePreference(ProtoId<LanguageFluencyPrototype> fluency, SpokenState speaks, bool primary)
     {
         Fluency = fluency;
         Speaks = speaks;
         Primary = primary;
     }
+}
+
+public enum SpokenState : byte
+{
+    None,
+    Speaks,
+    Translator
 }

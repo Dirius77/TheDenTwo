@@ -421,7 +421,7 @@ namespace Content.Server.Database
         public int ProfileId { get; set; }
         public string LanguageEntryName { get; set; } = null!;
         public string FluencyName { get; set; } = null!;
-        public bool Speaks { get; set; }
+        public string Speaks { get; set; } = null!;
         public bool Primary { get; set; }
     }
     // DEN End
