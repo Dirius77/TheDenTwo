@@ -164,8 +164,7 @@ public sealed partial class HumanoidCharacterProfile
                 if (currentPrefs.Primary)
                     return new(this);
 
-                if (currentPrefs.Speaks == SpokenState.Speaks || 
-                    (currentPrefs.Speaks == SpokenState.Translator && fluency == SharedLanguageSystem.MinimumFluency))
+                if (currentPrefs.Speaks == SpokenState.Speaks)
                 {
                     speaks = SpokenState.None;
                 }
