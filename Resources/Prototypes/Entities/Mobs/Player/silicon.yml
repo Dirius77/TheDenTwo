@@ -76,6 +76,9 @@
     startPowerCorruptionAtCharIdx: 4
     maxPowerCorruptionAtCharIdx: 20
   # DEN: Languages
+  - type: ContainerContainer
+    containers:
+      languages: !type:Container
   - type: LanguageCommunicator
     languages:
       Binary: [ true, Fluent ]
@@ -103,6 +106,9 @@
         type: SiliconLawBoundUserInterface
   - type: ShowJobIcons
   - type: ShowCrewIcons
+  - type: ContainerContainer # DEN Languages
+    containers:
+      languages: !type:Container
   - type: LanguageCommunicator # DEN Languages
     languages:
       Binary: [ true, Fluent ]
