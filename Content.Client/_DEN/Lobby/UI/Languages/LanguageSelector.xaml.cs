@@ -92,9 +92,10 @@ public sealed partial class LanguageSelector : BoxContainer
         FluencySlider.Value = _langFluencies.FindIndex(l => l.ID == _langPreference.Fluency);
         FluencySlider.OnValueChanged += FluencySliderChanged;
         FluencySlider.OnReleased += _ => LanguageFluencyPreferenceUpdated();
-        
-        LanguageFluencyLabel.Text = Loc.GetString(_prototypeManager.Index(_langPreference.Fluency).Name);
 
+        if (_prototypeManager.TryIndex(_langPreference.Fluency, out var fluency))
+            LanguageFluencyLabel.Text = Loc.GetString(fluency.Name);
+        
         var availablePoints = _maxPoints - _points;
         LimitFluencySlider(availablePoints);
         LimitSpeechOptions(availablePoints);

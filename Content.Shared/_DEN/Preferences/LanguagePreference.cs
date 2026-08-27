@@ -1,4 +1,5 @@
 using Content.Shared._DEN.Language;
+using Content.Shared._DEN.Language.EntitySystems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
@@ -8,8 +9,13 @@ namespace Content.Shared.Preferences;
 [Serializable, NetSerializable]
 public partial struct LanguagePreference
 {
-    public ProtoId<LanguageFluencyPrototype> Fluency;
-    public SpokenState Speaks;
+    [DataField]
+    public ProtoId<LanguageFluencyPrototype> Fluency = SharedLanguageSystem.MinimumFluency;
+    
+    [DataField]
+    public SpokenState Speaks = SpokenState.None;
+    
+    [DataField]
     public bool Primary;
 
     public LanguagePreference(ProtoId<LanguageFluencyPrototype> fluency, SpokenState speaks, bool primary)
