@@ -1,6 +1,6 @@
 - type: marking
   id: CatEars
-  bodyPart: Special
+  bodyPart: HeadTop #DEN: Special -> HeadTop
   groupWhitelist: [Human]
   coloring:
     default:

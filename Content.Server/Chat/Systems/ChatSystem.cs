@@ -4,9 +4,7 @@ using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Chat.Managers;
 using Content.Server.GameTicking;
-using Content.Server.Ghost;
 using Content.Server.Interaction; // DEN - Use interaction system's range checks
-using Content.Server.Speech.EntitySystems;
 using Content.Server.Station.Systems;
 using Content.Shared._DEN.Utility;
 using Content.Shared.ActionBlocker;
@@ -15,9 +13,11 @@ using Content.Shared.CCVar;
 using Content.Shared.Chat;
 using Content.Shared.Examine;
 using Content.Shared.Ghost;
+using Content.Shared.Ghost.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Players.RateLimiting;
 using Content.Shared.Radio;
+using Content.Shared.Speech.EntitySystems;
 using Robust.Server.Player;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Configuration;
@@ -201,13 +201,13 @@ public sealed partial class ChatSystem : SharedChatSystem
         // Capitalizing the word I only happens in English, so we check language here
         bool shouldCapitalizeTheWordI = (!CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Parent.Name == "en")
             || (CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Name == "en");
-        
+
         message = SanitizeInGameICMessage(source, message, out var emoteStr, shouldCapitalize, shouldPunctuate, shouldCapitalizeTheWordI);
 
         // DEN: Detailed message system start.
 
         message = StringUtil.FilterStringTags(message, ChatAllowedTags);
-        
+
         bool needsRadio = false;
         RadioChannelPrototype? channel = null;
         // We want to do this processing before we try to parse it into a complex message.
@@ -219,10 +219,10 @@ public sealed partial class ChatSystem : SharedChatSystem
                 message = modMessage;
             }
         }
-        
+
         var complexMessage = ConvertMessageToComplex(message);
-        
-        if (player != null 
+
+        if (player != null
             && emoteStr != message
             && emoteStr != null
             && desiredType is not InGameICChatType.Subtle)
@@ -231,7 +231,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         }
 
         // DEN: Complex message will be empty, rather than a null string. Also eat any message that is only tags.
-        if (complexMessage.Parts.Count == 0 
+        if (complexMessage.Parts.Count == 0
             || complexMessage.Parts.All(part => part.Item1 is ChatPart.EmoteTag or ChatPart.DialogTag))
             return;
 

@@ -15,6 +15,11 @@
   name: species-name-apid
   text: "/ServerInfo/_MACRO/Guidebook/Mobs/Apid.xml"
 
+#- type: guideEntry
+#  id: Kodepiia
+#  name: Kodepiia
+#  text: "/ServerInfo/_MACRO/Guidebook/Mobs/Kodepiia.xml"
+
 - type: guideEntry
   id: Ungu
   name: species-name-ungu

@@ -1,10 +1,11 @@
 using System.Linq;
 using System.Text;
-using Content.Server.Speech.Prototypes;
 using Content.Shared.Chat;
 using Content.Shared._DEN.Earmuffs;
 using Content.Shared.Ghost;
+using Content.Shared.Ghost.Components;
 using Content.Shared.Players;
+using Content.Shared.Speech.Prototypes;
 using Robust.Shared.Console;
 using Robust.Shared.Network;
 using Robust.Shared.Player;

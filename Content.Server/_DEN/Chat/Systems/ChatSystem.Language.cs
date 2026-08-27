@@ -23,26 +23,8 @@ public sealed partial class ChatSystem
     [Dependency] private LanguageSystem _language = default!;
     [Dependency] private SharedMindSystem _mindSystem = default!;
 
-    public static readonly ProtoId<LanguageWrapperPrototype> SpeakWrapper = "SpeakWrapper";
-    public static readonly ProtoId<LanguageWrapperPrototype> WhisperWrapper = "WhisperWrapper";
-
-    /// <summary>
-    /// Attempts to make an entity speak using complex speech (languages, mixed actions and dialog).
-    /// </summary>
-    /// <param name="source">The entity doing the speaking.</param>
-    /// <param name="originalMessage">The message before any modifications are applied.</param>
-    /// <param name="wrapperProto">The wrapper to use for formatting the message to users.</param>
-    /// <param name="chatChannel">The chat channel to speak on.</param>
-    /// <param name="range">The range to which the message will attempt to be transmitted. Keep in mind that language
-    /// features and things like radios and cameras may cause it to be broadcast outside this range.</param>
-    /// <param name="radioChannel">The radio channel to speak on, or null if no radio is being used.</param>
-    /// <param name="nameOverride">The name to display for the speaker in place of their usual one.</param>
-    /// <param name="hideLog">Whether to ignore logging this message.</param>
-    /// <param name="ignoreActionBlocker">Whether this speech attempt ignores things that would usually prevent speaking.</param>
-    /// <param name="verbOverride">The verb to use for this message, if one is needed, skips usual verb selection.</param>
-    /// <param name="languageOverride">Forces the use of this specific language entity rather than selecting the one
-    /// that the entity is currently configured to speak.</param>
-    public void SendEntityComplexSpeech(EntityUid source,
+    /// <inheritdoc />
+    public override void SendEntityComplexSpeech(EntityUid source,
         ComplexChatMessage originalMessage,
         ProtoId<LanguageWrapperPrototype> wrapperProto,
         ChatChannel chatChannel,

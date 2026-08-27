@@ -7,22 +7,21 @@ namespace Content.Shared.Metabolism;
 
 public sealed partial class MetabolizerSystem
 {
-    [Dependency] private BodySystem _body = default!;
     [Dependency] private EntityWhitelistSystem _whitelist = default!;
 
-    private void InitializeDen()
+    public override void Initialize()
     {
+        base.Initialize();
+
         SubscribeLocalEvent<BodyComponent, AddTraitMetabolizerEvent>(_body.RelayEvent);
         SubscribeLocalEvent<BodyComponent, RemoveTraitMetabolizerEvent>(_body.RelayEvent);
-
-        SubscribeLocalEvent<MetabolizerComponent, BodyRelayedEvent<AddTraitMetabolizerEvent>>(OnAddTraitMetabolizerEvent);
-        SubscribeLocalEvent<MetabolizerComponent, BodyRelayedEvent<RemoveTraitMetabolizerEvent>>(OnRemoveTraitMetabolizerEvent);
     }
 
     /// <summary>
     ///     Adds metabolizers to metabolizer organs that pass a whitelist.
     /// </summary>
     /// <param name="ent">The metabolizer organ.</param>
+    [SubscribeLocalEvent]
     private void OnAddTraitMetabolizerEvent(Entity<MetabolizerComponent> ent,
         ref BodyRelayedEvent<AddTraitMetabolizerEvent> args)
     {
@@ -43,6 +42,7 @@ public sealed partial class MetabolizerSystem
     ///     Removes metabolizers from metabolizer organs that pass a whitelist.
     /// </summary>
     /// <param name="ent">The metabolizer organ.</param>
+    [SubscribeLocalEvent]
     private void OnRemoveTraitMetabolizerEvent(Entity<MetabolizerComponent> ent,
         ref BodyRelayedEvent<RemoveTraitMetabolizerEvent> args)
     {

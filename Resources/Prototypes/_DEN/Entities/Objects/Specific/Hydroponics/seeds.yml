@@ -5,6 +5,6 @@
   description: A sticky, sweet symbol of fertility and abundance.
   components:
   - type: Seed
-    seedId: pomegranate
+    plantId: PomegranatePlants
   - type: Sprite
     sprite: _DEN/Objects/Specific/Hydroponics/pomegranate.rsi

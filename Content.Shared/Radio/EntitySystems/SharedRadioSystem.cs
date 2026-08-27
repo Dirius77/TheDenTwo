@@ -1,0 +1,53 @@
+using Content.Shared._DEN.Language.Components;
+using Content.Shared.Chat;
+using JetBrains.Annotations;
+using Robust.Shared.Prototypes;
+
+namespace Content.Shared.Radio.EntitySystems;
+
+/// <summary>
+/// This system handles intrinsic radios and the general process of converting radio messages into chat messages.
+/// </summary>
+public abstract partial class SharedRadioSystem : EntitySystem
+{
+    /// <summary>
+    /// Send radio message to all active radio listeners.
+    /// </summary>
+    [PublicAPI]
+    public void SendRadioMessage(EntityUid messageSource,
+        string message,
+        ProtoId<RadioChannelPrototype> channel,
+        EntityUid radioSource,
+        bool escapeMarkup = true)
+    {
+        // DEN Start: Complex messages and languages
+        var complex = new ComplexChatMessage(message, "\"", false, true, false, escapeMarkup);
+        var languageEnt = _language.GetCurrentLanguageEntity(messageSource, true);
+        if (languageEnt is null)
+        {
+            Log.Warning("Default language entity is null! Unable to send message.");
+            return;
+        }
+        // DEN End
+
+        SendRadioMessage(messageSource, languageEnt.Value, complex, ProtoMan.Index(channel), radioSource); // DEN: Pass Languages and complex
+    }
+
+    /// <summary>
+    /// Sends a radio message to all active radio listeners.
+    /// </summary>
+    /// <param name="messageSource">Entity that spoke the message.</param>
+    /// <param name="message">Message to send over the radio.</param>
+    /// <param name="channel">Radio channel to send the message on.</param>
+    /// <param name="radioSource">Entity transmitting the message.</param>
+    /// <param name="escapeMarkup">Whether markup in the message should be escaped.</param>
+    [PublicAPI]
+    public virtual void SendRadioMessage(EntityUid messageSource,
+        Entity<LanguageComponent> languageEnt,
+        ComplexChatMessage message,
+        RadioChannelPrototype channel,
+        EntityUid radioSource) // DEN Pass Complex messages and language instead.
+    {
+
+    }
+}

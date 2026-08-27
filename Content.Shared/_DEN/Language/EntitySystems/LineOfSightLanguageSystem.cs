@@ -1,6 +1,6 @@
 using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
-using Content.Shared.Ghost;
+using Content.Shared.Ghost.Components;
 using Content.Shared.Interaction;
 using Content.Shared.Physics;
 

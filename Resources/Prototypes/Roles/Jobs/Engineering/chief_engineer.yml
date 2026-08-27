@@ -25,7 +25,6 @@
     department: Engineering
     minTime: 10h
   # End DEN
-  weight: 10
   startingGear: ChiefEngineerGear
   icon: "JobIconChiefEngineer"
   supervisors: job-supervisors-captain

@@ -12,7 +12,7 @@
   - type: Item
     heldPrefix: produce
   - type: Produce
-    seedId: pomegranate
+    plantId: PomegranatePlants
   - type: Extractable
     juiceSolution:
       reagents:

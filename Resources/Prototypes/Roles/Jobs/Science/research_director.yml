@@ -19,7 +19,6 @@
     department: Science
     minTime: 10h
   # End DEN
-  weight: 10
   startingGear: ResearchDirectorGear
   icon: "JobIconResearchDirector"
   supervisors: job-supervisors-captain

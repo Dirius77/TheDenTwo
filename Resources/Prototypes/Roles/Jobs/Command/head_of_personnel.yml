@@ -37,7 +37,6 @@
     department: Command
     minTime: 2.5h
   # End DEN
-  weight: 20
   startingGear: HoPGear
   icon: "JobIconHeadOfPersonnel"
   supervisors: job-supervisors-captain

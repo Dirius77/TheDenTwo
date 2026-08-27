@@ -33,12 +33,3 @@ public sealed partial class SkinColorationPrototype
         return altIsCloser ? alt : primary;
     }
 }
-
-public sealed partial class HumanTonedSkinColoration
-{
-    public Color ClosestSkinColor(Color color)
-    {
-        // More accurate "closest value"
-        return FromUnary(ToUnary(color));
-    }
-}

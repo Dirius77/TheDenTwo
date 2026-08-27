@@ -1,9 +1,7 @@
 using Content.Shared.Chat;
 using Content.Shared.Database;
-using Content.Shared.Ghost;
+using Content.Shared.Ghost.Components;
 using Content.Shared.IdentityManagement;
-using Content.Shared.Interaction;
-using Content.Shared.Physics;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Utility;

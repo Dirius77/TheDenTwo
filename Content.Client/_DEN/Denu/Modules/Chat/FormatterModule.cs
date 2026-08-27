@@ -137,12 +137,12 @@ public sealed class ChatFormatterDenuModule : DenuExclusiveModule<FormatterSetti
 
     public Color GetDialogueColor()
     {
-        return Color.TryFromHex(DialogueColor) ?? Color.White;
+        return !Color.TryFromHex(DialogueColor, out var color) ? Color.White : color;
     }
 
     public Color GetEmoteColor()
     {
-        return Color.TryFromHex(EmoteColor) ?? Color.Magenta;
+        return !Color.TryFromHex(EmoteColor, out var color) ? Color.Magenta : color;
     }
 
     public string FormatMessage(string message)

@@ -27,7 +27,6 @@
     department: Medical
     minTime: 10h
   # End DEN
-  weight: 10
   startingGear: CMOGear
   icon: "JobIconChiefMedicalOfficer"
   supervisors: job-supervisors-captain

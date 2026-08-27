@@ -79,7 +79,7 @@
   functions:
   - !type:AddComponentTrait
       components:
-      - type: Muted
+      - type: MutedStatusEffect
 
 - type: entityTrait
   id: Narcolepsy

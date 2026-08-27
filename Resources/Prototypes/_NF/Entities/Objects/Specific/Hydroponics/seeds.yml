@@ -5,6 +5,6 @@
   id: EveryspiceSeeds
   components:
     - type: Seed
-      seedId: everyspice
+      plantId: EveryspicePlants
     - type: Sprite
       sprite: _NF/Objects/Specific/Hydroponics/everyspice.rsi

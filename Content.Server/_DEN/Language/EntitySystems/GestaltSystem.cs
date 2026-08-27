@@ -3,7 +3,7 @@ using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.Components;
 using Content.Shared._DEN.Language.EntitySystems;
 using Content.Shared.Examine;
-using Content.Shared.Ghost;
+using Content.Shared.Ghost.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Speech;
@@ -88,7 +88,7 @@ public sealed partial class GestaltSystem : EntitySystem
     {
         if (_language.GetCurrentLanguageEntity(args.Source) is not { } spokenLangEnt)
             return;
-        
+
         // Check to see if the language being spoken is a gestalt.
         if (!_gestaltQuery.TryGetComponent(spokenLangEnt, out var gestalt))
             return;

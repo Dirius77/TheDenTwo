@@ -1,5 +1,5 @@
 - type: entity
-  parent: [ LockerBaseSecure, ContainerSelectionBase ]
+  parent: [ LockerBase, ContainerSelectionBase ]
   id: ContainerSelectionLockerDebug
   name: container selection locker debug
   description: A debug locker for testing container selection

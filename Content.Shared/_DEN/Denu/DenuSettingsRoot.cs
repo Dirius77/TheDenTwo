@@ -27,25 +27,25 @@ public sealed class DenuSettingsRoot
 
     private void EnsureFormatterSettings(HashSet<int> validProfileIds)
     {
-        List<FormatterSettings> items = Modules.Chat.Formatter.Items;
+        var items = Modules.Chat.Formatter.Items;
         TrimItems(items, MaxExclusiveItems);
 
-        foreach (FormatterSettings item in items)
+        foreach (var item in items)
         {
             item.ProfileIds ??= new List<int>();
         }
 
         EnsureScopes(items, validProfileIds);
 
-        foreach (FormatterSettings item in items)
+        foreach (var item in items)
         {
             if (string.IsNullOrWhiteSpace(item.Id))
                 item.Id = Guid.NewGuid().ToString();
 
-            if (string.IsNullOrWhiteSpace(item.DialogueColor) || Color.TryFromHex(item.DialogueColor) == null)
+            if (string.IsNullOrWhiteSpace(item.DialogueColor) || !Color.TryFromHex(item.DialogueColor, out _))
                 item.DialogueColor = "#FFFFFF";
 
-            if (string.IsNullOrWhiteSpace(item.EmoteColor) || Color.TryFromHex(item.EmoteColor) == null)
+            if (string.IsNullOrWhiteSpace(item.EmoteColor) || !Color.TryFromHex(item.EmoteColor, out _))
                 item.EmoteColor = "#FF13FF";
         }
     }

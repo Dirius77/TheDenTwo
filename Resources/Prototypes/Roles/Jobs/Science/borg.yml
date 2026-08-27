@@ -15,7 +15,6 @@
     job: Borg
     minTime: 5h
   # End DEN
-  weight: 10
   icon: JobIconStationAi
   supervisors: job-supervisors-rd
   jobEntity: StationAiBrain

@@ -1,7 +1,7 @@
 using Content.Shared._DEN.Language.Components;
 using Content.Shared.Chat;
 using Content.Shared.Examine;
-using Content.Shared.Ghost;
+using Content.Shared.Ghost.Components;
 
 namespace Content.Shared._DEN.Language.EntitySystems;
 

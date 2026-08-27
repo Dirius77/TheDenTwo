@@ -19,7 +19,6 @@
     department: Security
     minTime: 10h
   # End DEN
-  weight: 5
   startingGear: WardenGear
   icon: "JobIconWarden"
   supervisors: job-supervisors-hos

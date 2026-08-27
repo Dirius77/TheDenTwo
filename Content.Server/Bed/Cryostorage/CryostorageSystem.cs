@@ -1,14 +1,9 @@
 using System.Globalization;
 using Content.Server._DEN.Bed.Cryostorage.Components;
 using Content.Server.Chat.Managers;
-using Content.Server.Chat.Systems;
 using Content.Server.Ghost;
-using Content.Server.Hands.Systems;
-using Content.Server.Inventory;
-using Content.Server.Popups;
 using Content.Server.Station.Components;
 using Content.Server.Station.Systems;
-using Content.Server.StationRecords.Systems;
 using Content.Shared.Access.Systems;
 using Content.Shared.Bed.Cryostorage;
 using Content.Shared.Chat;
@@ -20,16 +15,20 @@ using Content.Shared.Hands.Components;
 using Content.Shared.Mind.Components;
 using Content.Shared.StationRecords;
 using Content.Shared.UserInterface;
-using Robust.Server.Audio;
-using Robust.Server.Containers;
-using Robust.Server.GameObjects;
 using Robust.Server.Player;
 using Robust.Shared.Containers;
 using Robust.Shared.Enums;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Content.Shared._DEN.Bed.Cryostorage.Components;
+using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Inventory;
+using Content.Shared.Popups;
+using Content.Shared.Station;
 using Content.Shared.Station.Components;
+using Content.Shared.StationRecords.Components;
+using Content.Shared.StationRecords.Systems;
+using Robust.Shared.Audio.Systems;
 
 namespace Content.Server.Bed.Cryostorage;
 
@@ -38,20 +37,20 @@ public sealed partial class CryostorageSystem : SharedCryostorageSystem
 {
     [Dependency] private IChatManager _chatManager = default!;
     [Dependency] private IPlayerManager _playerManager = default!;
-    [Dependency] private AudioSystem _audio = default!;
+    [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private AccessReaderSystem _accessReader = default!;
-    [Dependency] private ChatSystem _chatSystem = default!;
+    [Dependency] private SharedChatSystem _chatSystem = default!;
     [Dependency] private ClimbSystem _climb = default!;
-    [Dependency] private ContainerSystem _container = default!;
+    [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private GhostSystem _ghostSystem = default!;
-    [Dependency] private HandsSystem _hands = default!;
-    [Dependency] private ServerInventorySystem _inventory = default!;
-    [Dependency] private PopupSystem _popup = default!;
-    [Dependency] private StationSystem _station = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private InventorySystem _inventory = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private SharedStationSystem _station = default!;
     [Dependency] private StationJobsSystem _stationJobs = default!;
     [Dependency] private StationRecordsSystem _stationRecords = default!;
-    [Dependency] private TransformSystem _transform = default!;
-    [Dependency] private UserInterfaceSystem _ui = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private SharedUserInterfaceSystem _ui = default!;
 
     /// <inheritdoc/>
     public override void Initialize()
@@ -247,7 +246,7 @@ public sealed partial class CryostorageSystem : SharedCryostorageSystem
 
             var notIgnoring = _station.GetInStation(stationData)
                 .RemoveWhereAttachedEntity(HasComp<IgnoringCryoMessagesComponent>);
-                
+
             _chatSystem.DispatchFilteredAnnouncement(
                 notIgnoring,
                 Loc.GetString(
@@ -256,7 +255,7 @@ public sealed partial class CryostorageSystem : SharedCryostorageSystem
                     ("entity", ent.Owner), // gender things for supporting downstreams with other languages
                     ("job", CultureInfo.CurrentCulture.TextInfo.ToTitleCase(jobName))
                 ),
-                station.Value, 
+                station.Value,
                 Loc.GetString("earlyleave-cryo-sender"),
                 false
             );
@@ -340,7 +339,7 @@ public sealed partial class CryostorageSystem : SharedCryostorageSystem
             if (HasComp<AttachedClothingComponent>(item))
                 continue;
 
-            data.ItemSlots.Add(slotDef.Name, Name(item));
+            data.ItemSlots.Add((slotDef.Name, slotDef.DisplayName, Name(item)));
         }
 
         foreach (var hand in _hands.EnumerateHands(uid))
