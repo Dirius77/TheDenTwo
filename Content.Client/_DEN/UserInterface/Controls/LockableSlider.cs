@@ -15,7 +15,7 @@ public sealed class LockableSlider : Slider
 
     private bool _grabbed;
 
-    public bool Grabbed => _grabbed;
+    public new bool Grabbed => _grabbed;
 
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
     {
