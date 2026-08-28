@@ -58,8 +58,8 @@ public sealed partial class DenCCVars
     ///     How many points players have to spend on languages at character creation.
     ///     Points work as follows:
     ///     - 1 Point allows for any of Poor-Great Understanding of a language.
-    ///     - 2 Points allows for Fluent Understanding.
-    ///     - 3 Points allows for speaking.
+    ///     - +1 Points allows for Fluent Understanding.
+    ///     - +1 Points allows for speaking or translating.
     /// </summary>
     public static readonly CVarDef<int> LanguageSelectionPoints =
         CVarDef.Create("languages.language_selection_points", 6, CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);

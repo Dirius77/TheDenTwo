@@ -3,13 +3,17 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._DEN.Language;
 
+/// <summary>
+/// A prototype for making a language available for selection during character creation.
+/// </summary>
 [Prototype]
 [DataDefinition]
 public sealed partial class LanguageEntryPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
 
-    [DataField("language", required: true)] public ProtoId<LanguagePrototype> LanguageProto;
+    [DataField("language", required: true)]
+    public ProtoId<LanguagePrototype> LanguageProto;
 
     /// <summary>
     /// The requirements to be able to select this language, if any.

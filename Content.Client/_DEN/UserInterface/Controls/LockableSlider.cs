@@ -5,6 +5,10 @@ using Robust.Shared.Input;
 
 namespace Content.Client._DEN.UserInterface.Controls;
 
+/// <summary>
+/// A slider which allows you to prevent the slider from moving to positions greater than <see cref="LockMaxValue"/> or
+/// less than <see cref="LockMinValue"/>.
+/// </summary>
 public sealed class LockableSlider : Slider
 {
     public float LockMaxValue;

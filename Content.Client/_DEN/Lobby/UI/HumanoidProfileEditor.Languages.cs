@@ -2,6 +2,7 @@ using System.Linq;
 using Content.Client._DEN.Lobby.UI.Languages;
 using Content.Shared._DEN.Language;
 using Content.Shared._DEN.Language.EntitySystems;
+using Robust.Shared.Prototypes;
 
 namespace Content.Client.Lobby.UI;
 
@@ -12,14 +13,17 @@ public sealed partial class HumanoidProfileEditor
     {
         LanguagesList.RemoveAllChildren();
 
+        // Sort languages by highest priority first, then alphabetically in a tie.
         var languageEntries = _prototypeManager.EnumeratePrototypes<LanguageEntryPrototype>()
             .OrderByDescending(t => t.Priority)
             .ThenBy(t => _prototypeManager.Index(t.LanguageProto).LocalizedName)
             .ToList();
         
+        // Filter fluencies to only roundstart ones, then sort by understanding, then store IDs.
         var languageFluencies = _prototypeManager.EnumeratePrototypes<LanguageFluencyPrototype>()
             .Where(t => t.RoundStart)
             .OrderBy(t => t.Understanding)
+            .Select(t => (ProtoId<LanguageFluencyPrototype>) t.ID)
             .ToList();
 
         var points = Profile?.CalculateUsedLanguagePoints();

@@ -146,6 +146,8 @@ public sealed partial class HumanoidCharacterProfile
         };
     }
     
+    // Builds a profile with a specific Language Fluency. It will try to adjust other settings to still be valid with
+    // the selected fluency.
     [PublicAPI]
     public HumanoidCharacterProfile WithLanguageFluency(ProtoId<LanguageEntryPrototype> languageEntry,
         ProtoId<LanguageFluencyPrototype> fluency)
@@ -195,6 +197,8 @@ public sealed partial class HumanoidCharacterProfile
         };
     }
     
+    // Builds a profile with the selected language marked as primary. Will attempt to remove other primary languages
+    // as well as promote the language to Fluent and Spoken as required to be primary.
     [PublicAPI]
     public HumanoidCharacterProfile WithLanguagePrimary(ProtoId<LanguageEntryPrototype> languageEntry, bool primary)
     {
@@ -247,6 +251,8 @@ public sealed partial class HumanoidCharacterProfile
         };
     }
 
+    // Builds a profile with the selected speech preference. Attempts to adjust fluency and the primary state of the
+    // language based on the newly selected speech preference.
     [PublicAPI]
     public HumanoidCharacterProfile WithLanguageSpeechPreference(ProtoId<LanguageEntryPrototype> languageEntry, SpokenState speaks)
     {

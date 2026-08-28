@@ -13,6 +13,7 @@ public sealed partial class LanguageFluencyPrototype : IPrototype
     [DataField(required: true)]
     public int Understanding;
 
+    // Controls if this fluency is included as an option during character creation.
     [DataField] public bool RoundStart = true;
 
     public Color Color => Color.InterpolateBetween(Color.Green, Color.Red, (float)(Understanding / 100.0));

@@ -2,7 +2,7 @@
   parent: BaseAudible
   id: Basic
   name: language-basic
-  displayInChat: true
+  displayInChat: false
   icon:
     sprite: "/Textures/Effects/speech.rsi"
     state: default0

@@ -24,12 +24,22 @@ public sealed partial class LanguageSelector : BoxContainer
     private HumanoidCharacterProfile? _profile;
     private LanguageEntryPrototype _entryProto;
     private LanguagePrototype? _langProto;
-    private List<LanguageFluencyPrototype> _langFluencies;
+    private List<ProtoId<LanguageFluencyPrototype>> _langFluencies;
     private LanguagePreference _langPreference;
     private int _points;
     private int _maxPoints;
 
-    public LanguageSelector(HumanoidCharacterProfile? profile, LanguageEntryPrototype entryProto, List<LanguageFluencyPrototype> langFluencies, int? points, int? maxPoints)
+    /// <summary>
+    /// A selector which is a group of: Language name with a tooltip of the language description. A fluency slider and
+    /// text display. An Option Box for selecting speaking, translating, or neither, for a language. And a checkbox for
+    /// if this language should be marked as your primary.
+    /// </summary>
+    /// <param name="profile">The current HumanoidCharacterProfile, used for getting preferences.</param>
+    /// <param name="entryProto">The LanguageEntryPrototype that this selector represents.</param>
+    /// <param name="langFluencies">Prototype versions of the language fluencies.</param>
+    /// <param name="points"></param>
+    /// <param name="maxPoints"></param>
+    public LanguageSelector(HumanoidCharacterProfile? profile, LanguageEntryPrototype entryProto, List<ProtoId<LanguageFluencyPrototype>> langFluencies, int? points, int? maxPoints)
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
@@ -54,7 +64,8 @@ public sealed partial class LanguageSelector : BoxContainer
             Visible = false;
             return;
         }
-
+        
+        // Disable all the buttons if we don't meet the requirements.
         if (!SharedPlayerRequirementManager.CheckRequirements(context, _entryProto.Requirements))
         {
             SpeaksOptionButton.Disabled = true;
@@ -89,7 +100,8 @@ public sealed partial class LanguageSelector : BoxContainer
         FluencySlider.MaxValue = _langFluencies.Count - 1;
         FluencySlider.LockMaxValue = FluencySlider.MaxValue;
         FluencySlider.LockMinValue = 0;
-        FluencySlider.Value = _langFluencies.FindIndex(l => l.ID == _langPreference.Fluency);
+        var curVal = _langFluencies.IndexOf(_langPreference.Fluency);
+        FluencySlider.Value = curVal == -1 ? 0 : curVal;
         FluencySlider.OnValueChanged += FluencySliderChanged;
         FluencySlider.OnReleased += _ => LanguageFluencyPreferenceUpdated();
 
@@ -112,6 +124,7 @@ public sealed partial class LanguageSelector : BoxContainer
         return context;
     }
 
+    // Locks the fluency slider to only move within ranges that we have enough points to spend.
     private void LimitFluencySlider(int availablePoints)
     {
         switch (availablePoints)
@@ -132,6 +145,7 @@ public sealed partial class LanguageSelector : BoxContainer
             FluencySlider.LockMinValue = _langFluencies.Count - 1;
     }
 
+    // Lock the speech options based on how many points we have to spend.
     private void LimitSpeechOptions(int availablePoints)
     {
         switch (availablePoints)
@@ -156,6 +170,7 @@ public sealed partial class LanguageSelector : BoxContainer
         }
     }
 
+    // Lock the primary button if we don't have enough points to promote a language to primary.
     private void LimitPrimaryButton(int availablePoints)
     {
         switch (availablePoints)
@@ -179,9 +194,11 @@ public sealed partial class LanguageSelector : BoxContainer
     private void FluencySliderChanged(Range range)
     {
         var fluency = (int)range.Value;
-        LanguageFluencyLabel.Text = Loc.GetString(_langFluencies[fluency].Name);
+        if (_prototypeManager.TryIndex(_langFluencies[fluency], out var fluencyProto))
+            LanguageFluencyLabel.Text = Loc.GetString(fluencyProto.Name);
     }
 
+    // Build a profile with the speech preference selected.
     private void LanguageSpeechPreferenceUpdated()
     {
         var spokenState = (SpokenState)SpeaksOptionButton.SelectedId;
@@ -190,14 +207,16 @@ public sealed partial class LanguageSelector : BoxContainer
         OnPreferenceUpdated?.Invoke(_profile);
     }
     
+    // Build a profile with the new fluency selected.
     private void LanguageFluencyPreferenceUpdated()
     {
-        var fluency = _langFluencies[(int)FluencySlider.Value].ID;
+        var fluency = _langFluencies[(int)FluencySlider.Value];
         _profile = _profile?.WithLanguageFluency(_entryProto.ID, fluency);
         
         OnPreferenceUpdated?.Invoke(_profile);
     }
     
+    // Build a profile with the new primary preference selected.
     private void LanguagePrimaryPreferenceUpdated()
     {
         var primary = PrimaryButton.Pressed;
